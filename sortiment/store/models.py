@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 
 
@@ -38,7 +38,7 @@ class Transaction(models.Model):
     from_shop = models.ForeignKey(Shop, on_delete=models.CASCADE, blank=True, null=True, related_name='from_shop')
 
     to_room = models.ForeignKey(Room, on_delete=models.CASCADE, blank=True, null=True, related_name='to_room')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='to_user')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='to_user')
 
     price = models.DecimalField(max_digits=8, decimal_places=2)
     amount = models.IntegerField()
