@@ -1,5 +1,5 @@
 .idea/
 node_modules/
 .env
-/.pnpm-debug.log
-/sortiment/static/app.css
+.pnpm-debug.log
+sortiment/static/app.css
