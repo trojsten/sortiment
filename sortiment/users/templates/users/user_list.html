@@ -1,0 +1,18 @@
+{% extends "root.html" %}
+
+{% block content %}
+    <div class="bg-white rounded-md shadow-xl m-12 p-6">
+        <h1 class="font-bold text-3xl text-center">Vitaj hladný pocestný!</h1>
+
+        <div class="flex gap-2 flex-wrap justify-center mt-8">
+            {% for user in user_list %}
+            <div class="w-28 h-28 relative cursor-pointer" hx-post="{% url "login" user.id %}">
+                <img src="https://picsum.photos/200" class="top-0 left-0 bg-red-700 absolute w-full h-full rounded-md">
+                <div class="z-10 absolute bottom-0 w-full text-center bg-black bg-opacity-70 text-white p-1 rounded-b-md">
+                    {{ user.username }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
