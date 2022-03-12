@@ -13,9 +13,12 @@ class Shop(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=64)
     price = models.DecimalField(max_digits=8, decimal_places=2)
-    image = models.ImageField()
-    ean = models.CharField(max_length=32)
+    image = models.ImageField(blank=True)
+    ean = models.CharField(max_length=32, blank=True)
     sum = models.DecimalField(max_digits=8, decimal_places=2)
+
+    def __str__(self):
+        return self.name
 
 
 class Inventory(models.Model):

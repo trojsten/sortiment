@@ -13,9 +13,14 @@
                     <p class="-mt-1 font-bold text-lg">0.00 &euro;</p>
                 </div>
 
-                <a href="#" class="ml-auto text-gray-600 hover:text-gray-800">
-                    {% icon "settings" %}
-                </a>
+                <div class="ml-auto flex gap-2">
+                    <a href="#" class="text-gray-600 hover:text-gray-800">
+                        {% icon "settings" %}
+                    </a>
+                    <a href="{% url "logout" %}" class="text-gray-600 hover:text-gray-800">
+                        {% icon "power" %}
+                    </a>
+                </div>
             </div>
             <h1 class="font-bold text-xl my-2">Tvoj nákup</h1>
 
@@ -40,37 +45,14 @@
 
         <div class="flex flex-col bg-white rounded-lg shadow-xl p-6 flex-grow">
             <div class="border-b mb-4 pb-4 flex gap-2">
-                <a href="#" class="bg-gray-300 px-4 py-2 rounded-md text-gray-700">Všetky produkty</a>
                 <a href="#" class="bg-blue-600 px-4 py-2 rounded-md text-white">Všetky produkty</a>
+{#                <a href="#" class="bg-gray-300 px-4 py-2 rounded-md text-gray-700">Všetky produkty</a>#}
 
-                <input type="text" autofocus class="ml-auto input" placeholder="Načítaj čiarový kód produktu">
+{#                <input type="text" autofocus class="ml-auto input" placeholder="Načítaj čiarový kód produktu">#}
             </div>
             
             <div class="overflow-y-auto">
-                <div class="grid grid-cols-8 gap-2">
-                    <div class="border rounded-md p-2 flex flex-col">
-                        <img src="https://picsum.photos/200" class="rounded-md" alt="">
-                        <div class="my-1 flex-grow">
-                            <div class="font-bold">Peanuts spicy Alesto</div>
-                            <div class="text-sm flex">
-                                0.80 &euro;
-                                <span class="font-bold text-green-600 ml-auto">2 ks</span>
-                            </div>
-                        </div>
-                        <button class="btn-green text-sm">{% icon "plus-circle" class="w-4 h-4" %} Kúpiť</button>
-                    </div>
-                    <div class="border rounded-md p-2">
-                        <img src="https://picsum.photos/200" class="rounded-md grayscale opacity-50" alt="">
-                        <div class="my-1 text-sm">
-                            <div class="font-bold">Carré Milky Hazelnut Wafer Slices</div>
-                            <div class="flex">
-                                0.80 &euro;
-                                <span class="font-bold text-orange-600 ml-auto">FKS</span>
-                            </div>
-                        </div>
-                        <button class="btn-disabled text-sm">Nie je na sklade</button>
-                    </div>
-                </div>
+                {% include "store/_product_list.html" %}
             </div>
         </div>
     </div>

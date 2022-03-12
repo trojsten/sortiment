@@ -1,0 +1,26 @@
+{% load icon %}
+<div class="grid grid-cols-8 gap-2">
+    {% for item in items %}
+    <div class="border rounded-md p-2 flex flex-col">
+        {% if item.product.image %}
+        <img src="https://picsum.photos/200" class="rounded-md mb-1 {% if not item.local_inventory %}grayscale opacity-50{% endif %}" alt="{{ item.product.name }}">
+        {% endif %}
+        <div class="mb-2 flex-grow">
+            <div class="font-bold">{{ item.product.name }}</div>
+            <div class="text-sm flex">
+                {{ item.product.price }} &euro;
+                {% if item.local_inventory %}
+                <span class="font-bold text-green-600 ml-auto">{{ item.local_inventory }} ks</span>
+                {% else %}
+                <span class="font-bold text-red-600 ml-auto">{{ item.global_inventory }} ks inde</span>
+                {% endif %}
+            </div>
+        </div>
+        {% if item.local_inventory %}
+        <button class="btn-green text-sm">{% icon "plus-circle" class="w-4 h-4" %} Kúpiť</button>
+        {% else %}
+        <button class="btn-disabled text-sm">Nie je na sklade</button>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
