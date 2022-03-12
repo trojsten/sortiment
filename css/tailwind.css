@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.input {
+    @apply rounded-md border-gray-400 shadow-sm focus:border-blue-700 focus:ring focus:ring-blue-500 focus:ring-opacity-50;
+}
+
+.btn-base {
+    @apply rounded-md shadow-sm font-bold text-center w-full py-2 px-4 flex items-center justify-center flex-wrap gap-1.5;
+}
+
+.btn-green {
+     @apply btn-base bg-green-600 hover:bg-green-700 text-white;
+}
+
+.btn-disabled {
+    @apply btn-base bg-gray-200 text-gray-500 cursor-not-allowed;
+}
