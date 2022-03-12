@@ -9,6 +9,7 @@ django-environ = "~=0.8.1"
 psycopg2-binary = "~=2.9.3"
 pillow = "~=9.0.1"
 django-htmx = "~=1.9.0"
+django-feather = "~=0.3.0"
 
 [dev-packages]
 

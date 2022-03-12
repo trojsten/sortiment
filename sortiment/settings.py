@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "sortiment.store",
     "sortiment.users",
     "django_htmx",
+    'django_feather',
 ]
 
 MIDDLEWARE = [
