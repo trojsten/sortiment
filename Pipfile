@@ -7,8 +7,8 @@ name = "pypi"
 django = "~=4.0"
 django-environ = "~=0.8.1"
 psycopg2-binary = "~=2.9.3"
-pillow = "*"
-django-htmx = "==1.8.0"
+pillow = "~=9.0.1"
+django-htmx = "~=1.9.0"
 
 [dev-packages]
 
