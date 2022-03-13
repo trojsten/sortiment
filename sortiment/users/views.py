@@ -7,6 +7,9 @@ from django.views import View
 from django.views.generic import ListView, FormView
 from django_htmx.http import HttpResponseClientRedirect
 
+from sortiment.store.models import Room
+from sortiment.store.services.room import get_room_from_request
+from sortiment.transactions.models import CreditTransaction
 from sortiment.users.forms import CreditAdjustmentForm
 from sortiment.users.models import User
 
@@ -41,5 +44,12 @@ class CreditView(LoginRequiredMixin, FormView):
         u: User = self.request.user
         u.credit += form.cleaned_data["amount"]
         u.save()
+
+        tx = CreditTransaction()
+        tx.actor = u
+        tx.room = get_room_from_request(self.request)
+        tx.price = form.cleaned_data["amount"]
+        tx.save()
+
         return redirect("settings_credit")
 
