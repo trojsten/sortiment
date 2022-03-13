@@ -17,7 +17,9 @@
             </div>
         </div>
         {% if item.local_inventory %}
-        <button class="btn-green text-sm">{% icon "plus-circle" class="w-4 h-4" %} Kúpiť</button>
+        <button class="btn-green text-sm" hx-post="{% url "cart_add" item.product.id %}" hx-target="#hx-cart" hx-swap="outerHTML">
+            {% icon "plus-circle" class="w-4 h-4" %} Kúpiť
+        </button>
         {% else %}
         <button class="btn-disabled text-sm">Nie je na sklade</button>
         {% endif %}

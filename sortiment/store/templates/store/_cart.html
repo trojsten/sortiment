@@ -1,0 +1,32 @@
+{% load icon %}
+<div id="hx-cart" class="flex flex-col h-full" hx-target="this" hx-swap="outerHTML">
+    <h1 class="font-bold text-xl my-2">Tvoj nákup</h1>
+
+    <div class="flex-grow flex flex-col overflow-y-auto gap-2">
+        {% for cp in cart %}
+        <div class="border py-2 px-3 rounded-md flex items-center">
+            <div>
+                <strong>{{ cp.product.name }}</strong>
+                <div>
+                    {{ cp.amount }} <span class="text-sm text-gray-600">&times; {{ cp.product.price|floatformat:"2u" }} &euro;</span>
+                </div>
+            </div>
+            <div class="ml-auto text-red-500 hover:text-red-700 cursor-pointer" hx-post="{% url "cart_remove" cp.product.id %}">{% icon "trash-2" %}</div>
+        </div>
+        {% empty %}
+        <div class="text-gray-600 text-sm">
+            Nič tu nie je. Fňuk.
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="border-t mt-auto pt-2">
+        <p class="mb-2">Spolu: <strong>{{ cart.total|floatformat:"2u" }} &euro;</strong></p>
+
+        {% if cart.total %}
+            <button class="btn-green">Zaplatiť</button>
+        {% else %}
+            <button class="btn-disabled">Prázdny košík</button>
+        {% endif %}
+    </div>
+</div>

@@ -22,25 +22,8 @@
                     </a>
                 </div>
             </div>
-            <h1 class="font-bold text-xl my-2">Tvoj nákup</h1>
 
-            <div class="flex-grow flex flex-col overflow-y-auto gap-2">
-                <div class="border py-2 px-3 rounded-md flex items-center">
-                    <div>
-                        <strong>Kofola 32l</strong>
-                        <div>
-                            2 <span class="text-sm text-gray-600">&times; 1.25 &euro;</span>
-                        </div>
-                    </div>
-                    <div class="ml-auto text-red-500 hover:text-red-700 cursor-pointer">{% icon "trash-2" %}</div>
-                </div>
-            </div>
-
-            <div class="border-t mt-auto pt-2">
-                <p class="mb-2">Spolu: <strong>0.00 &euro;</strong></p>
-                <button class="btn-green">Zaplatiť</button>
-            </div>
-
+            {% include "store/_cart.html" %}
         </div>
 
         <div class="flex flex-col bg-white rounded-lg shadow-xl p-6 flex-grow">
