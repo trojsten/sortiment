@@ -36,6 +36,21 @@ def cart_add(request, product):
 
 
 @login_required
+def cart_scan(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    cart = Cart.from_cookie(request.session.get("cart"))
+    # TODO: Room filter
+    product = Product.objects.filter(ean=request.POST.get("ean"), inventory__amount__gt=0).first()
+    if product:
+        cart.add(product)
+
+    request.session["cart"] = cart.to_cookie()
+    return render(request, "store/_cart.html", {"cart": cart})
+
+
+@login_required
 def cart_remove(request, product):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])

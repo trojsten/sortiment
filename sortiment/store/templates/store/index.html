@@ -31,7 +31,9 @@
                 <a href="#" class="bg-blue-600 px-4 py-2 rounded-md text-white">Všetky produkty</a>
 {#                <a href="#" class="bg-gray-300 px-4 py-2 rounded-md text-gray-700">Všetky produkty</a>#}
 
-{#                <input type="text" autofocus class="ml-auto input" placeholder="Načítaj čiarový kód produktu">#}
+                <form hx-post="{% url "cart_scan" %}" hx-target="#hx-cart" hx-swap="outerHTML" class="ml-auto">
+                    <input type="text" name="ean" autofocus class="input" id="js-barcode" placeholder="Načítaj čiarový kód produktu">
+                </form>
             </div>
             
             <div class="overflow-y-auto">
@@ -39,4 +41,11 @@
             </div>
         </div>
     </div>
+
+    <script>
+    window.addEventListener("htmx:afterOnLoad", () => {
+        document.getElementById('js-barcode').value = ''
+        document.getElementById('js-barcode').focus()
+    })
+    </script>
 {% endblock %}
