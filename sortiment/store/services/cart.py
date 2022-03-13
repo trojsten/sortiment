@@ -1,4 +1,6 @@
+import math
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Optional
 
 from sortiment.store.models import Product
@@ -15,25 +17,39 @@ class CartProduct:
 
 
 class Cart:
-    def __init__(self):
+    def __init__(self, round: bool = False):
         self.products: list[CartProduct] = []
+        self.round = round
 
     def to_cookie(self) -> dict:
         return {x.product.id: x.amount for x in self.products}
 
     @classmethod
-    def from_cookie(cls, cookie: Optional[dict]):
+    def from_cookie(cls, cookie: Optional[dict], round: bool = False):
+        cart = cls(round)
         if cookie is None:
-            return cls()
+            return cart
 
         ids = cookie.keys()
         products = {x.id: x for x in Product.objects.filter(id__in=ids).all()}
-        cart = cls()
         cart.products = [CartProduct(products[int(k)], v) for k, v in cookie.items()]
         return cart
 
-    def total(self):
+    @property
+    def subtotal(self) -> Decimal:
         return sum([x.total for x in self.products])
+
+    @property
+    def rounding(self) -> Decimal:
+        if not self.round:
+            return Decimal(0)
+
+        s = self.subtotal
+        return Decimal(math.ceil(s * 10) / 10) - s
+
+    @property
+    def total(self) -> Decimal:
+        return self.subtotal + self.rounding
 
     def add(self, product: Product, n: int = 1):
         for i, cp in enumerate(self.products):

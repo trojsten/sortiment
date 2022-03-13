@@ -18,13 +18,28 @@
             Nič tu nie je. Fňuk.
         </div>
         {% endfor %}
+
+        {% if cart.rounding %}
+        <div class="border py-2 px-3 rounded-md flex items-center">
+            <div>
+                <strong>Poplatok za platbu v hotovosti</strong>
+                <div>
+                    <span class="text-sm text-gray-600"> {{ cart.rounding|floatformat:"2u" }} &euro;</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <div class="border-t mt-auto pt-2">
         <p class="mb-2">Spolu: <strong>{{ cart.total|floatformat:"2u" }} &euro;</strong></p>
 
         {% if cart.total %}
+            {% if user.credit >= cart.total %}
             <button class="btn-green">Zaplatiť</button>
+            {% else %}
+            <button class="btn-disabled">Nedostatok kreditu</button>
+            {% endif %}
         {% else %}
             <button class="btn-disabled">Prázdny košík</button>
         {% endif %}
