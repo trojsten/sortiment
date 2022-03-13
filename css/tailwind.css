@@ -17,3 +17,7 @@
 .btn-disabled {
     @apply btn-base bg-gray-200 text-gray-500 cursor-not-allowed;
 }
+
+[x-cloak] {
+    display: none;
+}

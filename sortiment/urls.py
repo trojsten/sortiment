@@ -18,7 +18,7 @@ from django.contrib.auth.views import LogoutView
 from django.urls import path
 
 from sortiment.store.views import StoreView
-from sortiment.users.views import UserListView, LoginView
+from sortiment.users.views import UserListView, LoginView, CreditView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,4 +26,5 @@ urlpatterns = [
     path('login/<user_id>/', LoginView.as_view(), name="login"),
     path('logout/', LogoutView.as_view(), name="logout"),
     path('store/', StoreView.as_view(), name="store"),
+    path('settings/credit/', CreditView.as_view(), name="settings_credit"),
 ]

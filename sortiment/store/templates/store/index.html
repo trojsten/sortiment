@@ -10,11 +10,11 @@
 
                 <div>
                     <p>{{ user.username }}</p>
-                    <p class="-mt-1 font-bold text-lg">0.00 &euro;</p>
+                    <p class="-mt-1 font-bold text-lg">{{ user.credit|floatformat:"2u" }} &euro;</p>
                 </div>
 
                 <div class="ml-auto flex gap-2">
-                    <a href="#" class="text-gray-600 hover:text-gray-800">
+                    <a href="{% url "settings_credit" %}" class="text-gray-600 hover:text-gray-800">
                         {% icon "settings" %}
                     </a>
                     <a href="{% url "logout" %}" class="text-gray-600 hover:text-gray-800">

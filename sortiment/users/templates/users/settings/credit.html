@@ -1,0 +1,43 @@
+{% extends "users/settings/base.html" %}
+{% load icon %}
+
+{% block title %}Dobitie kreditu | {{ block.super }}{% endblock %}
+
+{% block settings_content %}
+    <div class="flex justify-center items-center h-full">
+        <div class="w-full max-w-md">
+            <div class="flex items-baseline">
+                <h1 class="font-bold mb-2 text-2xl">Dobitie kreditu</h1>
+                <span class="text-base font-normal ml-auto">{{ user.credit|floatformat:"2u" }} &euro;</span>
+            </div>
+            <form method="post" x-data="{ data: '' }">
+                {% csrf_token %}
+                <input type="text" pattern="[0-9.,\-]*" name="amount" class="input w-full text-3xl" autofocus x-model="data">
+                {% if form.amount.errors %}
+                <div class="text-red-600 mt-1">{{ form.amount.errors|first }}</div>
+                {% endif %}
+
+                <div class="grid grid-cols-3 grid-rows-3 gap-4 cursor-pointer select-none my-6">
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" @click="data += '1'">1</div>
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" @click="data += '2'">2</div>
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" @click="data += '3'">3</div>
+
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" @click="data += '4'">4</div>
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" @click="data += '5'">5</div>
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" @click="data += '6'">6</div>
+
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" @click="data += '7'">7</div>
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" @click="data += '8'">8</div>
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" @click="data += '9'">9</div>
+
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" x-show="data === ''" @click="data += '-'">-</div>
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" x-cloak x-show="data !== ''" @click="data += '.'">.</div>
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" @click="data += '0'">0</div>
+                    <div class="rounded-md border aspect-square flex items-center justify-center text-5xl hover:bg-gray-100" @click="data = data.substring(0, data.length - 1)">{% icon "delete" class="w-10 h-10" %}</div>
+                </div>
+
+                <button type="submit" class="btn-green text-2xl">Uložiť</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

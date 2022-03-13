@@ -1,10 +1,12 @@
 from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
-from django.views.generic import ListView
+from django.views.generic import ListView, FormView
 from django_htmx.http import HttpResponseClientRedirect
 
+from sortiment.users.forms import CreditAdjustmentForm
 from sortiment.users.models import User
 
 
@@ -22,3 +24,20 @@ class LoginView(View):
     def post(self, *args, **kwargs):
         login(self.request, User.objects.get(id=kwargs["user_id"]))
         return HttpResponseClientRedirect(reverse("store"))
+
+
+class CreditView(LoginRequiredMixin, FormView):
+    template_name = "users/settings/credit.html"
+    form_class = CreditAdjustmentForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        u = self.request.user
+        u.credit += form.cleaned_data["amount"]
+        u.save()
+        return redirect("settings_credit")
+
