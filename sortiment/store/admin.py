@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
-from sortiment.store.models import Room, Shop, Product, Inventory, Transaction
+from sortiment.store.models import Room, Shop, Product, Inventory
 
 
 @admin.register(Room)
@@ -21,9 +20,4 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Inventory)
 class InventoryAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(Transaction)
-class TransactionAdmin(admin.ModelAdmin):
     pass

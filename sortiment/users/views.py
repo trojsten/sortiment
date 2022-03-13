@@ -1,5 +1,6 @@
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
@@ -35,8 +36,9 @@ class CreditView(LoginRequiredMixin, FormView):
         kwargs["user"] = self.request.user
         return kwargs
 
+    @transaction.atomic
     def form_valid(self, form):
-        u = self.request.user
+        u: User = self.request.user
         u.credit += form.cleaned_data["amount"]
         u.save()
         return redirect("settings_credit")

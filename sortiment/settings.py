@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "sortiment.store",
     "sortiment.users",
+    "sortiment.transactions",
     "django_htmx",
     'django_feather',
 ]
