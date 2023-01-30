@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="w-full min-h-screen flex">
+    <div class="w-64 bg-gray-100 shrink-0 border-r">
+        <div class="bg-blue-600 text-white font-bold text-center text-xl p-2">
+            Sortiment
+        </div>
+        <div class="py-2 px-3 flex text-lg">
+            <div class="font-bold">User</div>
+            <div class="ml-auto">Kredit &euro;</div>
+        </div>
+    </div>
+    <div class="p-6 overflow-y-auto">
+        {% block cartright %}{% endblock %}
+    </div>
+</div>
+{% endblock %}
