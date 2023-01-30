@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrácia{% endblock %}
+
+{% block content %}
+<div class="w-full min-h-screen bg-blue-600 p-8">
+    <div class="bg-white p-8 rounded-md shadow-xl">
+        <h1 class="font-bold text-3xl text-center mb-6">Registrácia nového používateľa</h1>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="grid grid-cols-3 gap-2 items-center max-w-md mx-auto">
+                {% for field in form %}
+                    {{ field.errors }}
+                    <div class="col-span-1">
+                        {{ field.label_tag }}
+                    </div>
+                    <div class="col-span-2 w-full">
+                        {{ field }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="flex flex-wrap justify-center mt-2">
+                <input class='px-4 py-2 rounded bg-gray-200 hover:bg-gray-600 hover:text-white text-xl' type="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
