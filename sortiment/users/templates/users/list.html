@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Prihlásenie{% endblock %}
+
+{% block content %}
+<div class="w-full min-h-screen bg-blue-600 p-8">
+    <div class="bg-white p-8 rounded-md shadow-xl">
+        <h1 class="font-bold text-3xl text-center mb-6">Sortiment</h1>
+
+        <div class="flex flex-wrap gap-2 justify-center">
+            {% for user in users %}
+                <a href="login/{{ user.id }}/" class="px-4 py-2 rounded
+
+                {% if user.credit > 50%}
+                    bg-pink-200
+                {% elif user.credit > 25 %}
+                    bg-red-200
+                {% elif user.credit > 5 %}
+                    bg-orange-200
+                {% elif user.credit > 1 %}
+                    bg-green-200
+                {% else %}
+                    bg-gray-200
+                {% endif %}
+
+                {% if user.credit > 50%}
+                    hover:bg-pink-600
+                {% elif user.credit > 25 %}
+                    hover:bg-red-600
+                {% elif user.credit > 5 %}
+                    hover:bg-orange-600
+                {% elif user.credit > 1 %}
+                    hover:bg-green-600
+                {% else %}
+                    hover:bg-gray-600
+                {% endif %}
+
+                hover:text-white text-xl">{{ user.username }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
