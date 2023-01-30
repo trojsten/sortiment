@@ -1,0 +1,7 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'app.css' %}">
+
+{% for user in users %}
+    <a href="login/{{ user.id }}/">{{ user.username }}</a>
+{% endfor %}
