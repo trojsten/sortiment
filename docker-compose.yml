@@ -15,10 +15,18 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./sortiment/:/app/
+      - ./sortiment/:/app/sortiment/
     depends_on:
       - db
     command: "./start_dev.sh"
+
+  tailwind:
+    build:
+      context: .
+      target: cssbuild
+    volumes:
+      - ./:/app/
+    tty: true
 
 volumes:
   postgres_data:

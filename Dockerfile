@@ -1,3 +1,15 @@
+FROM node:19.3.0-alpine AS cssbuild
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm install
+
+COPY sortiment ./sortiment
+COPY tailwind.config.js ./
+RUN npm run css-prod
+CMD ["npm", "run", "css-dev"]
+
 FROM python:3.10-slim-bullseye
 WORKDIR /app
 RUN useradd --create-home appuser
@@ -18,6 +30,8 @@ RUN pip install --upgrade pipenv
 COPY Pipfile Pipfile.lock ./
 RUN pipenv install --system --dev --deploy
 
-COPY ./sortiment .
+COPY sortiment ./sortiment
+COPY --from=cssbuild /app/sortiment/static/app.css /app/sortiment/static/app.css
 
+WORKDIR /app/sortiment
 CMD ["gunicorn", "sortiment.wsgi", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--log-file", "-", "--workers", "4"]
