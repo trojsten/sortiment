@@ -1,6 +1,4 @@
 #!/bin/bash
-set -euo pipefail
-
 # Wait for database to be up
 while :
 do
@@ -11,5 +9,6 @@ do
     sleep 1
 done
 
+set -euo pipefail
 python manage.py migrate
 exec python manage.py runserver 0.0.0.0:8000
