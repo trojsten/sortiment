@@ -11,7 +11,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = SortimentUser
-        fields = ('credit', 'barcode')
+        fields = ('username', 'first_name', 'last_name', 'barcode')
 
 class UserChangeForm(forms.ModelForm):
     """A form for updating users. Includes all the fields on
