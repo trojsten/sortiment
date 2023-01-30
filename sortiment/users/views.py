@@ -12,4 +12,4 @@ def user_list(request):
 def login_user(request, user_id):
     user = SortimentUser.objects.get(id=user_id)
     login(request, user)
-    return HttpResponseRedirect(reverse('store:product_list'))
+    return HttpResponseRedirect(reverse('product_list'))
