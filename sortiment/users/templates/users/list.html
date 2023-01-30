@@ -9,7 +9,33 @@
 
         <div class="flex flex-wrap gap-2 justify-center">
             {% for user in users %}
-                <a href="#" class="px-4 py-2 rounded bg-gray-100 hover:bg-blue-600 hover:text-white text-xl">{{ user.username }}</a>
+                <a href="login/{{ user.id }}/" class="px-4 py-2 rounded
+
+                {% if user.credit > 50%}
+                    bg-pink-200
+                {% elif user.credit > 25 %}
+                    bg-red-200
+                {% elif user.credit > 5 %}
+                    bg-orange-200
+                {% elif user.credit > 1 %}
+                    bg-green-200
+                {% else %}
+                    bg-gray-200
+                {% endif %}
+
+                {% if user.credit > 50%}
+                    hover:bg-pink-600
+                {% elif user.credit > 25 %}
+                    hover:bg-red-600
+                {% elif user.credit > 5 %}
+                    hover:bg-orange-600
+                {% elif user.credit > 1 %}
+                    hover:bg-green-600
+                {% else %}
+                    hover:bg-gray-600
+                {% endif %}
+
+                hover:text-white text-xl">{{ user.username }}</a>
             {% endfor %}
         </div>
     </div>
