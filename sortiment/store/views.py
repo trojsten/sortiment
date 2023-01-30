@@ -3,7 +3,7 @@ from collections import defaultdict
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
-from .models import Product, Warehouse, WarehouseState
+from .models import Product, Warehouse, WarehouseState, WarehouseEvent
 
 
 def product_list(request):
@@ -30,4 +30,25 @@ def product_list(request):
     }
     return render(request, "store/products.html", context)
 
-# Create your views here.
+
+def purchase_history(request):
+
+    context = {
+        "logged_in": request.user.is_authenticated
+    }
+
+    if request.user.is_authenticated:
+        events = WarehouseEvent.objects.filter(user=request.user, type=WarehouseEvent.EventType.PURCHASE)
+        events = events.order_by("-timestamp")
+        history = []
+        for event in events:
+            history.append({
+                "product": event.product,
+                "quantity": event.quantity,
+                "price": event.price,
+                "date": event.timestamp.date(),
+                "time": event.timestamp.time()
+            })
+        context["history"] = history
+
+    return render(request, "store/purchase_history.html", context)

@@ -113,9 +113,9 @@ AUTH_USER_MODEL = "users.SortimentUser"
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "sk-sk"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Bratislava"
 
 USE_I18N = True
 
