@@ -34,9 +34,20 @@ class SortimentUser(AbstractUser):
     barcode = models.CharField(max_length=32, blank=True)
     REQUIRED_FIELDS = ["credit", "first_name", "last_name"]
 
+    def can_pay(self, money):
+        return -money <= self.credit
+
+    def make_credit_operation(self, money):
+        CreditLog(user=self, price=money).save()
+        self.credit += money
+        self.save()
+
 
 class CreditLog(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.user} {self.price} {self.timestamp}"
 
