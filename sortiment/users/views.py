@@ -40,11 +40,11 @@ def credit(request):
             user = request.user
             if not isinstance(user, SortimentUser):
                 return
-            money = credit_movement_form.cleaned_data.get('credit')
+            money = -credit_movement_form.cleaned_data.get('credit')
             if user.can_pay(money):
                 user2 = credit_movement_form.cleaned_data.get('user')
-                user.make_credit_operation(money)
-                user2.make_credit_operation(-money)
+                user.make_credit_operation(-money)
+                user2.make_credit_operation(money)
                 return HttpResponseRedirect(reverse('store:product_list'))
             else:
                 credit_movement_form.add_error('credit', 'Nemáš na to dosť peňazí')
@@ -56,7 +56,7 @@ def credit(request):
                 return
             money = credit_add_and_withdrawal_form.cleaned_data.get('credit')
             if user.can_pay(money):
-                user.make_credit_operation(money)
+                user.make_credit_operation(-money)
                 return HttpResponseRedirect(reverse('store:product_list'))
             else:
                 credit_add_and_withdrawal_form.add_error('credit', 'Nemáš na to dosť peňazí')

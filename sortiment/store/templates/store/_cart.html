@@ -26,7 +26,7 @@
         {% if cart.total_price > user.credit %}
             <div class="bg-red-600 btn cursor-not-allowed">Nedostatok kreditu</div>
         {% else %}
-            <a href="#" class="bg-blue-600 hover:bg-blue-700 btn">Zaplatiť {{ cart.total_price|floatformat:2 }} €</a>
+            <a href="{% url "store:checkout" %}" class="bg-blue-600 hover:bg-blue-700 btn">Zaplatiť {{ cart.total_price|floatformat:2 }} €</a>
         {% endif %}
     </div>
 </div>

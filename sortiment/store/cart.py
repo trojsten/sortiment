@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 
 from django.http import HttpRequest
+
+from store.helpers import get_warehouse
 from store.models import Product
+from users.models import SortimentUser
 
 
 @dataclass
@@ -73,3 +76,14 @@ class Cart:
     @property
     def total_price(self):
         return sum([i.total_price for i in self.items])
+
+
+    def checkout(self, request):
+        if not isinstance(request.user, SortimentUser):
+            return False
+        if not request.user.can_pay(self.total_price):
+            return False
+        for item in self.items:
+            item.product.buy(item.quantity, get_warehouse(request), request.user)
+        return True
+
