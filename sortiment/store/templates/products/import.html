@@ -28,7 +28,8 @@
 
         <form method="post">
             {% csrf_token %}
-            <div class="space-y-2 max-w-md mx-auto mb-6" x-data="{'quantity': 0, 'unit': 0, 'total': 0}">
+            <div class="space-y-2 max-w-md mx-auto mb-6" x-data="{'quantity': 0, 'unit': 0, 'total': 0,
+                'current': {'price': '{{total.price|escapejs}}', 'quantity': '{{total.quantity|escapejs}}'}}">
                 <div>
                     <label for="{{ form.quantity.id_for_label }}" class="text-sm font-medium text-gray-700">{{ form.quantity.label }}:</label>
                     {% render_field form.quantity class="input mt-1" x-model="quantity" @change="unit=0; total=0" %}
@@ -45,6 +46,9 @@
                     </div>
                 </div>
                 {% field form.sell_price %}
+                <p class="text-sm text-gray-700">Odporúčaná predajná cena: <b>
+                    <span x-text="((parseFloat(current.price) + parseFloat(total)) / (parseInt(quantity) + parseInt(current.quantity))).toFixed(3)">0.000</span> €
+                </b></p>
             </div>
             <div class="flex flex-wrap justify-center mt-2">
                 <button class='btn bg-blue-600 hover:bg-blue-700 text-white' type="submit">Prijať na sklad {{ warehouse.name }}</button>

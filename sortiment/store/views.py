@@ -9,10 +9,10 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from users.models import SortimentUser
+
 from .cart import Cart
-from .forms import DiscardForm, ProductForm, TransferForm
-from .forms import InsertForm
-from .helpers import get_warehouse, get_dummy_barcode_data
+from .forms import DiscardForm, InsertForm, ProductForm, TransferForm
+from .helpers import get_dummy_barcode_data, get_warehouse
 from .models import Product, Tag, Warehouse, WarehouseEvent, WarehouseState
 
 
@@ -129,6 +129,11 @@ def product_import(request):
     if product:
         product = get_object_or_404(Product, id=product)
         wh = get_warehouse(request)
+        total = product.warehousestate_set.aggregate(
+            quantity=Sum("quantity"), price=Sum("total_price")
+        )
+        if not total["quantity"]:
+            total = {"quantity": 0, "price": 0}
 
         if request.method == "POST":
             form = InsertForm(request.POST)
@@ -150,10 +155,11 @@ def product_import(request):
         form = None
         product = None
         wh = None
+        total = {}
     return render(
         request,
         "products/import.html",
-        {"form": form, "product": product, "warehouse": wh},
+        {"form": form, "product": product, "warehouse": wh, "total": total},
     )
 
 
