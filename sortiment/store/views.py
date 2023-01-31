@@ -7,16 +7,17 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
+
 from users.models import SortimentUser
 
 from .cart import Cart
-from .forms import DiscardForm, InsertForm, ProductForm
+from .forms import DiscardForm, ProductForm, TransferForm
+from .forms import InsertForm
 from .helpers import get_warehouse
 from .models import Product, Tag, Warehouse, WarehouseEvent, WarehouseState
 
 
 def product_list(request):
-
     warehouse_id = get_warehouse(request)
 
     tags = []
@@ -60,7 +61,6 @@ def product_list(request):
 
 
 def purchase_history(request):
-
     context = {"logged_in": request.user.is_authenticated}
 
     if request.user.is_authenticated:
@@ -89,7 +89,6 @@ def product_event(request):
 
 
 def add_product(request):
-
     f = ProductForm()
     if request.method == "POST":
         f = ProductForm(request.POST)
@@ -102,7 +101,6 @@ def add_product(request):
 
 
 def discard(request):
-
     wh = get_warehouse(request)
 
     f = DiscardForm(wh)
@@ -204,3 +202,30 @@ def checkout(request):
         return HttpResponseRedirect(reverse("logout"))
     else:
         raise SuspiciousOperation("Not enough credit")
+
+
+@login_required
+def transfer(request):
+    form = TransferForm()
+    if request.method == "POST":
+        form = TransferForm(request.POST)
+        if form.is_valid():
+            WarehouseEvent(
+                product=form.cleaned_data["product"],
+                warehouse=form.cleaned_data["from_warehouse"],
+                quantity=-form.cleaned_data["qty"],
+                price=0,
+                type=WarehouseEvent.EventType.TRANSFER_OUT,
+                user=request.user,
+            ).save()
+
+            WarehouseEvent(
+                product=form.cleaned_data["product"],
+                warehouse=form.cleaned_data["to_warehouse"],
+                quantity=-form.cleaned_data["qty"],
+                price=0,
+                type=WarehouseEvent.EventType.TRANSFER_IN,
+                user=request.user,
+            ).save()
+
+    return render(request, "store/transfer.html", {"form": form})

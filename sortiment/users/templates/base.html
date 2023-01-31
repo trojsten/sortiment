@@ -11,6 +11,7 @@
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     {% block content %}{% endblock %}
 
+    <script src="//unpkg.com/alpinejs" defer></script>
     <script src="https://unpkg.com/htmx.org@1.8.5"></script>
     {% django_htmx_script %}
     {% if debug %}
