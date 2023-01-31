@@ -1,0 +1,53 @@
+{% extends "store/cart_base.html" %}
+
+{% block cartright %}
+
+<div class="h-full flex w-full">
+    <div class="w-full">
+        <div class="bg-blue-600 text-white font-bold text-center text-xl p-2">
+            História nákupov
+        </div>
+        <table class="w-full">
+            <thead>
+                <tr class="bg-blue-400">
+                    <th class="font-bold w-2/5" colspan="2">Produkt</th>
+                    <th class="font-bold w-1/5">Množstvo</th>
+                    <th class="font-bold w-1/5">Cena</th>
+                    <th class="font-bold w-1/5">Dátum</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if logged_in %}
+                    {% for purchase in history %}
+                        <tr class="even:bg-gray-200 h-24">
+                            <td colspan="2" class="p-4">
+                                <div class="flex items-center">
+                                    <img class="w-16 h-16 rounded" src="https://picsum.photos/500" alt="{{ purchase.product.name }}">
+                                    <div class="ml-4">
+                                        <div class="font-bold">{{ purchase.product.name }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center p-4">{{ purchase.quantity }}</td>
+                            <td class="text-center p-4">{{ purchase.price }}&nbsp;&euro;</td>
+                            <td class="text-center p-4">
+                                <div class="font-bold">{{ purchase.date }}</div>
+                                <div>{{ purchase.time }}</div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="text-center text-xl font-bold">
+                                Nie ste prihlásený
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

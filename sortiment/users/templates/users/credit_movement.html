@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Operácie s kreditom{% endblock %}
+
+{% block content %}
+<div class="w-full min-h-screen bg-blue-600 p-8">
+    <div class="bg-white p-8 rounded-md shadow-xl">
+        <a class='px-4 py-2 rounded bg-gray-200 hover:bg-gray-600 hover:text-white text-xl' href="{% url 'product_list' %}">Späť</a>
+
+        <h1 class="font-bold text-3xl text-center mb-6">Operácie s kreditom</h1>
+
+        <div class="max-w-md mx-auto">
+            <form>
+                <label><input type="radio" name="form" value="add" checked onclick="document.getElementById('move').style.display='none';document.getElementById('add').style.display=''"> Pridať/odobrať</label><br>
+                <label><input type="radio" name="form" value="move" onclick="document.getElementById('add').style.display='none';document.getElementById('move').style.display=''"> Presun</label><br>
+            </form>
+        </div>
+
+        <form method="post" id="move" style="display: none">
+            {% csrf_token %}
+            <div class="grid grid-cols-3 gap-2 items-center max-w-md mx-auto">
+                {% for field in credit_movement_form %}
+                    <div class="col-span-1">
+                        {{ field.label_tag }}
+                    </div>
+                    <div class="col-span-2 w-full">
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="flex flex-wrap justify-center mt-2">
+                <input class='px-4 py-2 rounded bg-gray-200 hover:bg-gray-600 hover:text-white text-xl' type="submit" value="Submit">
+            </div>
+        </form>
+
+        <form method="post" id="add">
+            {% csrf_token %}
+            <div class="grid grid-cols-3 gap-2 items-center max-w-md mx-auto">
+                {% for field in credit_add_and_withdrawal_form %}
+                    <div class="col-span-1">
+                        {{ field.label_tag }}
+                    </div>
+                    <div class="col-span-2 w-full">
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="flex flex-wrap justify-center mt-2">
+                <input class='px-4 py-2 rounded bg-gray-200 hover:bg-gray-600 hover:text-white text-xl' type="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
