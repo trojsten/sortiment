@@ -1,4 +1,5 @@
-from django.forms import CharField, ChoiceField, Form, IntegerField, ModelForm
+from django import forms
+from django.forms import CharField, Form, IntegerField, ModelForm
 
 from .models import Product
 
@@ -10,11 +11,6 @@ class ProductForm(ModelForm):
 
 
 class DiscardForm(Form):
-
-    CHOICES = []
-    for pr in Product.objects.all():
-        CHOICES.append((pr.name, pr.name))
-
     barcode = CharField(label="barcode", max_length=32)
-    product = ChoiceField(choices=CHOICES)
+    product = forms.ModelChoiceField(queryset=Product.objects.all())
     qty = IntegerField(min_value=0)

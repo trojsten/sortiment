@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="warehouse",
             name="ip",
-            field=models.GenericIPAddressField(default="", unique=True),
+            field=models.GenericIPAddressField(default="10.0.0.1", unique=True),
             preserve_default=False,
         ),
         migrations.AlterField(
