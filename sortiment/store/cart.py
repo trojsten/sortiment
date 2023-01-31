@@ -85,6 +85,6 @@ class Cart:
         if not request.user.can_pay(self.total_price):
             return False
         for item in self.items:
-            item.product.buy(item.quantity, get_warehouse(request), request.user, item.dummy)
+            item.product.buy(item.quantity, get_warehouse(request), request.user)
         return True
 
