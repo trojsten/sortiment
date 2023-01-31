@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import SuspiciousOperation
+from django.db import transaction
 from django.db.models import Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -196,6 +197,7 @@ def cart_add_barcode(request):
 
 
 @login_required
+@transaction.atomic
 def checkout(request):
     ok = Cart(request).checkout(request)
     if ok:
@@ -205,6 +207,7 @@ def checkout(request):
 
 
 @login_required
+@transaction.atomic
 def transfer(request):
     form = TransferForm()
     if request.method == "POST":
