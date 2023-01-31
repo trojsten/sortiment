@@ -3,7 +3,7 @@ from collections import defaultdict
 from django.db.models import Sum
 from django.shortcuts import render
 
-from .forms import ProductForm
+from .forms import DiscardForm, ProductForm
 from .models import Product, WarehouseState
 
 
@@ -39,7 +39,7 @@ def product_event(request):
     return render(request, "store/event.html", {})
 
 
-def insert(request):
+def add_product(request):
 
     f = ProductForm()
     if request.method == "POST":
@@ -49,4 +49,17 @@ def insert(request):
             product.total_price = 0
             product.save()
 
-    return render(request, "store/insert.html", {"f": f})
+    return render(request, "store/add_product.html", {"f": f})
+
+
+def discard(request):
+
+    f = DiscardForm()
+    if request.method == "POST":
+        f = DiscardForm(request.POST)
+        if f.is_valid():
+            f_product = f.save(commit=False)
+            product = Product.objects.filter(barcode=f_product.barcode)
+            product.total_price -= f_product.qty * product.price
+
+    return render(request, "store/discard.html", {"f": f})

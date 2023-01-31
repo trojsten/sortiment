@@ -15,7 +15,7 @@ class Tag(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=128)
-    barcode = models.CharField(max_length=32)
+    barcode = models.CharField(max_length=32, unique=True)
     image = models.FileField(blank=True, null=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     is_unlimited = models.BooleanField()
