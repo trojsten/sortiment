@@ -46,7 +46,14 @@ class WarehouseState(models.Model):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
-    total_price = models.DecimalField(max_digits=16, decimal_places=2)
+    total_price = models.DecimalField(max_digits=16, decimal_places=2, default=0)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["warehouse", "product"], name="whstate_wh_prod_unique"
+            )
+        ]
 
     def __str__(self):
         return f"{self.warehouse}; {self.product}; {self.quantity}"
@@ -70,6 +77,10 @@ class WarehouseEvent(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
     )
+
+    def __save__(self):
+        # TODO spravit, aby dobre bolo aj s ws
+        pass
 
     def __str__(self):
         return f"{self.warehouse}; {self.product}; {self.timestamp}"

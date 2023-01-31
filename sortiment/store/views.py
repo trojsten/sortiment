@@ -1,11 +1,15 @@
 from collections import defaultdict
 
+from django.db.models import Sum
+from django.shortcuts import render
+from .forms import DiscardForm, InsertForm, ProductForm
+from .helpers import get_warehouse
+from .models import Product, Tag, WarehouseEvent, WarehouseState
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
 from users.models import SortimentUser
-
 from .cart import Cart
 from .forms import DiscardForm, ProductForm
 from .helpers import get_warehouse
@@ -55,6 +59,7 @@ def product_list(request):
 
 
 def purchase_history(request):
+
     context = {"logged_in": request.user.is_authenticated}
 
     if request.user.is_authenticated:
@@ -89,7 +94,7 @@ def add_product(request):
         f = ProductForm(request.POST)
         if f.is_valid():
             product = f.save(commit=False)
-            product.total_price = 0
+            product.price = f.cleaned_data["price"]
             product.save()
 
     return render(request, "store/add_product.html", {"f": f})
@@ -97,16 +102,46 @@ def add_product(request):
 
 def discard(request):
 
-    f = DiscardForm()
+    wh = get_warehouse(request)
+
+    f = DiscardForm(wh)
     if request.method == "POST":
-        f = DiscardForm(request.POST)
+        f = DiscardForm(wh, request.POST)
         if f.is_valid():
-            f_product = f.save(commit=False)
-            product = Product.objects.filter(barcode=f_product.barcode)
-            product.total_price -= f_product.qty * product.price
+
+            WarehouseEvent(
+                product=f.cleaned_data["product"],
+                warehouse=wh,
+                quantity=-f.cleaned_data["qty"],
+                price=0,
+                type=WarehouseEvent.EventType.DISCARD,
+                user=request.user,
+            ).save()
 
     return render(request, "store/discard.html", {"f": f})
 
+
+def insert(request):
+
+    # TODO prepojenie barcode a product, prepojenie total a unit price
+
+    wh = get_warehouse(request)
+
+    f = InsertForm()
+    if request.method == "POST":
+        f = InsertForm(request.POST)
+        if f.is_valid():
+
+            WarehouseEvent(
+                product=f.cleaned_data["product"],
+                warehouse=wh,
+                quantity=f.cleaned_data["qty"],
+                price=f.cleaned_data["unit_price"],
+                type=WarehouseEvent.EventType.IMPORT,
+                user=request.user,
+            ).save()
+
+    return render(request, "store/insert.html", {"f": f})
 
 def stats(request):
 
@@ -147,3 +182,4 @@ def cart_add(request, product):
     product = get_object_or_404(Product, id=product)
     cart.add_product(product, 1)
     return render(request, "store/_cart.html", {"cart": cart})
+
