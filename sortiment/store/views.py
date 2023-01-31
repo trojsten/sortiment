@@ -11,7 +11,7 @@ from .models import Product, Warehouse, WarehouseState, WarehouseEvent, Tag
 
 def product_list(request):
 
-    warehouse_id = request.GET.get("warehouse_id", 1)
+    warehouse_id = get_warehouse(request)
 
     tags = []
     for tag in Tag.objects.all():
