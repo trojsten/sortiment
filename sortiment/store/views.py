@@ -8,12 +8,10 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
-
 from users.models import SortimentUser
 
 from .cart import Cart
-from .forms import DiscardForm, ProductForm, TransferForm
-from .forms import InsertForm
+from .forms import DiscardForm, InsertForm, ProductForm, TransferForm
 from .helpers import get_warehouse
 from .models import Product, Tag, Warehouse, WarehouseEvent, WarehouseState
 
@@ -43,14 +41,19 @@ def product_list(request):
 
     # only show products that have all active tags
 
+    infty_string = "&#8734;"
     prods = Product.objects.all()
     for tag in active_tags:
         prods = prods.filter(tags__name__contains=tag)
     for p in prods:
-        p.qty = state_d[p.id] if not p.is_unlimited else "&#8734;"
-        p.totqty = all_state_d[p.id] if not p.is_unlimited else "&#8734;"
+        p.qty = state_d[p.id] if not p.is_unlimited else infty_string
+        p.totqty = all_state_d[p.id] if not p.is_unlimited else infty_string
 
     non_zero_prods = filter(lambda p: p.is_unlimited or p.totqty > 0, prods)
+    non_zero_prods = sorted(non_zero_prods, key=lambda x: x.name)
+    non_zero_prods = sorted(
+        non_zero_prods, key=lambda x: not (isinstance(x.qty, int) and x.qty != 0)
+    )
 
     context = {
         "prods": non_zero_prods,
