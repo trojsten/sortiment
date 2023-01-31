@@ -147,3 +147,14 @@ def cart_add(request, product):
     product = get_object_or_404(Product, id=product)
     cart.add_product(product, 1)
     return render(request, "store/_cart.html", {"cart": cart})
+
+
+@require_POST
+@login_required
+def cart_add_barcode(request):
+    cart = Cart(request)
+    product = Product.objects.get(barcode=request.POST['barcode'])
+    if product is None:
+        pass
+    cart.add_product(product, 1)
+    return render(request, "store/_cart.html", {"cart": cart})
