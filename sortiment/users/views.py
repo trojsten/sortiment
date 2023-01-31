@@ -43,12 +43,15 @@ def credit(request):
             user = request.user
             if not isinstance(user, SortimentUser) or user.is_guest:
                 return
-            money = -credit_movement_form.cleaned_data.get("credit")
+            money = credit_movement_form.cleaned_data.get("credit")
             if user.can_pay(money):
                 user2 = credit_movement_form.cleaned_data.get("user")
-                user.make_credit_operation(-money)
-                user2.make_credit_operation(money)
-                return HttpResponseRedirect(reverse("store:product_list"))
+                if user2.id == user.id:
+                    credit_movement_form.add_error("user", "Nemôžeš poslať peniaze samému sebe.")
+                else:
+                    user.make_credit_operation(-money)
+                    user2.make_credit_operation(money)
+                    return HttpResponseRedirect(reverse("store:product_list"))
             else:
                 credit_movement_form.add_error("credit", "Nemáš na to dosť peňazí")
 
@@ -69,6 +72,7 @@ def credit(request):
         credit_add_and_withdrawal_form = CreditAddAndWithdrawalForm()
 
         credit_movement_form = CreditMovementForm()
+        credit_movement_form.remove_user_from_choices(request.user)
 
     context = {
         "credit_movement_form": credit_movement_form,
