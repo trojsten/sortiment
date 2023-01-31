@@ -1,11 +1,11 @@
 from collections import defaultdict
+
 from django.db.models import Sum
 from django.shortcuts import render
+
 from .forms import DiscardForm, ProductForm
-from .models import Product, WarehouseState
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
-from .models import Product, Warehouse, WarehouseState, WarehouseEvent, Tag
+from .helpers import get_warehouse
+from .models import Product, Tag, WarehouseEvent, WarehouseState
 
 
 def product_list(request):
@@ -14,12 +14,8 @@ def product_list(request):
 
     tags = []
     for tag in Tag.objects.all():
-        tags.append({
-            "name": tag.name,
-            "active": "tag-%s" % tag.name in request.GET
-        })
+        tags.append({"name": tag.name, "active": "tag-%s" % tag.name in request.GET})
     active_tags = [tag["name"] for tag in tags if tag["active"]]
-
 
     w_states = WarehouseState.objects.filter(warehouse__exact=warehouse_id)
     state_d = defaultdict(lambda: 0)
@@ -47,7 +43,7 @@ def product_list(request):
 
     context = {
         "prods": prods,
-        'user': request.user,
+        "user": request.user,
         "tags": tags,
     }
     return render(request, "store/products.html", context)
@@ -55,25 +51,28 @@ def product_list(request):
 
 def purchase_history(request):
 
-    context = {
-        "logged_in": request.user.is_authenticated
-    }
+    context = {"logged_in": request.user.is_authenticated}
 
     if request.user.is_authenticated:
-        events = WarehouseEvent.objects.filter(user=request.user, type=WarehouseEvent.EventType.PURCHASE)
+        events = WarehouseEvent.objects.filter(
+            user=request.user, type=WarehouseEvent.EventType.PURCHASE
+        )
         events = events.order_by("-timestamp")
         history = []
         for event in events:
-            history.append({
-                "product": event.product,
-                "quantity": event.quantity,
-                "price": event.price,
-                "date": event.timestamp.date(),
-                "time": event.timestamp.time()
-            })
+            history.append(
+                {
+                    "product": event.product,
+                    "quantity": event.quantity,
+                    "price": event.price,
+                    "date": event.timestamp.date(),
+                    "time": event.timestamp.time(),
+                }
+            )
         context["history"] = history
 
     return render(request, "store/purchase_history.html", context)
+
 
 def product_event(request):
     return render(request, "store/event.html", {})
@@ -86,7 +85,6 @@ def add_product(request):
         f = ProductForm(request.POST)
         if f.is_valid():
             product = f.save(commit=False)
-            product.total_price = 0
             product.save()
 
     return render(request, "store/add_product.html", {"f": f})
@@ -94,12 +92,20 @@ def add_product(request):
 
 def discard(request):
 
-    f = DiscardForm()
+    wh = get_warehouse(request)
+
+    f = DiscardForm(wh)
     if request.method == "POST":
-        f = DiscardForm(request.POST)
+        f = DiscardForm(wh, request.POST)
         if f.is_valid():
-            f_product = f.save(commit=False)
-            product = Product.objects.filter(barcode=f_product.barcode)
-            product.total_price -= f_product.qty * product.price
+
+            WarehouseEvent(
+                product=f.cleaned_data["product"],
+                warehouse=wh,
+                quantity=-f.cleaned_data["qty"],
+                price=0,
+                type=WarehouseEvent.EventType.DISCARD,
+                user=request.user,
+            ).save()
 
     return render(request, "store/discard.html", {"f": f})

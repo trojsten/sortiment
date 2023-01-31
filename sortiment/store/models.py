@@ -21,13 +21,16 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     is_unlimited = models.BooleanField()
     tags = models.ManyToManyField(Tag, blank=True)
-    total_price = models.DecimalField(max_digits=16, decimal_places=2)
+
+    def __str__(self):
+        return self.name
 
 
 class WarehouseState(models.Model):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
+    total_price = models.DecimalField(max_digits=16, decimal_places=2, default=0)
 
 
 class WarehouseEvent(models.Model):
@@ -48,3 +51,7 @@ class WarehouseEvent(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
     )
+
+    def __save__(self):
+        # TODO spravit, aby dobre bolo aj s ws
+        pass
