@@ -9,7 +9,7 @@
         </div>
         <div class="p-3 flex text-lg items-baseline">
             <div class="font-bold">{{ user.username }}</div>
-            <div class="ml-auto text-sm">Kredit: {{ user.credit }}&euro;</div>
+            <div class="ml-auto text-sm">Kredit: {{ user.credit }} &euro;</div>
         </div>
         <div class="flex w-full justify-around pt-1 pb-4 px-3">
             <a href="{% url 'store:purchase_history' %}" class="text-gray-700 hover:text-gray-900">{% icon "activity" class="w-6 h-6" %}</a>
