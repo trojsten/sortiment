@@ -50,6 +50,16 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.name}; {self.price}"
 
+    def buy(self, quantity, warehouse, user):
+        WarehouseEvent(product=self,
+                       warehouse=warehouse,
+                       quantity=-quantity,
+                       price=self.price,
+                       type=WarehouseEvent.EventType.PURCHASE,
+                       user=user).save()
+        user.credit -= self.price*quantity
+        user.save()
+
 
 class WarehouseState(models.Model):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)

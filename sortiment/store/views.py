@@ -1,11 +1,17 @@
 from collections import defaultdict
-
+from django.core.exceptions import BadRequest, SuspiciousOperation
+from django.db.models import Sum
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.shortcuts import render, redirect
+from django.urls import reverse
+from .forms import DiscardForm, InsertForm, ProductForm
+from .helpers import get_warehouse
+from .models import Product, Tag, WarehouseEvent, WarehouseState
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
 from users.models import SortimentUser
-
 from .cart import Cart
 from .forms import DiscardForm, InsertForm, ProductForm
 from .helpers import get_warehouse
@@ -179,3 +185,23 @@ def cart_add(request, product):
     product = get_object_or_404(Product, id=product)
     cart.add_product(product, 1)
     return render(request, "store/_cart.html", {"cart": cart})
+
+@require_POST
+@login_required
+def cart_add_barcode(request):
+    cart = Cart(request)
+    product = Product.objects.get(barcode=request.POST['barcode'])
+    if product is None:
+        pass
+    cart.add_product(product, 1)
+    return render(request, "store/_cart.html", {"cart": cart})
+
+
+@login_required
+def checkout(request):
+    ok = Cart(request).checkout(request)
+    if ok:
+        return HttpResponseRedirect(reverse('logout'))
+    else:
+        raise SuspiciousOperation("Not enough credit")
+
