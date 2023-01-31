@@ -14,7 +14,7 @@
                 </div>
 
                 <div class="text-blue-700 text-sm ml-auto shrink-0">{{ item.total_price|floatformat:2 }} €</div>
-                <div class="hover:bg-red-100 text-red-700 p-1 rounded-full shrink-0 -ml-1 cursor-pointer" role="button" hx-post="{% url 'cart_remove' item.product.id %}">
+                <div class="hover:bg-red-100 text-red-700 p-1 rounded-full shrink-0 -ml-1 cursor-pointer" role="button" hx-post="{% url 'store:cart_remove' item.product.id %}">
                     {% icon "x" class="w-6 h-6" %}
                 </div>
             </div>
