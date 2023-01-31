@@ -1,17 +1,14 @@
 from collections import defaultdict
-from django.core.exceptions import BadRequest, SuspiciousOperation
-from django.db.models import Sum
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
-from django.shortcuts import render, redirect
-from django.urls import reverse
-from .forms import DiscardForm, InsertForm, ProductForm
-from .helpers import get_warehouse
-from .models import Product, Tag, WarehouseEvent, WarehouseState
+
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import SuspiciousOperation
 from django.db.models import Sum
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 from users.models import SortimentUser
+
 from .cart import Cart
 from .forms import DiscardForm, InsertForm, ProductForm
 from .helpers import get_warehouse
@@ -51,8 +48,10 @@ def product_list(request):
         p.qty = state_d[p.id] if not p.is_unlimited else "&#8734;"
         p.totqty = all_state_d[p.id] if not p.is_unlimited else "&#8734;"
 
+    non_zero_prods = filter(lambda p: p.is_unlimited or p.totqty > 0, prods)
+
     context = {
-        "prods": prods,
+        "prods": non_zero_prods,
         "user": request.user,
         "tags": tags,
         "cart": Cart(request),
@@ -186,11 +185,12 @@ def cart_add(request, product):
     cart.add_product(product, 1)
     return render(request, "store/_cart.html", {"cart": cart})
 
+
 @require_POST
 @login_required
 def cart_add_barcode(request):
     cart = Cart(request)
-    product = Product.objects.get(barcode=request.POST['barcode'])
+    product = Product.objects.get(barcode=request.POST["barcode"])
     if product is None:
         pass
     cart.add_product(product, 1)
@@ -201,7 +201,6 @@ def cart_add_barcode(request):
 def checkout(request):
     ok = Cart(request).checkout(request)
     if ok:
-        return HttpResponseRedirect(reverse('logout'))
+        return HttpResponseRedirect(reverse("logout"))
     else:
         raise SuspiciousOperation("Not enough credit")
-
