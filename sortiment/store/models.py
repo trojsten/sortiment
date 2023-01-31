@@ -7,21 +7,30 @@ class Warehouse(models.Model):
     ip = models.GenericIPAddressField(unique=True)
 
     def get_products_price_for_sale_sum(self):
-        return sum( state.quantity*state.product.price for state in WarehouseState.objects.filter(warehouse=self) )
+        return sum(
+            state.quantity * state.product.price
+            for state in WarehouseState.objects.filter(warehouse=self)
+        )
 
     def get_products_price_when_buy_sum(self):
-        return sum( state.total_price for state in WarehouseState.objects.filter(warehouse=self) )
+        return sum(
+            state.total_price for state in WarehouseState.objects.filter(warehouse=self)
+        )
 
     @staticmethod
     def get_global_products_price_for_sale_sum():
-        return sum( state.quantity*state.product.price for state in WarehouseState.objects.all() )
+        return sum(
+            state.quantity * state.product.price
+            for state in WarehouseState.objects.all()
+        )
 
     @staticmethod
     def get_global_products_price_when_buy_sum():
-        return sum( state.total_price for state in WarehouseState.objects.all() )
+        return sum(state.total_price for state in WarehouseState.objects.all())
 
     def __str__(self):
         return f"{self.name}; {self.ip}"
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=64)
@@ -88,9 +97,24 @@ class WarehouseEvent(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
     )
 
-    def __save__(self):
-        # TODO spravit, aby dobre bolo aj s ws
-        pass
+    def save(self, *args, **kwargs):
+
+        ws = WarehouseState.objects.filter(
+            product=self.product, warehouse=self.warehouse
+        ).first()
+
+        if not ws:
+            ws = WarehouseState()
+            ws.quantity = 0
+            ws.total_price = 0
+            ws.warehouse = self.warehouse
+            ws.product = self.product
+
+        ws.quantity = ws.quantity + self.quantity
+        ws.total_price = ws.total_price + self.price * self.quantity
+        ws.save()
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.warehouse}; {self.product}; {self.timestamp}"
