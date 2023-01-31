@@ -106,22 +106,27 @@ def add_product(request):
 
 def discard(request):
     wh = get_warehouse(request)
+    form = DiscardForm(wh, None)
 
-    f = DiscardForm(wh)
-    if request.method == "POST":
-        f = DiscardForm(wh, request.POST)
-        if f.is_valid():
+    product = request.GET.get("product")
+    if product:
+        product = get_object_or_404(Product, id=product)
 
-            WarehouseEvent(
-                product=f.cleaned_data["product"],
-                warehouse=wh,
-                quantity=-f.cleaned_data["qty"],
-                price=0,
-                type=WarehouseEvent.EventType.DISCARD,
-                user=request.user,
-            ).save()
+        if request.method == "POST":
+            form = DiscardForm(wh, product, request.POST)
+            if form.is_valid():
+                WarehouseEvent(
+                    product=product,
+                    warehouse=wh,
+                    quantity=-form.cleaned_data["quantity"],
+                    price=0,
+                    type=WarehouseEvent.EventType.DISCARD,
+                    user=request.user,
+                ).save()
 
-    return render(request, "store/discard.html", {"f": f})
+                return redirect("store:product_discard")
+
+    return render(request, "products/discard.html", {"form": form, "product": product})
 
 
 def product_import(request):
@@ -233,13 +238,13 @@ def checkout(request):
 @login_required
 @transaction.atomic
 def product_transfer(request):
-    form = TransferForm()
+    form = TransferForm(None)
     product = request.GET.get("product")
     if product:
         product = get_object_or_404(Product, id=product)
 
         if request.method == "POST":
-            form = TransferForm(request.POST)
+            form = TransferForm(product, request.POST)
             if form.is_valid():
                 WarehouseEvent(
                     product=product,
