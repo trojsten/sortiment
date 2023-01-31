@@ -32,13 +32,18 @@ class SortimentUser(AbstractUser):
     last_name = models.CharField("last name", max_length=150)
     credit = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     barcode = models.CharField(max_length=32, blank=True)
+    is_guest = models.BooleanField(default=False)
     REQUIRED_FIELDS = ["credit", "first_name", "last_name"]
 
     def can_pay(self, money):
+        if self.is_guest:
+            return True
         print(-money, self.credit, -money <= self.credit)
         return -money <= self.credit
 
     def make_credit_operation(self, money):
+        if self.is_guest:
+            return
         CreditLog(user=self, price=money).save()
         self.credit += money
         self.save()
