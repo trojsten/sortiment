@@ -1,5 +1,6 @@
 <!doctype html>
 {% load static %}
+{% load django_htmx %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +8,24 @@
     <link rel="stylesheet" href="{% static 'app.css' %}">
     <title>{% block title %}{% endblock %} | Sortiment</title>
 </head>
-<body>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     {% block content %}{% endblock %}
+
+    <script src="https://unpkg.com/htmx.org@1.8.5"></script>
+    {% django_htmx_script %}
+    {% if debug %}
+    <script>
+        if (typeof window.htmx !== "undefined") {
+            htmx.on("htmx:afterSettle", function(detail) {
+                if (
+                    typeof window.djdt !== "undefined"
+                    && detail.target instanceof HTMLBodyElement
+                ) {
+                    djdt.show_toolbar();
+                }
+            });
+        }
+    </script>
+    {% endif %}
 </body>
 </html>
