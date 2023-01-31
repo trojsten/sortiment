@@ -257,6 +257,36 @@ def transfer(request):
 
     return render(request, "store/transfer.html", {"form": form})
 
+def inventory(request):
+    warehouses = Warehouse.objects.all()
+    products = []
+
+    for p in Product.objects.all():
+        stock = []
+        for w in warehouses:
+            stockCount = WarehouseState.objects.filter(warehouse=w, product=p).first()
+            if stockCount:
+                stock.append(stockCount.quantity)
+            else:
+                stock.append(0)
+        total = sum(stock)
+        if total > 0:
+            products.append({
+                'name': p.name,
+                'barcode': p.barcode,
+                'price': p.price,
+                'stock': stock,
+                'total': total
+            })
+
+    context = {
+        'warehouses': warehouses,
+        'wh_count': len(warehouses)+1,
+        'products': products
+    }
+
+    return render(request, "store/inventory.html", context)
+
 
 def search(request):
     query = request.GET.get("q", "")

@@ -17,4 +17,5 @@ urlpatterns = [
     path("cart/add_barcode/", views.cart_add_barcode, name="cart_add_barcode"),
     path("products/search/", views.search, name="product_search"),
     path("products/import/", views.product_import, name="product_import"),
+    path("inventory/", views.inventory, name="inventory"),
 ]
