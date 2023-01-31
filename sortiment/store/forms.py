@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import CharField, DecimalField, Form, IntegerField, ModelForm
 
-from .models import Product, WarehouseState, Warehouse
+from .models import Product, Warehouse, WarehouseState
 
 
 class ProductForm(ModelForm):
@@ -37,13 +37,9 @@ class DiscardForm(Form):
 
 
 class InsertForm(Form):
-
-    barcode = CharField(label="Barcode", max_length=32)
-    product = forms.ModelChoiceField(queryset=Product.objects.all())
-    # TODO prepojenie barcode a product
-    qty = IntegerField(min_value=0)
-    unit_price = DecimalField(min_value=0)
-    total_price = DecimalField(min_value=0)
+    quantity = IntegerField(label="Počet kusov", min_value=0)
+    unit_price = DecimalField(label="Jednotková cena", min_value=0)
+    sell_price = DecimalField(label="Predajná cena", min_value=0)
 
 
 class TransferForm(Form):
@@ -54,21 +50,18 @@ class TransferForm(Form):
     qty = IntegerField(min_value=0)
     # TODO prepojenie barcode a product
 
-
     def clean_to_warehouse(self):
         from_warehouse = self.cleaned_data["from_warehouse"]
         to_warehouse = self.cleaned_data["to_warehouse"]
         if from_warehouse == to_warehouse:
-            raise ValidationError(
-                "Cannot transfer product between same warehouse"
-            )
+            raise ValidationError("Cannot transfer product between same warehouse")
         return from_warehouse
-
 
     def clean_qty(self):
         qty = self.cleaned_data["qty"]
         ws = WarehouseState.objects.filter(
-            product=self.cleaned_data["product"], warehouse=self.cleaned_data["from_warehouse"]
+            product=self.cleaned_data["product"],
+            warehouse=self.cleaned_data["from_warehouse"],
         )
         if ws[0].quantity < qty:
             raise ValidationError(
