@@ -4,7 +4,7 @@ from django.db import models
 
 class Warehouse(models.Model):
     name = models.CharField(max_length=32)
-    ip = models.GenericIPAddressField()
+    ip = models.GenericIPAddressField(unique=True)
 
 
 class Tag(models.Model):
@@ -12,6 +12,7 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Product(models.Model):
     name = models.CharField(max_length=128)
