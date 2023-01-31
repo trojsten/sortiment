@@ -134,7 +134,7 @@ def product_import(request):
             form = InsertForm(request.POST)
             if form.is_valid():
                 WarehouseEvent(
-                    product=form.cleaned_data["product"],
+                    product=product,
                     warehouse=wh,
                     quantity=form.cleaned_data["qty"],
                     price=form.cleaned_data["unit_price"],
