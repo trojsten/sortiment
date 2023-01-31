@@ -3,5 +3,13 @@
 @tailwind utilities;
 
 .btn {
-    @apply font-bold text-white px-3 py-2 rounded-md block text-lg text-center;
+    @apply font-bold px-3 py-2 rounded-md block text-center;
+}
+
+[x-cloak] {
+    display: none;
+}
+
+.input {
+    @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-600 focus:ring focus:ring-blue-500 focus:ring-opacity-50;
 }
