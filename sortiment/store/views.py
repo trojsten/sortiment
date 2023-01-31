@@ -3,7 +3,7 @@ from collections import defaultdict
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Q, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -124,27 +124,37 @@ def discard(request):
     return render(request, "store/discard.html", {"f": f})
 
 
-def insert(request):
+def product_import(request):
+    product = request.GET.get("product")
+    if product:
+        product = get_object_or_404(Product, id=product)
+        wh = get_warehouse(request)
 
-    # TODO prepojenie barcode a product, prepojenie total a unit price
+        if request.method == "POST":
+            form = InsertForm(request.POST)
+            if form.is_valid():
+                WarehouseEvent(
+                    product=form.cleaned_data["product"],
+                    warehouse=wh,
+                    quantity=form.cleaned_data["qty"],
+                    price=form.cleaned_data["unit_price"],
+                    type=WarehouseEvent.EventType.IMPORT,
+                    user=request.user,
+                ).save()
 
-    wh = get_warehouse(request)
+                product.price = form.cleaned_data["sell_price"]
+                product.save()
 
-    f = InsertForm()
-    if request.method == "POST":
-        f = InsertForm(request.POST)
-        if f.is_valid():
-
-            WarehouseEvent(
-                product=f.cleaned_data["product"],
-                warehouse=wh,
-                quantity=f.cleaned_data["qty"],
-                price=f.cleaned_data["unit_price"],
-                type=WarehouseEvent.EventType.IMPORT,
-                user=request.user,
-            ).save()
-
-    return render(request, "store/insert.html", {"f": f})
+        form = InsertForm(initial={"sell_price": product.price})
+    else:
+        form = None
+        product = None
+        wh = None
+    return render(
+        request,
+        "products/import.html",
+        {"form": form, "product": product, "warehouse": wh},
+    )
 
 
 def stats(request):
@@ -235,3 +245,15 @@ def transfer(request):
             ).save()
 
     return render(request, "store/transfer.html", {"form": form})
+
+
+def search(request):
+    query = request.GET.get("q", "")
+    products = []
+    if query:
+        products = Product.objects.filter(Q(barcode=query) | Q(name__icontains=query))[
+            0:10
+        ]
+    return render(
+        request, "products/search.html", {"products": products, "query": query}
+    )

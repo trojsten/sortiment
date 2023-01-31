@@ -1,0 +1,31 @@
+{% load icon %}
+<form hx-target="#hx-search-results" hx-select="#hx-search-results"
+      hx-swap="outerHTML" hx-get="{% url 'store:product_search' %}">
+    <input type="search" class="input" name="q" placeholder="Zadaj čiarový kód / názov produktu..."
+           hx-get="{% url 'store:product_search' %}" hx-trigger="keyup changed delay:500ms" />
+
+    <div id="hx-search-results">
+        {% if query %}
+        <div class="mt-4 bg-gray-50 p-2 rounded-md space-y-2">
+            {% for product in products %}
+                <a href="?product={{ product.id }}" class="flex items-center gap-2 hover:bg-gray-100 rounded p-2">
+                    <img src="https://picsum.photos/200?{{ forloop.counter }}" alt="" class="w-12 rounded">
+
+                    <div>
+                        <div class="font-bold text-sm">{{ product.name }}</div>
+                        <div class="text-xs">{{ product.price }} €</div>
+                    </div>
+                </a>
+            {% endfor %}
+
+            <a href="{% url 'store:add_product' %}" class="flex items-center gap-2 hover:bg-gray-100 rounded p-2">
+                <div class="w-12 h-12 bg-green-500 rounded text-white flex items-center justify-center">
+                    {% icon "plus" %}
+                </div>
+
+                <div class="font-bold text-sm">Pridať produkt</div>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</form>
