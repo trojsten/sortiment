@@ -11,6 +11,7 @@ from users.models import SortimentUser
 class CartItem:
     product: Product
     quantity: int
+    dummy: bool
 
     @property
     def total_price(self):
@@ -30,21 +31,21 @@ class Cart:
         self.items.clear()
 
         for item in cart:
-            if item["product"] not in product_map:
+            if item["product"] not in product_map and item["dummy"] != True:
                 continue
             if item["quantity"] <= 0:
                 continue
-            self.items.append(CartItem(product_map[item["product"]], item["quantity"]))
+            self.items.append(CartItem(product_map[item["product"]], item["quantity"], item["dummy"]))
 
     def _save_session(self):
         data = []
         for item in self.items:
             if item.quantity <= 0:
                 continue
-            data.append({"product": item.product.id, "quantity": item.quantity})
+            data.append({"product": item.product.id, "quantity": item.quantity, "dummy": item.dummy})
         self.request.session["cart"] = data
 
-    def add_product(self, product: Product, quantity: int = 1):
+    def add_product(self, product: Product, quantity: int = 1, dummy: bool = False):
         if quantity <= 0:
             raise ValueError("Quantity must be greater than 0.")
 
@@ -55,7 +56,7 @@ class Cart:
                 self._save_session()
                 return
 
-        self.items.append(CartItem(product, quantity))
+        self.items.append(CartItem(product, quantity, dummy))
         self._save_session()
 
     def remove_product(self, product: Product, quantity: int = 1):
@@ -84,6 +85,6 @@ class Cart:
         if not request.user.can_pay(self.total_price):
             return False
         for item in self.items:
-            item.product.buy(item.quantity, get_warehouse(request), request.user)
+            item.product.buy(item.quantity, get_warehouse(request), request.user, item.dummy)
         return True
 

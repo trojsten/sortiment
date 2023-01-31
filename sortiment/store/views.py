@@ -10,11 +10,10 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from users.models import SortimentUser
-
 from .cart import Cart
 from .forms import DiscardForm, ProductForm, TransferForm
 from .forms import InsertForm
-from .helpers import get_warehouse
+from .helpers import get_warehouse, get_dummy_barcode_data
 from .models import Product, Tag, Warehouse, WarehouseEvent, WarehouseState
 
 
@@ -181,7 +180,7 @@ def cart_remove(request, product):
 def cart_add(request, product):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product)
-    cart.add_product(product, 1)
+    cart.add_product(product, 1, False)
     return render(request, "store/_cart.html", {"cart": cart})
 
 
@@ -189,10 +188,15 @@ def cart_add(request, product):
 @login_required
 def cart_add_barcode(request):
     cart = Cart(request)
-    product = Product.objects.get(barcode=request.POST["barcode"])
+    barcode = request.POST["barcode"].strip()
+    product = Product.objects.filter(barcode=barcode).first()
     if product is None:
-        pass
-    cart.add_product(product, 1)
+        price = get_dummy_barcode_data(barcode)
+        if price is not None:
+            product = Product.generate_one_time_product(price, barcode)
+            cart.add_product(product, 1, True)
+    else:
+        cart.add_product(product, 1, False)
     return render(request, "store/_cart.html", {"cart": cart})
 
 
