@@ -6,8 +6,9 @@
         <div class="space-y-2 mt-3">
             {% for item in cart.items %}
             <div class="flex items-center gap-2">
-                <img src="https://picsum.photos/200?{{ forloop.counter }}" alt="" class="w-12 rounded">
-
+                <div class="w-12 shrink-0">
+                    {% include "store/_item_image.html" with product=item.product %}
+                </div>
                 <div>
                     <div class="font-bold text-sm">{{ item.product.name }}</div>
                     <div class="text-xs">{{ item.quantity }} × {{ item.product.price }} €</div>
@@ -26,7 +27,10 @@
         {% if cart.total_price > user.credit and not user.is_guest %}
             <div class="bg-red-600 btn text-lg cursor-not-allowed text-white">Nedostatok kreditu</div>
         {% else %}
-            <a onclick="if(!('{{ user.is_guest}}'=='False' || confirm('Naozaj si zaplatil?'))) event.preventDefault();" href="{% url 'store:checkout' %}" class="bg-blue-600 hover:bg-blue-700 btn text-lg text-white">Zaplatiť {{ cart.total_price|floatformat:2 }} €</a>
+            <a {% if user.is_guest %}
+                onclick="if(!confirm('Naozaj si zaplatil?')) event.preventDefault();"
+            {% endif %}
+            href="{% url 'store:checkout' %}" class="bg-blue-600 hover:bg-blue-700 btn text-lg text-white">Zaplatiť {{ cart.total_price|floatformat:2 }} €</a>
         {% endif %}
     </div>
 </div>

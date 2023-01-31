@@ -1,0 +1,8 @@
+{% load icon %}
+<div class="mx-auto w-full flex items-center justify-center aspect-square rounded-md bg-blue-300 overflow-hidden">
+    {% if product.image %}
+        <img class="max-w-full max-h-full" src="{{ product.image.url }}">
+    {% else %}
+        {% icon "help-circle" class="w-1/2 h-1/2 text-white" %}
+    {% endif %}
+</div>
