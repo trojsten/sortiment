@@ -37,7 +37,7 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('is_staff',)
     fieldsets = (
         (None, {"fields": ("username", "password", 'credit')}),
-        ("Personal info", {"fields": ("first_name", "last_name", 'barcode')}),
+        ("Personal info", {"fields": ("first_name", "last_name", 'barcode', 'is_guest')}),
         (
             "Permissions",
             {
@@ -54,7 +54,7 @@ class UserAdmin(BaseUserAdmin):
     # overrides get_fieldsets to use this attribute when creating a user.
     add_fieldsets = (
         (None, {"fields": ("username", "password", 'credit')}),
-        ("Personal info", {"fields": ("first_name", "last_name", 'barcode')}),
+        ("Personal info", {"fields": ("first_name", "last_name", 'barcode', 'is_guest')}),
         (
             "Permissions",
             {

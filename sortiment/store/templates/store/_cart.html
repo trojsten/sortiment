@@ -2,7 +2,7 @@
 <div class="flex flex-col flex-1 min-h-0 border-t" id="hx-cart" hx-target="this" hx-swap="outerHTML">
     <div class="pl-3 pr-2 py-2 overflow-y-auto">
         <div class="font-bold">Môj nákup</div>
-        
+
         <div class="space-y-2 mt-3">
             {% for item in cart.items %}
             <div class="flex items-center gap-2">
@@ -23,10 +23,10 @@
     </div>
 
     <div class="p-3 mt-auto border-t">
-        {% if cart.total_price > user.credit %}
+        {% if cart.total_price > user.credit and not user.is_guest %}
             <div class="bg-red-600 btn text-lg cursor-not-allowed text-white">Nedostatok kreditu</div>
         {% else %}
-            <a href="{% url "store:checkout" %}" class="bg-blue-600 hover:bg-blue-700 btn text-lg text-white">Zaplatiť {{ cart.total_price|floatformat:2 }} €</a>
+            <a onclick="if(!('{{ user.is_guest}}'=='False' || confirm('Naozaj si zaplatil?'))) event.preventDefault();" href="{% url 'store:checkout' %}" class="bg-blue-600 hover:bg-blue-700 btn text-lg text-white">Zaplatiť {{ cart.total_price|floatformat:2 }} €</a>
         {% endif %}
     </div>
 </div>
