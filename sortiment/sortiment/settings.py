@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "django_htmx",
     "django_feather",
+    "widget_tweaks",
 ]
 
 MIDDLEWARE = [

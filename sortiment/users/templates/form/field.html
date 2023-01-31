@@ -1,0 +1,11 @@
+{% load widget_tweaks %}
+
+<div>
+    <label for="{{ field.id_for_label }}" class="text-sm font-medium text-gray-700">{{ field.label }}:</label>
+    {% if not field.errors %}
+        {% render_field field class="input mt-1" %}
+    {% else %}
+        {% render_field field class="input mt-1 border-red-600 placeholder-red-600" %}
+        <p class="mt-1 text-sm text-red-600">{{ field.errors|first }}</p>
+    {% endif %}
+</div>
