@@ -3,7 +3,7 @@ from collections import defaultdict
 from django.db.models import Sum
 from django.shortcuts import render
 
-from .forms import DiscardForm, ProductForm
+from .forms import DiscardForm, InsertForm, ProductForm
 from .helpers import get_warehouse
 from .models import Product, Tag, WarehouseEvent, WarehouseState
 
@@ -110,3 +110,26 @@ def discard(request):
             ).save()
 
     return render(request, "store/discard.html", {"f": f})
+
+
+def insert(request):
+
+    # TODO prepojenie barcode a product, prepojenie total a unit price
+
+    wh = get_warehouse(request)
+
+    f = InsertForm()
+    if request.method == "POST":
+        f = InsertForm(request.POST)
+        if f.is_valid():
+
+            WarehouseEvent(
+                product=f.cleaned_data["product"],
+                warehouse=wh,
+                quantity=f.cleaned_data["qty"],
+                price=f.cleaned_data["unit_price"],
+                type=WarehouseEvent.EventType.IMPORT,
+                user=request.user,
+            ).save()
+
+    return render(request, "store/insert.html", {"f": f})

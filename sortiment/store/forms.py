@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.forms import CharField, Form, IntegerField, ModelForm
+from django.forms import CharField, DecimalField, Form, IntegerField, ModelForm
 
 from .models import Product, WarehouseState
 
@@ -14,6 +14,7 @@ class ProductForm(ModelForm):
 
 
 class DiscardForm(Form):
+
     barcode = CharField(label="barcode", max_length=32)
     product = forms.ModelChoiceField(queryset=Product.objects.all())
     qty = IntegerField(min_value=0)
@@ -33,3 +34,13 @@ class DiscardForm(Form):
                 "Not possible to discard more items that is in warehouse."
             )
         return qty
+
+
+class InsertForm(Form):
+
+    barcode = CharField(label="Barcode", max_length=32)
+    product = forms.ModelChoiceField(queryset=Product.objects.all())
+    # TODO prepojenie barcode a product
+    qty = IntegerField(min_value=0)
+    unit_price = DecimalField(min_value=0)
+    total_price = DecimalField(min_value=0)
