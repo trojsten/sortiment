@@ -90,7 +90,7 @@ class WarehouseEvent(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     quantity = models.IntegerField()
-    price = models.DecimalField(max_digits=6, decimal_places=2)
+    price = models.DecimalField(max_digits=6, decimal_places=2) # TODO jednotkova?
     timestamp = models.DateTimeField(auto_now_add=True)
     type = models.IntegerField(choices=EventType.choices)
     user = models.ForeignKey(

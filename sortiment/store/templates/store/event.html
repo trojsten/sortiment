@@ -1,19 +1,25 @@
-<form action="{% url 'store:event' %}" method="post">
-{% csrf_token %}
-<fieldset>
-    <div>
-      <input type="radio" id="import" name="event_type" value="import"
-             checked>
-      <label for="import">Import</label>
-    </div>
-    <div>
-      <input type="radio" id="discard" name="event_type" value="discard">
-      <label for="discard">Discard</label>
-    </div>
-    <div>
-      <input type="radio" id="correction" name="event_type" value="correction">
-      <label for="correction">Correction</label>
-    </div>
-</fieldset>
-<input type="submit" value="Vote">
-</form>
+{% extends 'base.html' %}
+
+{% block title %}Prenos tovaru{% endblock %}
+
+{% block content %}
+    <form action="{% url 'store:event' %}" method="post">
+    {% csrf_token %}
+    <fieldset>
+        <div>
+          <input type="radio" id="import" name="event_type" value="import"
+                 checked>
+          <label for="import">Import</label>
+        </div>
+        <div>
+          <input type="radio" id="discard" name="event_type" value="discard">
+          <label for="discard">Discard</label>
+        </div>
+        <div>
+          <input type="radio" id="correction" name="event_type" value="correction">
+          <label for="correction">Correction</label>
+        </div>
+    </fieldset>
+    <input type="submit" value="Vote">
+    </form>
+{% endblock %}
