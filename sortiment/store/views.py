@@ -39,10 +39,9 @@ def product_list(request):
         p.totqty = all_state_d[p.id]
 
 
-
     context = {
         "prods": prods,
-        'user': request.user
+        'user': request.user,
         "tags": tags,
     }
     return render(request, "store/products.html", context)
