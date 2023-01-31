@@ -52,7 +52,7 @@ def product_list(request):
     non_zero_prods = filter(lambda p: p.is_unlimited or p.totqty > 0, prods)
     non_zero_prods = sorted(non_zero_prods, key=lambda x: x.name)
     non_zero_prods = sorted(
-        non_zero_prods, key=lambda x: not (isinstance(x.qty, int) and x.qty != 0)
+        non_zero_prods, key=lambda x: not (isinstance(x.qty, int) and x.qty > 0)
     )
 
     context = {
