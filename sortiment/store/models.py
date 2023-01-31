@@ -32,6 +32,13 @@ class WarehouseState(models.Model):
     quantity = models.IntegerField()
     total_price = models.DecimalField(max_digits=16, decimal_places=2, default=0)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["warehouse", "product"], name="whstate_wh_prod_unique"
+            )
+        ]
+
 
 class WarehouseEvent(models.Model):
     class EventType(models.IntegerChoices):
