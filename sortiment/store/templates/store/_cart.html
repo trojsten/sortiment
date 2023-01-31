@@ -1,0 +1,32 @@
+{% load icon %}
+<div class="flex flex-col flex-1 min-h-0 border-t" id="hx-cart" hx-target="this" hx-swap="outerHTML">
+    <div class="pl-3 pr-2 py-2 overflow-y-auto">
+        <div class="font-bold">Môj nákup</div>
+        
+        <div class="space-y-2 mt-3">
+            {% for item in cart.items %}
+            <div class="flex items-center gap-2">
+                <img src="https://picsum.photos/200?{{ forloop.counter }}" alt="" class="w-12 rounded">
+
+                <div>
+                    <div class="font-bold text-sm">{{ item.product.name }}</div>
+                    <div class="text-xs">{{ item.quantity }} ×  {{ item.product.price }} €</div>
+                </div>
+
+                <div class="text-blue-700 text-sm ml-auto shrink-0">{{ item.total_price|floatformat:2 }} €</div>
+                <div class="hover:bg-red-100 text-red-700 p-1 rounded-full shrink-0 -ml-1 cursor-pointer" role="button" hx-post="{% url 'store:cart_remove' item.product.id %}">
+                    {% icon "x" class="w-6 h-6" %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="p-3 mt-auto border-t">
+        {% if cart.total_price > user.credit %}
+            <div class="bg-red-600 btn cursor-not-allowed">Nedostatok kreditu</div>
+        {% else %}
+            <a href="#" class="bg-blue-600 hover:bg-blue-700 btn">Zaplatiť {{ cart.total_price|floatformat:2 }} €</a>
+        {% endif %}
+    </div>
+</div>

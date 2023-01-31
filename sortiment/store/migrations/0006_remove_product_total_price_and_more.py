@@ -6,17 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("store", "0005_warehouse_ip_alter_product_barcode"),
+        ('store', '0005_warehouse_ip_alter_product_barcode'),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name="product",
-            name="total_price",
+            model_name='product',
+            name='total_price',
         ),
         migrations.AddField(
-            model_name="warehousestate",
-            name="total_price",
+            model_name='warehousestate',
+            name='total_price',
             field=models.DecimalField(decimal_places=2, default=0, max_digits=16),
+            preserve_default=False,
         ),
     ]

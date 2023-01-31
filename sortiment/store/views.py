@@ -2,15 +2,23 @@ from collections import defaultdict
 
 from django.db.models import Sum
 from django.shortcuts import render
-
 from .forms import DiscardForm, InsertForm, ProductForm
 from .helpers import get_warehouse
 from .models import Product, Tag, WarehouseEvent, WarehouseState
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.http import require_POST
+from users.models import SortimentUser
+from .cart import Cart
+from .forms import DiscardForm, ProductForm
+from .helpers import get_warehouse
+from .models import Product, Tag, Warehouse, WarehouseEvent, WarehouseState
 
 
 def product_list(request):
 
-    warehouse_id = request.GET.get("warehouse_id", 1)
+    warehouse_id = get_warehouse(request)
 
     tags = []
     for tag in Tag.objects.all():
@@ -45,6 +53,7 @@ def product_list(request):
         "prods": prods,
         "user": request.user,
         "tags": tags,
+        "cart": Cart(request),
     }
     return render(request, "store/products.html", context)
 
@@ -133,3 +142,44 @@ def insert(request):
             ).save()
 
     return render(request, "store/insert.html", {"f": f})
+
+def stats(request):
+
+    context = {
+        "total_price_when_buy": Warehouse.get_global_products_price_when_buy_sum(),
+        "total_price_for_sale": Warehouse.get_global_products_price_when_buy_sum(),
+        "local_price_when_buy": get_warehouse(
+            request
+        ).get_global_products_price_when_buy_sum(),
+        "local_price_for_sale": get_warehouse(
+            request
+        ).get_global_products_price_when_buy_sum(),
+        "credit_sum": SortimentUser.get_credit_sum(),
+    }
+    context["total_profit"] = (
+        context["total_price_for_sale"] - context["total_price_when_buy"]
+    )
+    context["local_profit"] = (
+        context["local_price_for_sale"] - context["local_price_when_buy"]
+    )
+
+    return render(request, "store/stats.html", context)
+
+
+@require_POST
+@login_required
+def cart_remove(request, product):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product)
+    cart.remove_product(product, 1)
+    return render(request, "store/_cart.html", {"cart": cart})
+
+
+@require_POST
+@login_required
+def cart_add(request, product):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product)
+    cart.add_product(product, 1)
+    return render(request, "store/_cart.html", {"cart": cart})
+

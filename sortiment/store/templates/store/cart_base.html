@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="w-full min-h-screen flex">
-    <div class="w-64 bg-gray-100 shrink-0 border-r">
+<div class="w-full h-screen flex">
+    <div class="w-72 bg-gray-100 shrink-0 h-screen max-h-screen border-r flex flex-col">
         <div class="bg-blue-600 text-white font-bold text-center text-xl p-2">
             Sortiment
         </div>
@@ -10,10 +10,13 @@
             <div class="font-bold">{{ user.username }}</div>
             <div class="ml-auto">Kredit: {{ user.credit }}&euro;</div>
         </div>
-        <a class='px-4 py-2 rounded bg-gray-200 hover:bg-gray-600 hover:text-white text-xl m-2 inline-block' href="{% url 'credit' %}">Zmeny v kredite</a>
-        <a class='px-4 py-2 rounded bg-red-200 hover:bg-red-600 hover:text-white text-xl m-2 inline-block' href="{% url 'logout' %}">Odhlás</a>
+        <div>
+            <a class='px-4 py-2 rounded bg-gray-200 hover:bg-gray-600 hover:text-white text-xl m-2 inline-block' href="{% url 'credit' %}">Zmeny v kredite</a>
+            <a class='px-4 py-2 rounded bg-red-200 hover:bg-red-600 hover:text-white text-xl m-2 inline-block' href="{% url 'logout' %}">Odhlás</a>
+        </div>
+        {% include "store/_cart.html" %}
     </div>
-    <div class="p-6 overflow-y-auto flex-1">
+    <div class="p-6 overflow-y-auto max-h-screen flex-1">
         {% block cartright %}{% endblock %}
     </div>
 </div>

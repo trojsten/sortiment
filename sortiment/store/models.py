@@ -6,6 +6,22 @@ class Warehouse(models.Model):
     name = models.CharField(max_length=32)
     ip = models.GenericIPAddressField(unique=True)
 
+    def get_products_price_for_sale_sum(self):
+        return sum( state.quantity*state.product.price for state in WarehouseState.objects.filter(warehouse=self) )
+
+    def get_products_price_when_buy_sum(self):
+        return sum( state.total_price for state in WarehouseState.objects.filter(warehouse=self) )
+
+    @staticmethod
+    def get_global_products_price_for_sale_sum():
+        return sum( state.quantity*state.product.price for state in WarehouseState.objects.all() )
+
+    @staticmethod
+    def get_global_products_price_when_buy_sum():
+        return sum( state.total_price for state in WarehouseState.objects.all() )
+
+    def __str__(self):
+        return f"{self.name}; {self.ip}"
 
 class Tag(models.Model):
     name = models.CharField(max_length=64)
@@ -23,7 +39,7 @@ class Product(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name}; {self.price}"
 
 
 class WarehouseState(models.Model):
@@ -38,6 +54,9 @@ class WarehouseState(models.Model):
                 fields=["warehouse", "product"], name="whstate_wh_prod_unique"
             )
         ]
+
+    def __str__(self):
+        return f"{self.warehouse}; {self.product}; {self.quantity}"
 
 
 class WarehouseEvent(models.Model):
@@ -62,3 +81,6 @@ class WarehouseEvent(models.Model):
     def __save__(self):
         # TODO spravit, aby dobre bolo aj s ws
         pass
+
+    def __str__(self):
+        return f"{self.warehouse}; {self.product}; {self.timestamp}"
