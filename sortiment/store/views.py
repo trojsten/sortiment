@@ -136,7 +136,7 @@ def product_import(request):
                 WarehouseEvent(
                     product=product,
                     warehouse=wh,
-                    quantity=form.cleaned_data["qty"],
+                    quantity=form.cleaned_data["quantity"],
                     price=form.cleaned_data["unit_price"],
                     type=WarehouseEvent.EventType.IMPORT,
                     user=request.user,
