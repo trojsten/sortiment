@@ -3,23 +3,9 @@
 {% block title %}Prenos tovaru{% endblock %}
 
 {% block content %}
-    <form action="{% url 'store:event' %}" method="post">
-    {% csrf_token %}
-    <fieldset>
-        <div>
-          <input type="radio" id="import" name="event_type" value="import"
-                 checked>
-          <label for="import">Import</label>
-        </div>
-        <div>
-          <input type="radio" id="discard" name="event_type" value="discard">
-          <label for="discard">Discard</label>
-        </div>
-        <div>
-          <input type="radio" id="correction" name="event_type" value="correction">
-          <label for="correction">Correction</label>
-        </div>
-    </fieldset>
-    <input type="submit" value="Vote">
-    </form>
+    <a href="{% url 'store:add_product' %}" class="m-3 bg-blue-600 hover:bg-blue-700 btn text-lg text-white">Vytvor produkt</a>
+    <a href="{% url 'store:insert' %}" class="m-3 bg-blue-600 hover:bg-blue-700 btn text-lg text-white">Nahoď produkty</a>
+    <a href="{% url 'store:discard' %}" class="m-3 bg-blue-600 hover:bg-blue-700 btn text-lg text-white">Zahoď produkty</a>
+    <a href="{% url 'store:add_product' %}" class="m-3 bg-blue-600 hover:bg-blue-700 btn text-lg text-white">Presun medzi skladmi</a>
+
 {% endblock %}
