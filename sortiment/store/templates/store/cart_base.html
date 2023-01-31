@@ -10,7 +10,7 @@
         <div class="p-3 flex text-lg items-baseline">
             <div class="font-bold">{{ user.username }}</div>
             {% if not user.is_guest %}
-                <div class="ml-auto text-sm">Kredit: {{ user.credit }}&euro;</div>
+                <div class="ml-auto text-sm">Kredit: {{ user.credit }} &euro;</div>
             {% endif %}
         </div>
         <div class="flex w-full justify-around pt-1 pb-4 px-3">

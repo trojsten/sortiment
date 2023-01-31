@@ -1,11 +1,20 @@
-{% extends 'base.html' %}
+{% extends 'settings_base.html' %}
+{% load forms %}
+{% load widget_tweaks %}
 
-{% block title %}Prenos tovaru{% endblock %}
+{% block title %}Odstránenie produktov{% endblock %}
 
-{% block content %}
-    <form action="{% url 'store:discard' %}" method="post">
+{% block setting %}
+    <h1 class="font-bold text-3xl text-center mb-6 mt-4">Odstránenie produktov</h1>
+    <form method="post">
         {% csrf_token %}
-        {{ f }}
-        <input type="submit" value="Submit">
+        <div class="space-y-2 max-w-md mx-auto mb-6">
+            {% for field in f %}
+                {% field field %}
+            {% endfor %}
+        </div>
+        <div class="flex flex-wrap justify-center mt-2">
+            <input class='btn bg-blue-600 hover:bg-blue-700 text-white' type="submit" value="Submit">
+        </div>
     </form>
 {% endblock %}
