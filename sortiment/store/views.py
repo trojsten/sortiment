@@ -74,7 +74,7 @@ def purchase_history(request):
             history.append(
                 {
                     "product": event.product,
-                    "quantity": event.quantity,
+                    "quantity": abs(event.quantity),
                     "price": event.price,
                     "date": event.timestamp.date(),
                     "time": event.timestamp.time(),

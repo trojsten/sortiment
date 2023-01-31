@@ -38,7 +38,7 @@ def credit(request):
         credit_movement_form = CreditMovementForm(request.POST)
         if credit_movement_form.is_valid():
             user = request.user
-            if not isinstance(user, SortimentUser):
+            if not isinstance(user, SortimentUser) or user.is_guest:
                 return
             money = -credit_movement_form.cleaned_data.get('credit')
             if user.can_pay(money):
@@ -52,7 +52,7 @@ def credit(request):
         credit_add_and_withdrawal_form = CreditAddAndWithdrawalForm(request.POST)
         if credit_add_and_withdrawal_form.is_valid():
             user = request.user
-            if not isinstance(user, SortimentUser):
+            if not isinstance(user, SortimentUser) or user.is_guest:
                 return
             money = credit_add_and_withdrawal_form.cleaned_data.get('credit')
             if user.can_pay(money):

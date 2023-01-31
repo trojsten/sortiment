@@ -57,8 +57,7 @@ class Product(models.Model):
                        price=self.price,
                        type=WarehouseEvent.EventType.PURCHASE,
                        user=user).save()
-        user.credit -= self.price*quantity
-        user.save()
+        user.make_credit_operation(-quantity * self.price)
 
 
 class WarehouseState(models.Model):

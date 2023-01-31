@@ -8,4 +8,4 @@ class CreditAddAndWithdrawalForm(forms.Form):
 
 class CreditMovementForm(forms.Form):
     credit = DecimalField(max_digits=6, decimal_places=2, max_value=0)
-    user = ModelChoiceField(queryset=SortimentUser.objects.all().order_by('username'))
+    user = ModelChoiceField(queryset=SortimentUser.objects.all().order_by('username').filter(is_guest=False))
