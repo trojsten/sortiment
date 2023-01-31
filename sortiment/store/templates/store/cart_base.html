@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load icon %}
 
 {% block content %}
 <div class="w-full h-screen flex">
@@ -6,13 +7,17 @@
         <div class="bg-blue-600 text-white font-bold text-center text-xl p-2">
             Sortiment
         </div>
-        <div class="py-2 px-3 flex text-lg">
+        <div class="p-3 flex text-lg items-baseline">
             <div class="font-bold">{{ user.username }}</div>
-            <div class="ml-auto">Kredit: {{ user.credit }}&euro;</div>
+            <div class="ml-auto text-sm">Kredit: {{ user.credit }}&euro;</div>
         </div>
-        <div>
-            <a class='px-4 py-2 rounded bg-gray-200 hover:bg-gray-600 hover:text-white text-xl m-2 inline-block' href="{% url 'credit' %}">Zmeny v kredite</a>
-            <a class='px-4 py-2 rounded bg-red-200 hover:bg-red-600 hover:text-white text-xl m-2 inline-block' href="{% url 'logout' %}">Odhlás</a>
+        <div class="flex w-full justify-around pt-1 pb-4 px-3">
+            <a href="{% url 'store:purchase_history' %}" class="text-gray-700 hover:text-gray-900">{% icon "activity" class="w-6 h-6" %}</a>
+            <a href="{% url 'credit' %}" class="text-gray-700 hover:text-gray-900">{% icon "dollar-sign" class="w-6 h-6" %}</a>
+            {% if user.is_staff %}
+            <a href="{% url 'credit' %}" class="text-gray-700 hover:text-gray-900">{% icon "edit-2" class="w-6 h-6" %}</a>
+            {% endif %}
+            <a href="{% url 'logout' %}" class="text-red-700 hover:text-red-900">{% icon "log-out" class="w-6 h-6" %}</a>
         </div>
         {% include "store/_cart.html" %}
     </div>
