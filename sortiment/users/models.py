@@ -35,6 +35,7 @@ class SortimentUser(AbstractUser):
     REQUIRED_FIELDS = ["credit", "first_name", "last_name"]
 
     def can_pay(self, money):
+        print(-money, self.credit, -money <= self.credit)
         return -money <= self.credit
 
     def make_credit_operation(self, money):

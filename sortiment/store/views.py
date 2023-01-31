@@ -1,7 +1,11 @@
 from collections import defaultdict
 
+from django.core.exceptions import BadRequest, SuspiciousOperation
 from django.db.models import Sum
-from django.shortcuts import render
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.shortcuts import render, redirect
+from django.urls import reverse
+
 from .forms import DiscardForm, InsertForm, ProductForm
 from .helpers import get_warehouse
 from .models import Product, Tag, WarehouseEvent, WarehouseState
@@ -192,3 +196,12 @@ def cart_add_barcode(request):
         pass
     cart.add_product(product, 1)
     return render(request, "store/_cart.html", {"cart": cart})
+
+
+@login_required
+def checkout(request):
+    ok = Cart(request).checkout(request)
+    if ok:
+        return HttpResponseRedirect(reverse('logout'))
+    else:
+        raise SuspiciousOperation("Not enough credit")
