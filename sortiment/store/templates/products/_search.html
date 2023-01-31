@@ -1,4 +1,5 @@
 {% load icon %}
+{% if not product %}
 <form hx-target="#hx-search-results" hx-select="#hx-search-results"
       hx-swap="outerHTML" hx-get="{% url 'store:product_search' %}">
     <input type="search" class="input" name="q" placeholder="Zadaj čiarový kód / názov produktu..."
@@ -29,3 +30,20 @@
         {% endif %}
     </div>
 </form>
+{% else %}
+<div class="flex items-center gap-2 p-4 bg-gray-100 rounded mb-4">
+    <img src="https://picsum.photos/200?{{ forloop.counter }}" alt="" class="w-12 rounded">
+
+    <div>
+        <div class="font-bold text-sm">{{ product.name }}</div>
+        <div class="text-xs">{{ product.price }} €</div>
+    </div>
+
+{#            <a href="{% url "store:product_import" %}" class="shrink-0 ml-auto">#}
+{#                {% icon "edit-2" class="w-5 h-5" %}#}
+{#            </a>#}
+    <a href="?" class="shrink-0">
+        {% icon "x" class="w-5 h-5" %}
+    </a>
+</div>
+{% endif %}
