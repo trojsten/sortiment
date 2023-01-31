@@ -85,6 +85,7 @@ def add_product(request):
         f = ProductForm(request.POST)
         if f.is_valid():
             product = f.save(commit=False)
+            product.price = f.cleaned_data["price"]
             product.save()
 
     return render(request, "store/add_product.html", {"f": f})

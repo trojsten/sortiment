@@ -8,7 +8,9 @@ from .models import Product, WarehouseState
 class ProductForm(ModelForm):
     class Meta:
         model = Product
-        fields = ["name", "barcode", "image", "price", "is_unlimited", "tags"]
+        fields = ["name", "barcode", "image", "is_unlimited", "tags"]
+
+    price = forms.DecimalField(min_value=0)
 
 
 class DiscardForm(Form):
@@ -26,7 +28,6 @@ class DiscardForm(Form):
         ws = WarehouseState.objects.filter(
             product=self.cleaned_data["product"], warehouse=self.wh
         )
-        # TODO make prod+ws unique
         if ws[0].quantity < qty:
             raise ValidationError(
                 "Not possible to discard more items that is in warehouse."
