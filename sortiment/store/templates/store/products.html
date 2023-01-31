@@ -22,15 +22,30 @@
             </div>
         </div>
     </form>
-    <form>
+    <script>
+        function filter(event) {
+            let tags = document.getElementsByClassName("tag");
+
+            let target = window.location.href.split("?")[0] + "?";
+            for (let i = 0; i < tags.length; i++) {
+                if (!tags[i].classList.contains("opacity-50")) {
+                    target += "&tag-" + tags[i].id.split("-")[1] + "=1";
+                }
+            }
+
+            window.location.href = target;
+            event.preventDefault();
+        }
+    </script>
+    <form onsubmit="filter(event)">
         <div class="w-full h-20 p-6 flex flex-row space-x-2">
             {% for tag in tags %}
-                <div class="h-8 rounded-full bg-gray-200 flex items-center justify-center flex-row w-min p-2">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-gray-600" {% if tag.active %}checked{% endif %} id="tag-{{ tag.name }}" name="tag-{{ tag.name }}" value="1">
-                    <label class="text-gray-700 font-bold" for="tag-{{ tag.name }}">{{ tag.name }}</label>
+                <div class="h-8 rounded-full bg-gray-200 flex items-center justify-center flex-row w-min p-2 transition-opacity cursor-default tag {% if not tag.active %}opacity-50{% endif %}" id="tag-{{ tag.name }}"
+                     onclick="if(this.classList.contains('opacity-50')) { this.classList.remove('opacity-50'); } else { this.classList.add('opacity-50'); }">
+                    <span class="text-gray-700 font-bold">{{ tag.name }}</span>
                 </div>
             {% endfor %}
-            <input type="submit" value="Filter" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded h-8">
+            <input type="submit" value="Filter" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 cursor-pointer rounded-full">
         </div>
     </form>
 </div>
