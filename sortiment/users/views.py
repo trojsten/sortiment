@@ -1,4 +1,4 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -9,7 +9,7 @@ from .models import SortimentUser
 
 def user_list(request):
     context = {'users': SortimentUser.objects.all().order_by('username')}
-    return render(request, 'users/list.html', context)
+    return render(request, 'users/users_list.html', context)
 
 
 def login_user(request, user_id):
@@ -17,12 +17,17 @@ def login_user(request, user_id):
     login(request, user)
     return HttpResponseRedirect(reverse('product_list'))
 
+def logout_user(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('user_list'))
+
+
 def create_user(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('list'))
+            return HttpResponseRedirect(reverse('user_list'))
     else:
         form = UserCreationForm()
     context = {'form': form}
