@@ -50,14 +50,24 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.name}; {self.price}"
 
-    def buy(self, quantity, warehouse, user):
-        WarehouseEvent(product=self,
+    def buy(self, quantity, warehouse, user, dummy):
+        if not dummy:
+            WarehouseEvent(product=self,
                        warehouse=warehouse,
                        quantity=-quantity,
                        price=self.price,
                        type=WarehouseEvent.EventType.PURCHASE,
                        user=user).save()
         user.make_credit_operation(-quantity * self.price)
+
+    @staticmethod
+    def generate_one_time_product(price, barcode):
+        # TODO: fotka?
+        product = Product(price=price, name="Jednokusová položka", is_unlimited=False, barcode=barcode)
+        product.save()
+        product = Product.objects.get(id=product.id)
+        return product
+
 
 
 class WarehouseState(models.Model):
