@@ -15,7 +15,7 @@ def user_list(request):
 def login_user(request, user_id):
     user = SortimentUser.objects.get(id=user_id)
     login(request, user)
-    return HttpResponseRedirect(reverse('product_list'))
+    return HttpResponseRedirect(reverse('store:product_list'))
 
 def logout_user(request):
     logout(request)
@@ -45,7 +45,7 @@ def credit(request):
                 user2 = credit_movement_form.cleaned_data.get('user')
                 user.make_credit_operation(money)
                 user2.make_credit_operation(-money)
-                return HttpResponseRedirect(reverse('product_list'))
+                return HttpResponseRedirect(reverse('store:product_list'))
             else:
                 credit_movement_form.add_error('credit', 'Nemáš na to dosť peňazí')
 
@@ -57,7 +57,7 @@ def credit(request):
             money = credit_add_and_withdrawal_form.cleaned_data.get('credit')
             if user.can_pay(money):
                 user.make_credit_operation(money)
-                return HttpResponseRedirect(reverse('product_list'))
+                return HttpResponseRedirect(reverse('store:product_list'))
             else:
                 credit_add_and_withdrawal_form.add_error('credit', 'Nemáš na to dosť peňazí')
     else:

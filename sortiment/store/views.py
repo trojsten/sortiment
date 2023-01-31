@@ -1,10 +1,11 @@
 from collections import defaultdict
+
 from django.db.models import Sum
 from django.shortcuts import render
+
+from users.models import SortimentUser
 from .forms import DiscardForm, ProductForm
-from .models import Product, WarehouseState
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
+from .helpers import get_warehouse
 from .models import Product, Warehouse, WarehouseState, WarehouseEvent, Tag
 
 
@@ -103,3 +104,18 @@ def discard(request):
             product.total_price -= f_product.qty * product.price
 
     return render(request, "store/discard.html", {"f": f})
+
+
+def stats(request):
+
+    context = {
+        "total_price_when_buy": Warehouse.get_global_products_price_when_buy_sum(),
+        "total_price_for_sale": Warehouse.get_global_products_price_when_buy_sum(),
+        "local_price_when_buy": get_warehouse(request).get_global_products_price_when_buy_sum(),
+        "local_price_for_sale": get_warehouse(request).get_global_products_price_when_buy_sum(),
+        "credit_sum": SortimentUser.get_credit_sum()
+    }
+    context["total_profit"] = context["total_price_for_sale"] - context["total_price_when_buy"]
+    context["local_profit"] = context["local_price_for_sale"] - context["local_price_when_buy"]
+
+    return render(request, "store/stats.html", context)

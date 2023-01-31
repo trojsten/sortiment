@@ -42,6 +42,10 @@ class SortimentUser(AbstractUser):
         self.credit += money
         self.save()
 
+    @staticmethod
+    def get_credit_sum():
+        return sum(user.credit for user in SortimentUser.objects.all())
+
 
 class CreditLog(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
