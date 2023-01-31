@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.forms import CharField, DecimalField, Form, IntegerField, ModelForm
+from django.forms import DecimalField, Form, IntegerField, ModelForm
 
 from .models import Product, Warehouse, WarehouseState
 
@@ -14,26 +14,21 @@ class ProductForm(ModelForm):
 
 
 class DiscardForm(Form):
+    quantity = IntegerField(min_value=0, label="Počet kusov")
 
-    barcode = CharField(label="barcode", max_length=32)
-    product = forms.ModelChoiceField(queryset=Product.objects.all())
-    qty = IntegerField(min_value=0)
-    # TODO prepojenie barcode a product
-
-    def __init__(self, warehouse, *args, **kwargs):
+    def __init__(self, warehouse, product, *args, **kwargs):
         self.wh = warehouse
+        self.product = product
         super().__init__(*args, **kwargs)
 
-    def clean_qty(self):
-        qty = self.cleaned_data["qty"]
+    def clean_quantity(self):
+        quantity = self.cleaned_data["quantity"]
         ws = WarehouseState.objects.filter(
-            product=self.cleaned_data["product"], warehouse=self.wh
-        )
-        if ws[0].quantity < qty:
-            raise ValidationError(
-                "Not possible to discard more items that is in warehouse."
-            )
-        return qty
+            product=self.product, warehouse=self.wh
+        ).first()
+        if not ws or ws.quantity < quantity:
+            raise ValidationError("Na sklade nie je dostatočný počet kusov.")
+        return quantity
 
 
 class InsertForm(Form):
@@ -43,28 +38,31 @@ class InsertForm(Form):
 
 
 class TransferForm(Form):
-    from_warehouse = forms.ModelChoiceField(queryset=Warehouse.objects.all())
-    to_warehouse = forms.ModelChoiceField(queryset=Warehouse.objects.all())
-    barcode = CharField(label="barcode", max_length=32)
-    product = forms.ModelChoiceField(queryset=Product.objects.all())
-    qty = IntegerField(min_value=0)
-    # TODO prepojenie barcode a product
+    from_warehouse = forms.ModelChoiceField(
+        queryset=Warehouse.objects.all(), label="Zdrojový sklad"
+    )
+    to_warehouse = forms.ModelChoiceField(
+        queryset=Warehouse.objects.all(), label="Cieľový sklad"
+    )
+    quantity = IntegerField(min_value=0, label="Počet kusov")
+
+    def __init__(self, product, *args, **kwargs):
+        self.product = product
+        super().__init__(*args, **kwargs)
 
     def clean_to_warehouse(self):
         from_warehouse = self.cleaned_data["from_warehouse"]
         to_warehouse = self.cleaned_data["to_warehouse"]
         if from_warehouse == to_warehouse:
-            raise ValidationError("Cannot transfer product between same warehouse")
+            raise ValidationError("Nemôžeš presunúť produkty v rámci jedného skladu.")
         return from_warehouse
 
-    def clean_qty(self):
-        qty = self.cleaned_data["qty"]
+    def clean_quantity(self):
+        quantity = self.cleaned_data["quantity"]
         ws = WarehouseState.objects.filter(
-            product=self.cleaned_data["product"],
+            product=self.product,
             warehouse=self.cleaned_data["from_warehouse"],
-        )
-        if ws[0].quantity < qty:
-            raise ValidationError(
-                "Not possible to discard more items that is in warehouse."
-            )
-        return qty
+        ).first()
+        if not ws or ws.quantity < quantity:
+            raise ValidationError("V zdrojovom sklade nie je dostatočny počet kusov.")
+        return quantity

@@ -2,14 +2,19 @@
 {% load forms %}
 {% load widget_tweaks %}
 
-{% block title %}Odstránenie produktov{% endblock %}
+{% block title %}Vyradenie tovaru{% endblock %}
 
 {% block setting %}
-    <h1 class="font-bold text-3xl text-center mb-6 mt-4">Odstránenie produktov</h1>
+<h1 class="font-bold text-3xl text-center mb-6 mt-4">Vyradenie tovaru</h1>
+
+<div class="max-w-md mx-auto">
+    {% include "products/_search.html" %}
+
+    {% if product %}
     <form method="post">
         {% csrf_token %}
         <div class="space-y-2 max-w-md mx-auto mb-6">
-            {% for field in f %}
+            {% for field in form %}
                 {% field field %}
             {% endfor %}
         </div>
@@ -17,4 +22,6 @@
             <input class='btn bg-blue-600 hover:bg-blue-700 text-white' type="submit" value="Submit">
         </div>
     </form>
+    {% endif %}
+</div>
 {% endblock %}

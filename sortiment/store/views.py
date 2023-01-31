@@ -5,7 +5,7 @@ from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
 from django.db.models import Q, Sum
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from users.models import SortimentUser
@@ -88,8 +88,8 @@ def purchase_history(request):
     return render(request, "store/purchase_history.html", context)
 
 
-def product_event(request):
-    return render(request, "store/event.html", {})
+def product_management(request):
+    return render(request, "products/home.html")
 
 
 def add_product(request):
@@ -106,22 +106,27 @@ def add_product(request):
 
 def discard(request):
     wh = get_warehouse(request)
+    form = DiscardForm(wh, None)
 
-    f = DiscardForm(wh)
-    if request.method == "POST":
-        f = DiscardForm(wh, request.POST)
-        if f.is_valid():
+    product = request.GET.get("product")
+    if product:
+        product = get_object_or_404(Product, id=product)
 
-            WarehouseEvent(
-                product=f.cleaned_data["product"],
-                warehouse=wh,
-                quantity=-f.cleaned_data["qty"],
-                price=0,
-                type=WarehouseEvent.EventType.DISCARD,
-                user=request.user,
-            ).save()
+        if request.method == "POST":
+            form = DiscardForm(wh, product, request.POST)
+            if form.is_valid():
+                WarehouseEvent(
+                    product=product,
+                    warehouse=wh,
+                    quantity=-form.cleaned_data["quantity"],
+                    price=0,
+                    type=WarehouseEvent.EventType.DISCARD,
+                    user=request.user,
+                ).save()
 
-    return render(request, "store/discard.html", {"f": f})
+                return redirect("store:product_discard")
+
+    return render(request, "products/discard.html", {"form": form, "product": product})
 
 
 def product_import(request):
@@ -232,30 +237,37 @@ def checkout(request):
 
 @login_required
 @transaction.atomic
-def transfer(request):
-    form = TransferForm()
-    if request.method == "POST":
-        form = TransferForm(request.POST)
-        if form.is_valid():
-            WarehouseEvent(
-                product=form.cleaned_data["product"],
-                warehouse=form.cleaned_data["from_warehouse"],
-                quantity=-form.cleaned_data["qty"],
-                price=0,
-                type=WarehouseEvent.EventType.TRANSFER_OUT,
-                user=request.user,
-            ).save()
+def product_transfer(request):
+    form = TransferForm(None)
+    product = request.GET.get("product")
+    if product:
+        product = get_object_or_404(Product, id=product)
 
-            WarehouseEvent(
-                product=form.cleaned_data["product"],
-                warehouse=form.cleaned_data["to_warehouse"],
-                quantity=-form.cleaned_data["qty"],
-                price=0,
-                type=WarehouseEvent.EventType.TRANSFER_IN,
-                user=request.user,
-            ).save()
+        if request.method == "POST":
+            form = TransferForm(product, request.POST)
+            if form.is_valid():
+                WarehouseEvent(
+                    product=product,
+                    warehouse=form.cleaned_data["from_warehouse"],
+                    quantity=-form.cleaned_data["quantity"],
+                    price=0,
+                    type=WarehouseEvent.EventType.TRANSFER_OUT,
+                    user=request.user,
+                ).save()
 
-    return render(request, "store/transfer.html", {"form": form})
+                WarehouseEvent(
+                    product=product,
+                    warehouse=form.cleaned_data["to_warehouse"],
+                    quantity=form.cleaned_data["quantity"],
+                    price=0,
+                    type=WarehouseEvent.EventType.TRANSFER_IN,
+                    user=request.user,
+                ).save()
+
+                return redirect("store:product_transfer")
+
+    return render(request, "products/transfer.html", {"form": form, "product": product})
+
 
 def inventory(request):
     warehouses = Warehouse.objects.all()
@@ -271,18 +283,20 @@ def inventory(request):
                 stock.append(0)
         total = sum(stock)
         if total > 0:
-            products.append({
-                'name': p.name,
-                'barcode': p.barcode,
-                'price': p.price,
-                'stock': stock,
-                'total': total
-            })
+            products.append(
+                {
+                    "name": p.name,
+                    "barcode": p.barcode,
+                    "price": p.price,
+                    "stock": stock,
+                    "total": total,
+                }
+            )
 
     context = {
-        'warehouses': warehouses,
-        'wh_count': len(warehouses)+1,
-        'products': products
+        "warehouses": warehouses,
+        "wh_count": len(warehouses) + 1,
+        "products": products,
     }
 
     return render(request, "store/inventory.html", context)
@@ -296,5 +310,5 @@ def search(request):
             0:10
         ]
     return render(
-        request, "products/search.html", {"products": products, "query": query}
+        request, "products/_search.html", {"products": products, "query": query}
     )
