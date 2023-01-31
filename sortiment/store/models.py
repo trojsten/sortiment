@@ -6,6 +6,22 @@ class Warehouse(models.Model):
     name = models.CharField(max_length=32)
     ip = models.GenericIPAddressField(unique=True)
 
+    def get_products_price_for_sale_sum(self):
+        return sum( state.quantity*state.product.price for state in WarehouseState.objects.filter(warehouse=self) )
+
+    def get_products_price_when_buy_sum(self):
+        return sum( state.total_price for state in WarehouseState.objects.filter(warehouse=self) )
+
+    @staticmethod
+    def get_global_products_price_for_sale_sum():
+        return sum( state.quantity*state.product.price for state in WarehouseState.objects.all() )
+
+    @staticmethod
+    def get_global_products_price_when_buy_sum():
+        return sum( state.total_price for state in WarehouseState.objects.all() )
+
+    def __str__(self):
+        return f"{self.name}; {self.ip}"
 
 class Tag(models.Model):
     name = models.CharField(max_length=64)
@@ -21,13 +37,19 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     is_unlimited = models.BooleanField()
     tags = models.ManyToManyField(Tag, blank=True)
-    total_price = models.DecimalField(max_digits=16, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.name}; {self.price}"
 
 
 class WarehouseState(models.Model):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
+    total_price = models.DecimalField(max_digits=16, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.warehouse}; {self.product}; {self.quantity}"
 
 
 class WarehouseEvent(models.Model):
@@ -48,3 +70,6 @@ class WarehouseEvent(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
     )
+
+    def __str__(self):
+        return f"{self.warehouse}; {self.product}; {self.timestamp}"

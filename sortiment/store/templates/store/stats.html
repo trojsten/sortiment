@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Štatistiky{% endblock %}
+
+{% block content %}
+<div class="w-full min-h-screen bg-blue-600 p-8">
+    <div class="bg-white p-8 rounded-md shadow-xl">
+
+        <a class='px-4 py-2 rounded bg-gray-200 hover:bg-gray-600 hover:text-white text-xl' href="{% url 'user_list' %}">Späť</a>
+
+        <h1 class="font-bold text-3xl text-center m-6">Štatistiky</h1>
+
+        <h1 class="font-bold text-xl text-center m-6">Hodnota tovaru</h1>
+        <table class="mx-auto">
+            <thead>
+                <tr class="bg-blue-100">
+                    <th></th>
+                    <th class="text-center p-4">Lokálne</th>
+                    <th class="text-center p-4">Celkovo</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th class="text-center p-4 bg-blue-100">Nákupná:</th>
+                    <td class="text-center p-2">{{ local_price_when_buy }}€</td>
+                    <td class="text-center p-2">{{ total_price_when_buy }}€</td>
+                </tr>
+                <tr>
+                    <th class="text-center p-4 bg-blue-100">Predajná:</th>
+                    <td class="text-center p-2">{{ local_price_for_sale }}€</td>
+                    <td class="text-center p-2">{{ total_price_for_sale }}€</td>
+                </tr>
+                <tr>
+                    <th class="text-center p-4 bg-blue-100">Zisk:</th>
+                    <td class="text-center p-2
+                    {% if local_profit >= 0 %}
+                        bg-green-200
+                    {% else %}
+                        bg-red-200
+                    {% endif %}
+                    ">{{ local_profit }}€</td>
+                    <td class="text-center p-2
+                    {% if total_profit >= 0 %}
+                        bg-green-200
+                    {% else %}
+                        bg-red-200
+                    {% endif %}
+                    ">{{ total_profit }}€</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 class="font-bold text-xl text-center m-3">Suma kreditov: {{ credit_sum }}€</h2>
+    </div>
+</div>
+{% endblock %}
