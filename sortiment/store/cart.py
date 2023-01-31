@@ -21,7 +21,7 @@ class Cart:
         self._load_session()
 
     def _load_session(self):
-        cart = self.request.session["cart"]
+        cart = self.request.session.get("cart", [])
         products = Product.objects.filter(id__in=[i["product"] for i in cart]).all()
         product_map = {p.id: p for p in products}
         self.items.clear()
@@ -69,3 +69,7 @@ class Cart:
                 break
 
         self._save_session()
+
+    @property
+    def total_price(self):
+        return sum([i.total_price for i in self.items])

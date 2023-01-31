@@ -15,9 +15,9 @@
     </div>
 </form>
 
-<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4" hx-target="#hx-cart" hx-swap="outerHTML">
 {% for product in prods %}
-    <div class="hover:bg-gray-50 p-2 rounded-lg cursor-pointer">
+    <div class="hover:bg-gray-50 p-2 rounded-lg cursor-pointer" role="button" hx-post="{% url 'cart_add' product.id %}">
         <img class="mx-auto w-full rounded-md bg-blue-50" src="https://picsum.photos/500">
         <h2 class="text-xl font-bold mt-1">{{ product.name }}</h2>
         <div class="flex text-gray-700">
