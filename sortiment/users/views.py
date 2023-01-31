@@ -8,7 +8,7 @@ from .forms import CreditMovementForm, CreditAddAndWithdrawalForm
 from .models import SortimentUser
 
 def user_list(request):
-    context = {'users': SortimentUser.objects.all().order_by('username')}
+    context = {'users': SortimentUser.objects.all().order_by('-is_guest', 'username')}
     return render(request, 'users/users_list.html', context)
 
 
