@@ -6,11 +6,14 @@ from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
 from django.db.models import Q, Sum
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+from django.shortcuts import redirect
 from django.utils import timezone
+from users.models import CreditLog
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
-from users.models import CreditLog, SortimentUser
+from django.views.generic import CreateView, FormView, TemplateView
+from users.models import SortimentUser
 
 from .cart import Cart
 from .forms import DiscardForm, InsertForm, ProductForm, TransferForm
@@ -93,88 +96,92 @@ def purchase_history(request):
     )
 
 
-def product_management(request):
-    return render(request, "products/home.html")
+class EventView(TemplateView):
+    template_name = "products/home.html"
 
 
-def add_product(request):
-    f = ProductForm()
-    if request.method == "POST":
-        f = ProductForm(request.POST)
-        if f.is_valid():
-            product = f.save(commit=False)
-            product.price = f.cleaned_data["price"]
-            product.save()
+class AddProductView(CreateView):
+    template_name = "store/add_product.html"
+    form_class = ProductForm
+    success_url = reverse_lazy("store:add_product")
 
-    return render(request, "store/add_product.html", {"f": f})
+    def form_valid(self, form):
+        product = form.save(commit=False)
+        product.price = form.cleaned_data["price"]
+        product.save()
 
-
-def discard(request):
-    wh = get_warehouse(request)
-    form = DiscardForm(wh, None)
-
-    product = request.GET.get("product")
-    if product:
-        product = get_object_or_404(Product, id=product)
-
-        if request.method == "POST":
-            form = DiscardForm(wh, product, request.POST)
-            if form.is_valid():
-                WarehouseEvent(
-                    product=product,
-                    warehouse=wh,
-                    quantity=-form.cleaned_data["quantity"],
-                    price=0,
-                    type=WarehouseEvent.EventType.DISCARD,
-                    user=request.user,
-                ).save()
-
-                return redirect("store:product_discard")
-
-    return render(request, "products/discard.html", {"form": form, "product": product})
+        return super().form_valid(form)
 
 
-def product_import(request):
-    product = request.GET.get("product")
-    if product:
-        product = get_object_or_404(Product, id=product)
-        wh = get_warehouse(request)
-        total = product.warehousestate_set.aggregate(
-            quantity=Sum("quantity"), price=Sum("total_price")
-        )
-        if not total["quantity"]:
-            total = {"quantity": 0, "price": 0}
+class DiscardView(FormView):
+    template_name = "products/discard.html"
+    form_class = DiscardForm
+    success_url = reverse_lazy("store:discard")
 
-        if request.method == "POST":
-            form = InsertForm(request.POST)
-            if form.is_valid():
-                WarehouseEvent(
-                    product=product,
-                    warehouse=wh,
-                    quantity=form.cleaned_data["quantity"],
-                    price=form.cleaned_data["unit_price"],
-                    type=WarehouseEvent.EventType.IMPORT,
-                    user=request.user,
-                ).save()
+    def form_valid(self, form):
+        wh = get_warehouse(self.request)
+        WarehouseEvent(
+            product=self.product,
+            warehouse=wh,
+            quantity=-form.cleaned_data["quantity"],
+            price=0,
+            type=WarehouseEvent.EventType.DISCARD,
+            user=self.request.user,
+        ).save()
 
-                product.price = form.cleaned_data["sell_price"]
-                product.save()
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["warehouse"] = get_warehouse(self.request)
+        kwargs["product"] = self.product
+        return kwargs
 
-        form = InsertForm(initial={"sell_price": product.price})
-    else:
-        form = None
-        product = None
-        wh = None
-        total = {}
-    return render(
-        request,
-        "products/import.html",
-        {"form": form, "product": product, "warehouse": wh, "total": total},
-    )
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["product"] = self.product
+        return ctx
+
+    def dispatch(self, request, *args, **kwargs):
+        product = request.GET.get("product")
+        self.product = get_object_or_404(Product, id=product) if product else None
+        return super().dispatch(request, *args, **kwargs)
+
+class ProductImportView(FormView):
+    template_name = "products/import.html"
+    form_class = InsertForm
+    success_url = reverse_lazy("store:product_import")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["product"] = self.product
+        if self.product:
+            ctx["warehouse"] = get_warehouse(self.request)
+            ctx["total"] = self.product.warehousestate_set.aggregate(
+                quantity=Sum("quantity"), price=Sum("total_price")
+            )
+        return ctx
+
+    def form_valid(self, form):
+        WarehouseEvent(
+            product=self.product,
+            warehouse=get_warehouse(self.request),
+            quantity=form.cleaned_data["quantity"],
+            price=form.cleaned_data["unit_price"],
+            type=WarehouseEvent.EventType.IMPORT,
+            user=self.request.user,
+        ).save()
+
+        self.product.price = form.cleaned_data["sell_price"]
+        self.product.save()
+
+        return super().form_valid(form)
+
+    def dispatch(self, request, *args, **kwargs):
+        product = request.GET.get("product")
+        self.product = get_object_or_404(Product, id=product) if product else None
+        return super().dispatch(request, *args, **kwargs)
 
 
 def stats(request):
-
     warehouse = get_warehouse(request)
 
     context = {
@@ -275,6 +282,7 @@ def product_transfer(request):
                 return redirect("store:product_transfer")
 
     return render(request, "products/transfer.html", {"form": form, "product": product})
+
 
 
 def inventory(request):
