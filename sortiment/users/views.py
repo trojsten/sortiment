@@ -36,7 +36,7 @@ class CreateUserView(CreateView):
 
 class CreditMovementView(FormView):
     form_class = CreditMovementForm
-    template_name = "users/creditmovement.html"
+    template_name = "users/credit_movement.html"
 
     def form_valid(self, form):
         user = self.request.user
@@ -52,9 +52,9 @@ class CreditMovementView(FormView):
             form.add_error("credit", "Nemáš na to dosť peňazí")
 
 
-class CreditAddWithdrawalView(FormView):
+class CreditChangeView(FormView):
     form_class = CreditAddAndWithdrawalForm
-    template_name = "users/credaddwithdrowal.html"
+    template_name = "users/credit_change.html"
 
     def form_valid(self, form):
         user = self.request.user

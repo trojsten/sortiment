@@ -24,7 +24,7 @@ urlpatterns = [
     path("creditmovement/", views.CreditMovementView.as_view(), name="creditmovement"),
     path(
         "credaddwithdrowal/",
-        views.CreditAddWithdrawalView.as_view(),
+        views.CreditChangeView.as_view(),
         name="credaddwithdrowal",
     ),
 ]
