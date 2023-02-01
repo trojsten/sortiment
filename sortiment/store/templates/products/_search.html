@@ -43,9 +43,9 @@
         <div class="text-xs">{{ product.price }} €</div>
     </div>
 
-{#            <a href="{% url "store:product_import" %}" class="shrink-0 ml-auto">#}
-{#                {% icon "edit-2" class="w-5 h-5" %}#}
-{#            </a>#}
+    <a href="{% url "store:product_edit" %}?product={{ product.id }}" class="shrink-0 ml-auto">
+        {% icon "edit-2" class="w-5 h-5" %}
+    </a>
     <a href="?" class="shrink-0">
         {% icon "x" class="w-5 h-5" %}
     </a>

@@ -17,7 +17,7 @@ class EventView(StaffRequiredMixin, TemplateView):
 
 
 class AddProductView(StaffRequiredMixin, CreateView):
-    template_name = "store/add_product.html"
+    template_name = "products/create.html"
     form_class = ProductForm
     success_url = reverse_lazy("store:add_product")
 
@@ -27,6 +27,33 @@ class AddProductView(StaffRequiredMixin, CreateView):
         product.save()
 
         return super().form_valid(form)
+
+
+class EditProductView(StaffRequiredMixin, FormView):
+    template_name = "products/edit.html"
+    form_class = ProductForm
+    success_url = reverse_lazy("store:product_edit")
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw["instance"] = self.product
+        return kw
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["product"] = self.product
+        return ctx
+
+    def form_valid(self, form):
+        product = form.save(commit=False)
+        product.save()
+
+        return super().form_valid(form)
+
+    def dispatch(self, request, *args, **kwargs):
+        product = request.GET.get("product")
+        self.product = get_object_or_404(Product, id=product) if product else None
+        return super().dispatch(request, *args, **kwargs)
 
 
 class DiscardView(StaffRequiredMixin, FormView):

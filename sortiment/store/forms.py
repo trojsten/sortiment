@@ -8,7 +8,15 @@ from .models import Product, Warehouse, WarehouseState
 class ProductForm(ModelForm):
     class Meta:
         model = Product
-        fields = ["name", "barcode", "image", "is_unlimited", "tags"]
+        fields = ["name", "barcode", "image", "is_unlimited", "tags", "price"]
+        labels = {
+            "name": "Názov",
+            "barcode": "Čiarový kód",
+            "image": "Obrázok",
+            "is_unlimited": "Neobmedzený predmet",
+            "tags": "Tagy",
+            "price": "Predajná cena",
+        }
 
     price = forms.DecimalField(min_value=0)
 

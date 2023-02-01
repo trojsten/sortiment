@@ -13,3 +13,7 @@
 .input {
     @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-600 focus:ring focus:ring-blue-500 focus:ring-opacity-50;
 }
+
+.checkbox {
+    @apply rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-600 focus:ring focus:ring-offset-0 focus:ring-blue-500 focus:ring-opacity-50;
+}
