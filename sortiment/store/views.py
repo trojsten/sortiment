@@ -42,7 +42,7 @@ def product_list(request):
     # only show products that have all active tags
 
     infty_string = "&#8734;"
-    prods = Product.objects.all()
+    prods = Product.objects.filter(is_dummy=False)
     for tag in active_tags:
         prods = prods.filter(tags__name__contains=tag)
     for p in prods:

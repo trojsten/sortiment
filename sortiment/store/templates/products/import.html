@@ -11,7 +11,9 @@
 <div class="max-w-md mx-auto">
     {% if form %}
         <div class="flex items-center gap-2 p-4 bg-gray-100 rounded mb-4">
-            <img src="https://picsum.photos/200?{{ forloop.counter }}" alt="" class="w-12 rounded">
+            <div class="w-12">
+                {% include "store/_item_image.html" %}
+            </div>
 
             <div>
                 <div class="font-bold text-sm">{{ product.name }}</div>
@@ -46,7 +48,7 @@
                     </div>
                 </div>
                 {% field form.sell_price %}
-                <p class="text-sm text-gray-700">Odporúčaná predajná cena: <b>
+                <p class="text-sm text-gray-700">Odporúčaná minimálna predajná cena: <b>
                     <span x-text="((parseFloat(current.price) + parseFloat(total)) / (parseInt(quantity) + parseInt(current.quantity))).toFixed(3)">0.000</span> €
                 </b></p>
             </div>

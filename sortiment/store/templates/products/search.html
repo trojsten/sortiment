@@ -9,7 +9,9 @@
         <div class="mt-4 bg-gray-50 p-2 rounded-md space-y-2">
             {% for product in products %}
                 <a href="?product={{ product.id }}" class="flex items-center gap-2 hover:bg-gray-100 rounded p-2">
-                    <img src="https://picsum.photos/200?{{ forloop.counter }}" alt="" class="w-12 rounded">
+                    <div class="w-12">
+                        {% include "store/_item_image.html" %}
+                    </div>
 
                     <div>
                         <div class="font-bold text-sm">{{ product.name }}</div>
