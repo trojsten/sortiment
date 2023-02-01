@@ -83,13 +83,17 @@ class CorrectionView(StaffRequiredMixin, ProductMixin, FormView):
             warehouse=warehouse, product=self.product
         ).first()
         old_quantity = state.quantity if state else 0
+        if old_quantity != 0:
+            price = state.total_price / old_quantity
+        else:
+            price = 0
 
         WarehouseEvent(
             warehouse=warehouse,
             product=self.product,
             quantity=new_quantity - old_quantity,
             type=WarehouseEvent.EventType.CORRECTION,
-            price=0,
+            price=price,
             user=self.request.user,
         ).save()
 
@@ -103,13 +107,11 @@ class DiscardView(StaffRequiredMixin, ProductMixin, FormView):
 
     def form_valid(self, form):
         wh = get_warehouse(self.request)
-        warehouse_state = WarehouseState.objects.get(warehouse=wh, product=self.product)
-        price = warehouse_state.total_price / warehouse_state.quantity
         WarehouseEvent(
             product=self.product,
             warehouse=wh,
             quantity=-form.cleaned_data["quantity"],
-            price=price,
+            price=0,
             type=WarehouseEvent.EventType.DISCARD,
             user=self.request.user,
         ).save()

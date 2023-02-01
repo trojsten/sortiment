@@ -22,7 +22,7 @@ class ProductForm(ModelForm):
 
 
 class DiscardForm(Form):
-    quantity = IntegerField(min_value=0, label="Počet kusov")
+    quantity = IntegerField(label="Počet kusov")
 
     def __init__(self, warehouse, product, *args, **kwargs):
         self.warehouse = warehouse
