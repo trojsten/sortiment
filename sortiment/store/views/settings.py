@@ -131,10 +131,19 @@ class ProductImportView(StaffRequiredMixin, ProductMixin, FormView):
         ctx = super().get_context_data(**kwargs)
         if self.product:
             ctx["warehouse"] = get_warehouse(self.request)
-            ctx["total"] = self.product.warehousestate_set.aggregate(
+            total = self.product.warehousestate_set.aggregate(
                 quantity=Sum("quantity"), price=Sum("total_price")
             )
+            if total["quantity"] is None:
+                total = {"quantity": 0, "price": 0}
+            ctx["total"] = total
         return ctx
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if self.product:
+            initial["sell_price"] = self.product.price
+        return initial
 
     def form_valid(self, form):
         WarehouseEvent(
