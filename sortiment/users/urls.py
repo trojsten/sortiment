@@ -21,10 +21,12 @@ urlpatterns = [
     path("login/<int:user_id>/", views.LoginUserView.as_view(), name="login"),
     path("logout/", views.LogoutUserView.as_view(), name="logout"),
     path("create/", views.CreateUserView.as_view(), name="create"),
-    path("creditmovement/", views.CreditMovementView.as_view(), name="creditmovement"),
     path(
-        "credaddwithdrowal/",
+        "credit/movement/", views.CreditMovementView.as_view(), name="credit_movement"
+    ),
+    path(
+        "credit/change/",
         views.CreditChangeView.as_view(),
-        name="credaddwithdrowal",
+        name="credit_change",
     ),
 ]

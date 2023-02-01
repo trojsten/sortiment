@@ -3,8 +3,24 @@ from django.forms import DecimalField, ModelChoiceField, forms
 from users.models import SortimentUser
 
 
-class CreditAddAndWithdrawalForm(forms.Form):
+class CreditChangeForm(forms.Form):
     credit = DecimalField(max_digits=6, decimal_places=2, label="Kredit")
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        if self.user.is_guest:
+            self.add_error("credit", "Guest nemôže pracovať s kreditom.")
+
+        return self.cleaned_data
+
+    def clean_credit(self):
+        credit = self.cleaned_data["credit"]
+        if not self.user.can_pay(credit):
+            raise ValidationError("Nemáš dostatok kreditu.")
+        return credit
 
 
 class CreditMovementForm(forms.Form):
@@ -21,5 +37,18 @@ class CreditMovementForm(forms.Form):
 
     def clean(self):
         data = self.cleaned_data
-        if data["user"] == data["user2"]:
-            raise ValidationError("Nemôžeš poslať peniaze samému sebe.")
+        if self.user.is_guest:
+            self.add_error("credit", "Guest nemôže pracovať s kreditom.")
+        if self.user == data["user"]:
+            self.add_error("user", "Nemôžeš poslať peniaze samému sebe.")
+        return data
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_credit(self):
+        credit = self.cleaned_data["credit"]
+        if not self.user.can_pay(-credit):
+            raise ValidationError("Nemáš dostatok kreditu.")
+        return credit

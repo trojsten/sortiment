@@ -17,7 +17,7 @@
             <a href="{% url 'store:product_list' %}" class="text-gray-700 hover:text-gray-900">{% icon "list" class="w-6 h-6" %}</a>
             {% if not user.is_guest %}
                 <a href="{% url 'store:purchase_history' %}" class="text-gray-700 hover:text-gray-900">{% icon "activity" class="w-6 h-6" %}</a>
-                <a href="{% url 'creditmovement' %}" class="text-gray-700 hover:text-gray-900">{% icon "dollar-sign" class="w-6 h-6" %}</a>
+                <a href="{% url 'credit_change' %}" class="text-gray-700 hover:text-gray-900">{% icon "dollar-sign" class="w-6 h-6" %}</a>
                 {% if user.is_staff %}
                 <a href="{% url 'store:product_management' %}" class="text-gray-700 hover:text-gray-900">{% icon "edit-2" class="w-6 h-6" %}</a>
                 {% endif %}
