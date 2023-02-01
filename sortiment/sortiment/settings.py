@@ -24,6 +24,9 @@ SECRET_KEY = os.environ.get(
 )
 DEBUG = os.environ.get("DEBUG", False)
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_HSTS_SECONDS = 3600
+
 hosts = os.environ.get("ALLOWED_HOSTS", "")
 if hosts:
     ALLOWED_HOSTS = hosts.split(",")
