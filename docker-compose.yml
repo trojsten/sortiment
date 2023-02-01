@@ -16,6 +16,8 @@ services:
       - "8000:8000"
     volumes:
       - ./sortiment/:/app/sortiment/
+    environment:
+      - DEBUG=True
     depends_on:
       - db
     command: "./start_dev.sh"
