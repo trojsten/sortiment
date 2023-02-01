@@ -14,7 +14,7 @@
             {% endif %}
         </div>
         <div class="flex w-full justify-around pt-1 pb-4 px-3">
-            <a href="{% url 'store:product_list' %}" class="text-gray-700 hover:text-gray-900">{% icon "list" class="w-6 h-6" %}</a>
+            <a href="{% url 'store:product_list' %}" class="text-gray-700 hover:text-gray-900">{% icon "shopping-cart" class="w-6 h-6" %}</a>
             {% if not user.is_guest %}
                 <a href="{% url 'store:purchase_history' %}" class="text-gray-700 hover:text-gray-900">{% icon "activity" class="w-6 h-6" %}</a>
                 <a href="{% url 'credit_change' %}" class="text-gray-700 hover:text-gray-900">{% icon "dollar-sign" class="w-6 h-6" %}</a>
