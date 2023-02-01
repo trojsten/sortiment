@@ -12,6 +12,18 @@ from store.models import Product, Warehouse, WarehouseEvent, WarehouseState
 from store.views.mixins import StaffRequiredMixin
 
 
+class ProductMixin:
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["product"] = self.product
+        return ctx
+
+    def dispatch(self, request, *args, **kwargs):
+        product = request.GET.get("product")
+        self.product = get_object_or_404(Product, id=product) if product else None
+        return super().dispatch(request, *args, **kwargs)
+
+
 class EventView(StaffRequiredMixin, TemplateView):
     template_name = "products/home.html"
 
@@ -29,7 +41,7 @@ class AddProductView(StaffRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class EditProductView(StaffRequiredMixin, FormView):
+class EditProductView(StaffRequiredMixin, ProductMixin, FormView):
     template_name = "products/edit.html"
     form_class = ProductForm
     success_url = reverse_lazy("store:product_edit")
@@ -39,24 +51,12 @@ class EditProductView(StaffRequiredMixin, FormView):
         kw["instance"] = self.product
         return kw
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["product"] = self.product
-        return ctx
-
     def form_valid(self, form):
-        product = form.save(commit=False)
-        product.save()
-
+        form.save()
         return super().form_valid(form)
 
-    def dispatch(self, request, *args, **kwargs):
-        product = request.GET.get("product")
-        self.product = get_object_or_404(Product, id=product) if product else None
-        return super().dispatch(request, *args, **kwargs)
 
-
-class DiscardView(StaffRequiredMixin, FormView):
+class DiscardView(StaffRequiredMixin, ProductMixin, FormView):
     template_name = "products/discard.html"
     form_class = DiscardForm
     success_url = reverse_lazy("store:discard")
@@ -78,25 +78,14 @@ class DiscardView(StaffRequiredMixin, FormView):
         kwargs["product"] = self.product
         return kwargs
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["product"] = self.product
-        return ctx
 
-    def dispatch(self, request, *args, **kwargs):
-        product = request.GET.get("product")
-        self.product = get_object_or_404(Product, id=product) if product else None
-        return super().dispatch(request, *args, **kwargs)
-
-
-class ProductImportView(StaffRequiredMixin, FormView):
+class ProductImportView(StaffRequiredMixin, ProductMixin, FormView):
     template_name = "products/import.html"
     form_class = InsertForm
     success_url = reverse_lazy("store:product_import")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["product"] = self.product
         if self.product:
             ctx["warehouse"] = get_warehouse(self.request)
             ctx["total"] = self.product.warehousestate_set.aggregate(
@@ -118,11 +107,6 @@ class ProductImportView(StaffRequiredMixin, FormView):
         self.product.save()
 
         return super().form_valid(form)
-
-    def dispatch(self, request, *args, **kwargs):
-        product = request.GET.get("product")
-        self.product = get_object_or_404(Product, id=product) if product else None
-        return super().dispatch(request, *args, **kwargs)
 
 
 @login_required
