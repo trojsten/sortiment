@@ -1,9 +1,8 @@
 from collections import defaultdict
 
-from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Q, Sum
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, FormView, TemplateView
 from store.forms import (
@@ -157,6 +156,7 @@ class ProductImportView(StaffRequiredMixin, ProductMixin, FormView):
         self.product = get_object_or_404(Product, id=product) if product else None
         return super().dispatch(request, *args, **kwargs)
 
+
 class ProductTransferView(StaffRequiredMixin, FormView):
     template_name = "products/transfer.html"
     form_class = TransferForm
@@ -170,8 +170,10 @@ class ProductTransferView(StaffRequiredMixin, FormView):
     @transaction.atomic
     def form_valid(self, form):
         from_warehouse = form.cleaned_data["from_warehouse"]
-        warehouse_state = WarehouseState.objects.get(warehouse=from_warehouse, product=self.product)
-        price = warehouse_state.total_price/warehouse_state.quantity
+        warehouse_state = WarehouseState.objects.get(
+            warehouse=from_warehouse, product=self.product
+        )
+        price = warehouse_state.total_price / warehouse_state.quantity
         WarehouseEvent(
             product=self.product,
             warehouse=from_warehouse,
