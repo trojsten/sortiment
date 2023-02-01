@@ -28,5 +28,16 @@
         }
     </script>
     {% endif %}
+    <script>
+        const barcode = document.getElementById("id_barcode")
+        if (barcode) {
+            barcode.addEventListener("keypress", (e) => {
+                if (e.code === "Enter") {
+                    e.preventDefault();
+                    return false;
+                }
+            })
+        }
+    </script>
 </body>
 </html>
