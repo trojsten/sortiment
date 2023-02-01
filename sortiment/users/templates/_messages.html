@@ -1,0 +1,32 @@
+{% load icon %}
+<div class="pointer-events-none fixed inset-0 flex items-start p-6 z-20">
+    <div class="flex w-full flex-col items-center space-y-4 sm:items-end" id="js-messages">
+
+        {% for message in messages %}
+            <div class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+                <div class="p-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                                {% icon "check-circle" class="text-green-600" %}
+                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                                {% icon "alert-circle" class="text-amber-600" %}
+                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                                {% icon "x-circle" class="text-red-600" %}
+                            {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+                                {% icon "info" class="text-blue-600" %}
+                            {% endif %}
+                        </div>
+                        <div class="ml-3 flex-1 text-sm text-gray-900">
+                            {{ message }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <script>
+            setTimeout(() => document.getElementById("js-messages").innerText = "", 5000)
+        </script>
+    </div>
+</div>

@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
@@ -13,9 +14,9 @@ from .models import SortimentUser
 
 class UserListView(ListView):
     template_name = "users/users_list.html"
-    queryset = SortimentUser.objects\
-        .filter(is_active=True)\
-        .order_by("-is_guest", "username")
+    queryset = SortimentUser.objects.filter(is_active=True).order_by(
+        "-is_guest", "username"
+    )
     context_object_name = "users"
 
 
@@ -37,6 +38,10 @@ class CreateUserView(CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy("user_list")
 
+    def form_valid(self, form):
+        messages.success(self.request, "Používateľ bol vytvorený.")
+        return super().form_valid(form)
+
 
 class CreditMovementView(LoginRequiredMixin, FormView):
     form_class = CreditMovementForm
@@ -54,6 +59,7 @@ class CreditMovementView(LoginRequiredMixin, FormView):
         user2 = form.cleaned_data.get("user")
         user.make_credit_operation(-money, is_purchase=False)
         user2.make_credit_operation(money, is_purchase=False)
+        messages.success(self.request, "Kredit bol presunutý.")
         return HttpResponseRedirect(reverse("store:product_list"))
 
 
@@ -71,4 +77,5 @@ class CreditChangeView(LoginRequiredMixin, FormView):
         user = self.request.user
         money = form.cleaned_data.get("credit")
         user.make_credit_operation(money, is_purchase=False)
+        messages.success(self.request, "Kredit bol nabitý.")
         return HttpResponseRedirect(reverse("store:product_list"))
