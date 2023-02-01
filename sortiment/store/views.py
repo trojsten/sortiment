@@ -170,15 +170,13 @@ def product_import(request):
 
 def stats(request):
 
+    warehouse = get_warehouse(request)
+
     context = {
         "total_price_when_buy": Warehouse.get_global_products_price_when_buy_sum(),
-        "total_price_for_sale": Warehouse.get_global_products_price_when_buy_sum(),
-        "local_price_when_buy": get_warehouse(
-            request
-        ).get_global_products_price_when_buy_sum(),
-        "local_price_for_sale": get_warehouse(
-            request
-        ).get_global_products_price_when_buy_sum(),
+        "total_price_for_sale": Warehouse.get_global_products_price_for_sale_sum(),
+        "local_price_when_buy": warehouse.get_products_price_when_buy_sum(),
+        "local_price_for_sale": warehouse.get_products_price_for_sale_sum(),
         "credit_sum": SortimentUser.get_credit_sum(),
     }
     context["total_profit"] = (

@@ -9,24 +9,30 @@ class Warehouse(models.Model):
     def get_products_price_for_sale_sum(self):
         return sum(
             state.quantity * state.product.price
-            for state in WarehouseState.objects.filter(warehouse=self)
+            for state in WarehouseState.objects.filter(warehouse=self, quantity__gt=0)
+                if not state.product.is_dummy and not state.product.is_unlimited
         )
 
     def get_products_price_when_buy_sum(self):
         return sum(
-            state.total_price for state in WarehouseState.objects.filter(warehouse=self)
+            state.total_price for state in WarehouseState.objects.filter(warehouse=self, quantity__gt=0)
+                if not state.product.is_dummy and not state.product.is_unlimited
         )
 
     @staticmethod
     def get_global_products_price_for_sale_sum():
         return sum(
             state.quantity * state.product.price
-            for state in WarehouseState.objects.all()
+            for state in WarehouseState.objects.filter(quantity__gt=0)
+                if not state.product.is_dummy and not state.product.is_unlimited and state.quantity > 0
         )
 
     @staticmethod
     def get_global_products_price_when_buy_sum():
-        return sum(state.total_price for state in WarehouseState.objects.all())
+        return sum(
+            state.total_price for state in WarehouseState.objects.filter(quantity__gt=0)
+                if not state.product.is_dummy and not state.product.is_unlimited
+        )
 
     def __str__(self):
         return f"{self.name}; {self.ip}"
