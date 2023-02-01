@@ -50,18 +50,18 @@ class Tag(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(verbose_name="meno", max_length=128)
-    barcode = models.CharField(verbose_name="čiarový kód", max_length=32, unique=True)
-    image = models.FileField(verbose_name="obrázok", blank=True, null=True)
+    name = models.CharField(max_length=128, verbose_name="názov")
+    barcode = models.CharField(max_length=32, unique=True, verbose_name="čiarový kóď")
+    image = models.FileField(blank=True, null=True, verbose_name="obrázok")
     price = models.DecimalField(
-        verbose_name="predajná cena", max_digits=6, decimal_places=2
+        max_digits=6, decimal_places=2, verbose_name="predajná cena"
     )
     is_unlimited = models.BooleanField(verbose_name="neobmedzený predmet")
-    tags = models.ManyToManyField(Tag, verbose_name="tagy", blank=True)
-    is_dummy = models.BooleanField(default=False)
+    tags = models.ManyToManyField(Tag, blank=True, verbose_name="tagy")
+    is_dummy = models.BooleanField(default=False, verbose_name="jednorázový predmet")
 
     def __str__(self):
-        return f"{self.name}; {self.price}"
+        return f"{self.name} ({self.price} €)"
 
     @staticmethod
     def generate_one_time_product(price, barcode):
@@ -77,10 +77,16 @@ class Product(models.Model):
 
 
 class WarehouseState(models.Model):
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-    total_price = models.DecimalField(max_digits=16, decimal_places=2, default=0)
+    warehouse = models.ForeignKey(
+        Warehouse, on_delete=models.CASCADE, verbose_name="sklad"
+    )
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, verbose_name="produkt"
+    )
+    quantity = models.IntegerField(verbose_name="počet")
+    total_price = models.DecimalField(
+        max_digits=16, decimal_places=2, default=0, verbose_name="skladová cena"
+    )
 
     class Meta:
         constraints = [
