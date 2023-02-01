@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import SuspiciousOperation
@@ -7,8 +8,9 @@ from django.db.models import Q, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.http import require_POST
-from users.models import SortimentUser
+from users.models import CreditLog, SortimentUser
 
 from .cart import Cart
 from .forms import DiscardForm, InsertForm, ProductForm, TransferForm
@@ -65,27 +67,30 @@ def product_list(request):
 
 
 def purchase_history(request):
-    context = {"logged_in": request.user.is_authenticated}
-
-    if request.user.is_authenticated:
-        events = WarehouseEvent.objects.filter(
+    end = timezone.now() - timedelta(days=60)
+    wh_events = (
+        WarehouseEvent.objects.filter(
             user=request.user, type=WarehouseEvent.EventType.PURCHASE
         )
-        events = events.order_by("-timestamp")
-        history = []
-        for event in events:
-            history.append(
-                {
-                    "product": event.product,
-                    "quantity": abs(event.quantity),
-                    "price": event.price,
-                    "date": event.timestamp.date(),
-                    "time": event.timestamp.time(),
-                }
-            )
-        context["history"] = history
+        .order_by("-timestamp")
+        .filter(timestamp__gte=end)
+    )
+    credit_events = CreditLog.objects.filter(
+        user=request.user, timestamp__gte=end
+    ).order_by("-timestamp")
 
-    return render(request, "store/purchase_history.html", context)
+    events = []
+    for e in wh_events:
+        events.append({"event": e, "timestamp": e.timestamp, "type": "product"})
+    for e in credit_events:
+        events.append({"event": e, "timestamp": e.timestamp, "type": "credit"})
+
+    events.sort(key=lambda x: x["timestamp"], reverse=True)
+    return render(
+        request,
+        "store/purchase_history.html",
+        {"events": events, "cart": Cart(request)},
+    )
 
 
 def product_management(request):

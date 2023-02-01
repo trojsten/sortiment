@@ -10,13 +10,14 @@ class Warehouse(models.Model):
         return sum(
             state.quantity * state.product.price
             for state in WarehouseState.objects.filter(warehouse=self, quantity__gt=0)
-                if not state.product.is_dummy and not state.product.is_unlimited
+            if not state.product.is_dummy and not state.product.is_unlimited
         )
 
     def get_products_price_when_buy_sum(self):
         return sum(
-            state.total_price for state in WarehouseState.objects.filter(warehouse=self, quantity__gt=0)
-                if not state.product.is_dummy and not state.product.is_unlimited
+            state.total_price
+            for state in WarehouseState.objects.filter(warehouse=self, quantity__gt=0)
+            if not state.product.is_dummy and not state.product.is_unlimited
         )
 
     @staticmethod
@@ -24,14 +25,17 @@ class Warehouse(models.Model):
         return sum(
             state.quantity * state.product.price
             for state in WarehouseState.objects.filter(quantity__gt=0)
-                if not state.product.is_dummy and not state.product.is_unlimited and state.quantity > 0
+            if not state.product.is_dummy
+            and not state.product.is_unlimited
+            and state.quantity > 0
         )
 
     @staticmethod
     def get_global_products_price_when_buy_sum():
         return sum(
-            state.total_price for state in WarehouseState.objects.filter(quantity__gt=0)
-                if not state.product.is_dummy and not state.product.is_unlimited
+            state.total_price
+            for state in WarehouseState.objects.filter(quantity__gt=0)
+            if not state.product.is_dummy and not state.product.is_unlimited
         )
 
     def __str__(self):
@@ -58,24 +62,27 @@ class Product(models.Model):
         return f"{self.name}; {self.price}"
 
     def buy(self, quantity, warehouse, user):
-        WarehouseEvent(product=self,
-                       warehouse=warehouse,
-                       quantity=-quantity,
-                       price=self.price,
-                       type=WarehouseEvent.EventType.PURCHASE,
-                       user=user).save()
+        WarehouseEvent(
+            product=self,
+            warehouse=warehouse,
+            quantity=-quantity,
+            price=self.price,
+            type=WarehouseEvent.EventType.PURCHASE,
+            user=user,
+        ).save()
         user.make_credit_operation(-quantity * self.price)
 
     @staticmethod
     def generate_one_time_product(price, barcode):
         # TODO: fotka?
-        product, created = Product.objects.get_or_create(price=price,
-                                                         name="Jednorazová položka",
-                                                         is_unlimited=True,
-                                                         barcode=barcode,
-                                                         is_dummy=True)
+        product, created = Product.objects.get_or_create(
+            price=price,
+            name="Jednorazová položka",
+            is_unlimited=True,
+            barcode=barcode,
+            is_dummy=True,
+        )
         return product
-
 
 
 class WarehouseState(models.Model):
@@ -107,15 +114,22 @@ class WarehouseEvent(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     quantity = models.IntegerField()
-    price = models.DecimalField(max_digits=6, decimal_places=2) # TODO jednotkova?
+    price = models.DecimalField(max_digits=6, decimal_places=2)  # TODO jednotkova?
     timestamp = models.DateTimeField(auto_now_add=True)
     type = models.IntegerField(choices=EventType.choices)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
     )
 
-    def save(self, *args, **kwargs):
+    @property
+    def abs_quantity(self):
+        return abs(self.quantity)
 
+    @property
+    def abs_price(self):
+        return abs(self.price)
+
+    def save(self, *args, **kwargs):
         ws = WarehouseState.objects.filter(
             product=self.product, warehouse=self.warehouse
         ).first()
