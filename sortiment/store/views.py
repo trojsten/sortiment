@@ -6,8 +6,9 @@ from django.db import transaction
 from django.db.models import Q, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
+from django.views.generic import CreateView, FormView, TemplateView
 from users.models import SortimentUser
 
 from .cart import Cart
@@ -88,79 +89,87 @@ def purchase_history(request):
     return render(request, "store/purchase_history.html", context)
 
 
-def product_event(request):
-    return render(request, "store/event.html", {})
+class EventView(TemplateView):
+    template_name = "store/event.html"
 
 
-def add_product(request):
-    f = ProductForm()
-    if request.method == "POST":
-        f = ProductForm(request.POST)
-        if f.is_valid():
-            product = f.save(commit=False)
-            product.price = f.cleaned_data["price"]
-            product.save()
+class AddProductView(CreateView):
+    template_name = "store/add_product.html"
+    form_class = ProductForm
+    success_url = reverse_lazy("store:add_product")
 
-    return render(request, "store/add_product.html", {"f": f})
+    def form_valid(self, form):
+        product = form.save(commit=False)
+        product.price = form.cleaned_data["price"]
+        product.save()
 
-
-def discard(request):
-    wh = get_warehouse(request)
-
-    f = DiscardForm(wh)
-    if request.method == "POST":
-        f = DiscardForm(wh, request.POST)
-        if f.is_valid():
-
-            WarehouseEvent(
-                product=f.cleaned_data["product"],
-                warehouse=wh,
-                quantity=-f.cleaned_data["qty"],
-                price=0,
-                type=WarehouseEvent.EventType.DISCARD,
-                user=request.user,
-            ).save()
-
-    return render(request, "store/discard.html", {"f": f})
+        return super().form_valid(form)
 
 
-def product_import(request):
-    product = request.GET.get("product")
-    if product:
-        product = get_object_or_404(Product, id=product)
-        wh = get_warehouse(request)
-        total = product.warehousestate_set.aggregate(
+class DiscardView(FormView):
+
+    template_name = "store/discard.html"
+    form_class = DiscardForm
+    success_url = reverse_lazy("store:discard")
+
+    def form_valid(self, form):
+        wh = get_warehouse(self.request)
+        WarehouseEvent(
+            product=form.cleaned_data["product"],
+            warehouse=wh,
+            quantity=-form.cleaned_data["qty"],
+            price=0,
+            type=WarehouseEvent.EventType.DISCARD,
+            user=self.user,
+        ).save()
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["warehouse"] = get_warehouse(self.request)
+        return kwargs
+
+
+class ProductImportView(FormView):
+
+    template_name = "products/import.html"
+    form_class = InsertForm
+    success_url = reverse_lazy("store:product_import")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.product_id:
+            product = get_object_or_404(Product, id=self.product_id)
+            context["product"] = product
+            context["warehouse"] = get_warehouse(self.request)
+            context["total"] = product.warehousestate_set.aggregate(
+                quantity=Sum("quantity"), price=Sum("total_price")
+            )
+        else:
+            context["form"] = None
+        return context
+
+    def form_valid(self, form):
+        product = get_object_or_404(Product, id=self.product_id)
+        WarehouseEvent(
+            product=product,
+            warehouse=get_warehouse(self.request),
+            quantity=form.cleaned_data["quantity"],
+            price=form.cleaned_data["unit_price"],
+            type=WarehouseEvent.EventType.IMPORT,
+            user=self.request.user,
+        ).save()
+
+        product.warehousestate_set.aggregate(
             quantity=Sum("quantity"), price=Sum("total_price")
         )
-        if not total["quantity"]:
-            total = {"quantity": 0, "price": 0}
+        product.price = form.cleaned_data["sell_price"]
+        product.save()
 
-        if request.method == "POST":
-            form = InsertForm(request.POST)
-            if form.is_valid():
-                WarehouseEvent(
-                    product=product,
-                    warehouse=wh,
-                    quantity=form.cleaned_data["quantity"],
-                    price=form.cleaned_data["unit_price"],
-                    type=WarehouseEvent.EventType.IMPORT,
-                    user=request.user,
-                ).save()
+        return super().form_valid(form)
 
-                product.price = form.cleaned_data["sell_price"]
-                product.save()
-
-        form = InsertForm(initial={"sell_price": product.price})
-    else:
-        form = None
-        product = None
-        wh = None
-        total = {}
-    return render(
-        request,
-        "products/import.html",
-        {"form": form, "product": product, "warehouse": wh, "total": total},
-    )
+    def dispatch(self, request, *args, **kwargs):
+        self.product_id = request.GET.get("product")
+        return super().dispatch(request, *args, **kwargs)
 
 
 def stats(request):
@@ -257,6 +266,7 @@ def transfer(request):
 
     return render(request, "store/transfer.html", {"form": form})
 
+
 def inventory(request):
     warehouses = Warehouse.objects.all()
     products = []
@@ -271,18 +281,20 @@ def inventory(request):
                 stock.append(0)
         total = sum(stock)
         if total > 0:
-            products.append({
-                'name': p.name,
-                'barcode': p.barcode,
-                'price': p.price,
-                'stock': stock,
-                'total': total
-            })
+            products.append(
+                {
+                    "name": p.name,
+                    "barcode": p.barcode,
+                    "price": p.price,
+                    "stock": stock,
+                    "total": total,
+                }
+            )
 
     context = {
-        'warehouses': warehouses,
-        'wh_count': len(warehouses)+1,
-        'products': products
+        "warehouses": warehouses,
+        "wh_count": len(warehouses) + 1,
+        "products": products,
     }
 
     return render(request, "store/inventory.html", context)

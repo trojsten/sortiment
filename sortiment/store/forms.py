@@ -21,13 +21,13 @@ class DiscardForm(Form):
     # TODO prepojenie barcode a product
 
     def __init__(self, warehouse, *args, **kwargs):
-        self.wh = warehouse
+        self.warehouse = warehouse
         super().__init__(*args, **kwargs)
 
     def clean_qty(self):
         qty = self.cleaned_data["qty"]
         ws = WarehouseState.objects.filter(
-            product=self.cleaned_data["product"], warehouse=self.wh
+            product=self.cleaned_data["product"], warehouse=self.warehouse
         )
         if ws[0].quantity < qty:
             raise ValidationError(
