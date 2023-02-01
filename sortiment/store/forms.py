@@ -17,14 +17,14 @@ class DiscardForm(Form):
     quantity = IntegerField(min_value=0, label="Počet kusov")
 
     def __init__(self, warehouse, product, *args, **kwargs):
-        self.wh = warehouse
+        self.warehouse = warehouse
         self.product = product
         super().__init__(*args, **kwargs)
 
     def clean_quantity(self):
         quantity = self.cleaned_data["quantity"]
         ws = WarehouseState.objects.filter(
-            product=self.product, warehouse=self.wh
+            product=self.product, warehouse=self.warehouse
         ).first()
         if not ws or ws.quantity < quantity:
             raise ValidationError("Na sklade nie je dostatočný počet kusov.")

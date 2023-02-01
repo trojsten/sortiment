@@ -11,7 +11,7 @@
 <div class="max-w-md mx-auto">
     {% include "products/_search.html" %}
 
-    {% if form %}
+    {% if product %}
         <form method="post">
             {% csrf_token %}
             <div class="space-y-2 max-w-md mx-auto mb-6" x-data="{'quantity': 0, 'unit': 0, 'total': 0,
