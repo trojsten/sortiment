@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
+from store.cart import Cart
 from .admin import UserCreationForm
 from .forms import CreditAddAndWithdrawalForm, CreditMovementForm
 from .models import SortimentUser
@@ -77,5 +78,6 @@ def credit(request):
     context = {
         "credit_movement_form": credit_movement_form,
         "credit_add_and_withdrawal_form": credit_add_and_withdrawal_form,
+        "cart": Cart(request)
     }
     return render(request, "users/credit_movement.html", context)
