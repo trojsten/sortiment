@@ -14,7 +14,8 @@ from store.forms import (
     TransferForm,
 )
 from store.helpers import get_warehouse
-from store.models import Product, Warehouse, WarehouseEvent, WarehouseState
+from store.helpers.events import new_correction, new_discard, new_import, new_transfer
+from store.models import Product, Warehouse, WarehouseState
 from store.views.mixins import StaffRequiredMixin
 
 
@@ -78,26 +79,17 @@ class CorrectionView(StaffRequiredMixin, ProductMixin, FormView):
     @transaction.atomic
     def form_valid(self, form):
         warehouse = get_warehouse(self.request)
-        new_quantity = form.cleaned_data["quantity"]
-
         state = WarehouseState.objects.filter(
             warehouse=warehouse, product=self.product
         ).first()
         old_quantity = state.quantity if state else 0
-        if old_quantity != 0:
-            price = state.total_price / old_quantity
-        else:
-            price = 0
 
-        WarehouseEvent(
-            warehouse=warehouse,
-            product=self.product,
-            quantity=new_quantity - old_quantity,
-            type=WarehouseEvent.EventType.CORRECTION,
-            price=price,
-            user=self.request.user,
-        ).save()
-
+        new_correction(
+            self.request.user,
+            self.product,
+            warehouse,
+            form.cleaned_data["quantity"] - old_quantity,
+        )
         messages.success(self.request, "Korekcia skladu bola úspešná.")
         return super().form_valid(form)
 
@@ -108,16 +100,12 @@ class DiscardView(StaffRequiredMixin, ProductMixin, FormView):
     success_url = reverse_lazy("store:product_discard")
 
     def form_valid(self, form):
-        wh = get_warehouse(self.request)
-        WarehouseEvent(
-            product=self.product,
-            warehouse=wh,
-            quantity=-form.cleaned_data["quantity"],
-            price=0,
-            type=WarehouseEvent.EventType.DISCARD,
-            user=self.request.user,
-        ).save()
-
+        new_discard(
+            self.request.user,
+            self.product,
+            get_warehouse(self.request),
+            form.cleaned_data["quantity"],
+        )
         messages.success(self.request, "Vyradenie tovaru bolo úspešné.")
         return super().form_valid(form)
 
@@ -152,15 +140,13 @@ class ProductImportView(StaffRequiredMixin, ProductMixin, FormView):
         return initial
 
     def form_valid(self, form):
-        WarehouseEvent(
-            product=self.product,
-            warehouse=get_warehouse(self.request),
-            quantity=form.cleaned_data["quantity"],
-            price=form.cleaned_data["unit_price"],
-            type=WarehouseEvent.EventType.IMPORT,
-            user=self.request.user,
-        ).save()
-
+        new_import(
+            self.request.user,
+            self.product,
+            get_warehouse(self.request),
+            form.cleaned_data["quantity"],
+            form.cleaned_data["unit_price"],
+        )
         self.product.price = form.cleaned_data["sell_price"]
         self.product.save()
 
@@ -185,29 +171,13 @@ class ProductTransferView(StaffRequiredMixin, FormView):
 
     @transaction.atomic
     def form_valid(self, form):
-        from_warehouse = form.cleaned_data["from_warehouse"]
-        warehouse_state = WarehouseState.objects.get(
-            warehouse=from_warehouse, product=self.product
+        new_transfer(
+            self.request.user,
+            self.product,
+            form.cleaned_data["from_warehouse"],
+            form.cleaned_data["to_warehouse"],
+            form.cleaned_data["quantity"],
         )
-        price = warehouse_state.total_price / warehouse_state.quantity
-        WarehouseEvent(
-            product=self.product,
-            warehouse=from_warehouse,
-            quantity=-form.cleaned_data["quantity"],
-            price=price,
-            type=WarehouseEvent.EventType.TRANSFER_OUT,
-            user=self.request.user,
-        ).save()
-
-        to_warehouse = form.cleaned_data["to_warehouse"]
-        WarehouseEvent(
-            product=self.product,
-            warehouse=to_warehouse,
-            quantity=form.cleaned_data["quantity"],
-            price=price,
-            type=WarehouseEvent.EventType.TRANSFER_IN,
-            user=self.request.user,
-        ).save()
         messages.success(self.request, "Presun bol úspešný.")
         return super().form_valid(form)
 

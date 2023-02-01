@@ -63,17 +63,6 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.name}; {self.price}"
 
-    def buy(self, quantity, warehouse, user):
-        WarehouseEvent(
-            product=self,
-            warehouse=warehouse,
-            quantity=-quantity,
-            price=self.price,
-            type=WarehouseEvent.EventType.PURCHASE,
-            user=user,
-        ).save()
-        user.make_credit_operation(-quantity * self.price, is_purchase=True)
-
     @staticmethod
     def generate_one_time_product(price, barcode):
         # TODO: fotka?
@@ -113,14 +102,28 @@ class WarehouseEvent(models.Model):
         DISCARD = 4, "discard"
         CORRECTION = 5, "correction"
 
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-    price = models.DecimalField(max_digits=6, decimal_places=2)  # TODO jednotkova?
-    timestamp = models.DateTimeField(auto_now_add=True)
-    type = models.IntegerField(choices=EventType.choices)
+    type = models.IntegerField(choices=EventType.choices, verbose_name="typ dokladu")
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, verbose_name="produkt"
+    )
+    warehouse = models.ForeignKey(
+        Warehouse, on_delete=models.CASCADE, verbose_name="sklad"
+    )
+
+    quantity = models.IntegerField(verbose_name="počet")
+    price = models.DecimalField(
+        max_digits=6, decimal_places=2, verbose_name="skladová cena / ks"
+    )
+    retail_price = models.DecimalField(
+        max_digits=5, decimal_places=2, verbose_name="odbytová cena / ks"
+    )
+
+    timestamp = models.DateTimeField(auto_now_add=True, verbose_name="dátum a čas")
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name="používateľ",
     )
 
     @property
@@ -137,11 +140,12 @@ class WarehouseEvent(models.Model):
         ).first()
 
         if not ws:
-            ws = WarehouseState()
-            ws.quantity = 0
-            ws.total_price = 0
-            ws.warehouse = self.warehouse
-            ws.product = self.product
+            ws = WarehouseState(
+                quantity=0,
+                total_price=0,
+                warehouse=self.warehouse,
+                product=self.product,
+            )
 
         ws.quantity = ws.quantity + self.quantity
         ws.total_price = ws.total_price + self.price * self.quantity

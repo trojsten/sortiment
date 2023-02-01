@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from django.http import HttpRequest
 from store.helpers import get_warehouse
+from store.helpers.events import new_purchase
 from store.models import Product
 from users.models import SortimentUser
 
@@ -90,6 +91,9 @@ class Cart:
             return False
         if not request.user.can_pay(self.total_price):
             return False
+
+        warehouse = get_warehouse(request)
         for item in self.items:
-            item.product.buy(item.quantity, get_warehouse(request), request.user)
+            new_purchase(request.user, item.product, warehouse, item.quantity)
+        request.user.make_credit_operation(-self.total_price, is_purchase=True)
         return True
