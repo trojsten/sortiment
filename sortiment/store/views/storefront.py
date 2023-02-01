@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
 from django.db.models import Sum
@@ -9,7 +10,10 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views import View
 from django.views.decorators.http import require_POST
+from django.views.generic import TemplateView
+
 from store.cart import Cart
 from store.helpers import get_dummy_barcode_data, get_warehouse
 from store.models import Product, Tag, Warehouse, WarehouseEvent, WarehouseState
@@ -91,63 +95,65 @@ def purchase_history(request):
     )
 
 
-def stats(request):
-    warehouse = get_warehouse(request)
+class StatsView(TemplateView):
+    template_name = "store/stats.html"
 
-    context = {
-        "total_price_when_buy": Warehouse.get_global_products_price_when_buy_sum(),
-        "total_price_for_sale": Warehouse.get_global_products_price_for_sale_sum(),
-        "local_price_when_buy": warehouse.get_products_price_when_buy_sum(),
-        "local_price_for_sale": warehouse.get_products_price_for_sale_sum(),
-        "credit_sum": SortimentUser.get_credit_sum(),
-    }
-    context["total_profit"] = (
-        context["total_price_for_sale"] - context["total_price_when_buy"]
-    )
-    context["local_profit"] = (
-        context["local_price_for_sale"] - context["local_price_when_buy"]
-    )
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        warehouse = get_warehouse(self.request)
 
-    return render(request, "store/stats.html", context)
+        ctx["total_price_when_buy"] = Warehouse.get_global_products_price_when_buy_sum()
+        ctx["total_price_for_sale"] = Warehouse.get_global_products_price_for_sale_sum()
+        ctx["local_price_when_buy"] = warehouse.get_products_price_when_buy_sum()
+        ctx["local_price_for_sale"] = warehouse.get_products_price_for_sale_sum()
+        ctx["credit_sum"] = SortimentUser.get_credit_sum()
+        ctx["total_profit"] = (ctx["total_price_for_sale"] - ctx["total_price_when_buy"])
+        ctx["local_profit"] = (ctx["local_price_for_sale"] - ctx["local_price_when_buy"])
+        return ctx
 
 
-@require_POST
-@login_required
-def cart_remove(request, product):
-    cart = Cart(request)
-    product = get_object_or_404(Product, id=product)
-    cart.remove_product(product, 1)
-    return render(request, "store/_cart.html", {"cart": cart})
+class CartRemoveView(LoginRequiredMixin, View):
+    def get(self, request, product):
+        raise SuspiciousOperation("Only POST method allowed")
+
+    def post(self, request, product):
+        cart = Cart(request)
+        product = get_object_or_404(Product, id=product)
+        cart.remove_product(product, 1)
+        return render(request, "store/_cart.html", {"cart": cart})
 
 
-@require_POST
-@login_required
-def cart_add(request, product):
-    cart = Cart(request)
-    product = get_object_or_404(Product, id=product)
-    cart.add_product(product, 1, False)
-    return render(request, "store/_cart.html", {"cart": cart})
+class CartAddView(LoginRequiredMixin, View):
+    def get(self, request, product):
+        raise SuspiciousOperation("Only POST method allowed")
 
-
-@require_POST
-@login_required
-def cart_add_barcode(request):
-    cart = Cart(request)
-    barcode = request.POST["barcode"].strip()
-    product = Product.objects.filter(barcode=barcode).first()
-    error = False
-    if product is None:
-        price = get_dummy_barcode_data(barcode)
-        if price is not None:
-            product = Product.generate_one_time_product(price, barcode)
-            cart.add_product(product, 1, True)
-        else:
-            error = True
-    else:
+    def post(self, request, product):
+        cart = Cart(request)
+        product = get_object_or_404(Product, id=product)
         cart.add_product(product, 1, False)
-    return render(
-        request, "store/_barcode_response.html", {"cart": cart, "error": error}
-    )
+        return render(request, "store/_cart.html", {"cart": cart})
+
+
+class CartAddBarcode(LoginRequiredMixin, View):
+    def get(self, request):
+        raise SuspiciousOperation("Only POST method allowed")
+    def post(self, request):
+        cart = Cart(request)
+        barcode = request.POST["barcode"].strip()
+        product = Product.objects.filter(barcode=barcode).first()
+        error = False
+        if product is None:
+            price = get_dummy_barcode_data(barcode)
+            if price is not None:
+                product = Product.generate_one_time_product(price, barcode)
+                cart.add_product(product, 1, True)
+            else:
+                error = True
+        else:
+            cart.add_product(product, 1, False)
+        return render(
+            request, "store/_barcode_response.html", {"cart": cart, "error": error}
+        )
 
 
 @login_required
