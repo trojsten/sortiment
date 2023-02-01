@@ -1,40 +1,48 @@
 {% extends 'base.html' %}
+{% load icon %}
 
 {% block title %}Inventúra{% endblock %}
 
 {% block content %}
-<table class="w-full h-full">
-  <thead class="border-b-2 border-gray-500">
-    <tr class="bg-gray-200">
-      <th colspan="2" rowspan="2" class="border-r border-black">Názov</th>
-      <th rowspan="2" class="border-r border-black">Čiarový kód</th>
-      <th rowspan="2" class="border-r border-black">Cena</th>
-      <th colspan="{{ wh_count }}" class="border-b border-gray-400">Množstvo</th>
-    </tr>
-    <tr class="bg-gray-300">
-      {% for wh in warehouses %}
-        <th class="border-r border-gray-400">{{ wh.name }}</th>
-      {% endfor %}
-      <th>Celkovo</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for product in rows %}
-      <tr class="even:bg-gray-100 h-16 odd:border-b border-gray-100">
-        <td class="p-2">{{ product.name }}</td>
-        <td class="p-2 flex justify-end border-r border-black">
-          <div class="w-12 h-12">
-            {% include "store/_item_image.html" %}
-          </div>
-        </td>
-        <td class="p-2 text-center border-r border-black"> {{ product.barcode }}</td>
-        <td class="p-2 text-right border-r border-black">{{ product.price }}&nbsp;&euro;</td>
-        {% for whStock in product.stock %}
-          <td class="p-2 text-right border-r border-gray-400">{{ whStock }}</td>
-        {% endfor %}
-        <td class="p-2 text-right">{{ product.total }}</td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    <div class="max-w-5xl mx-auto print:max-w-full p-6 print:p-0">
+        <a href="{% url 'store:product_list' %}" class="print:hidden flex items-center gap-1 text-blue-800 hover:underline mb-4">{% icon "arrow-left" class="w-5 h-5" %} Späť</a>
+
+        <h1 class="font-bold text-2xl">Inventúra</h1>
+        <p class="mb-6">Vygenerované {% now "d.m.Y H:i" %}</p>
+
+        <table class="w-full">
+            <thead class="border-b-2 border-gray-500">
+                <tr class="bg-gray-200 text-left">
+                    <th class="p-2">Produkt</th>
+                    <th class="p-2">Čiarový kód</th>
+                    {% for wh in warehouses %}
+                        <th class="p-2 text-center">{{ wh.name }}</th>
+                    {% endfor %}
+                    <th class="p-2 text-center">&sum;</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-500">
+            {% for product in rows %}
+                <tr class="even:bg-gray-100">
+                    <td class="p-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10">
+                                {% include "store/_item_image.html" %}
+                            </div>
+                            <div>
+                                <div class="font-bold">{{ product.name }}</div>
+                                <div class="text-xs -mt-0.5">{{ product.price }} €</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-2">{{ product.barcode }}</td>
+                    {% for whStock in product.stock %}
+                        <td class="p-2 text-center">{{ whStock }}</td>
+                    {% endfor %}
+                    <td class="p-2 text-center">{{ product.total }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
