@@ -30,13 +30,13 @@ class LogoutUserView(View):
         return HttpResponseRedirect(reverse("user_list"))
 
 
-class CreateUserView(LoginRequiredMixin, CreateView):
+class CreateUserView(CreateView):
     template_name = "users/create.html"
     form_class = UserCreationForm
     success_url = reverse_lazy("user_list")
 
 
-class CreditMovementView(FormView):
+class CreditMovementView(LoginRequiredMixin, FormView):
     form_class = CreditMovementForm
     template_name = "users/credit_movement.html"
 
