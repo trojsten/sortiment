@@ -1,0 +1,5 @@
+{% include "store/_cart.html" %}
+
+<div hx-swap-oob="true" id="hx-barcode-error" class="mt-1 text-sm text-red-600">
+    {% if error %}Produkt s daným čiarovým kódom neexistuje.{% endif %}
+</div>

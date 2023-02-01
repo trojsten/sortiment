@@ -218,14 +218,19 @@ def cart_add_barcode(request):
     cart = Cart(request)
     barcode = request.POST["barcode"].strip()
     product = Product.objects.filter(barcode=barcode).first()
+    error = False
     if product is None:
         price = get_dummy_barcode_data(barcode)
         if price is not None:
             product = Product.generate_one_time_product(price, barcode)
             cart.add_product(product, 1, True)
+        else:
+            error = True
     else:
         cart.add_product(product, 1, False)
-    return render(request, "store/_cart.html", {"cart": cart})
+    return render(
+        request, "store/_barcode_response.html", {"cart": cart, "error": error}
+    )
 
 
 @login_required
