@@ -59,18 +59,21 @@ class EditProductView(StaffRequiredMixin, ProductMixin, FormView):
 class DiscardView(StaffRequiredMixin, ProductMixin, FormView):
     template_name = "products/discard.html"
     form_class = DiscardForm
-    success_url = reverse_lazy("store:discard")
+    success_url = reverse_lazy("store:product_discard")
 
     def form_valid(self, form):
         wh = get_warehouse(self.request)
+        warehouse_state = WarehouseState.objects.get(warehouse=wh, product=self.product)
+        price = warehouse_state.total_price / warehouse_state.quantity
         WarehouseEvent(
             product=self.product,
             warehouse=wh,
             quantity=-form.cleaned_data["quantity"],
-            price=0,
+            price=price,
             type=WarehouseEvent.EventType.DISCARD,
             user=self.request.user,
         ).save()
+        return super().form_valid(form)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -108,39 +111,55 @@ class ProductImportView(StaffRequiredMixin, ProductMixin, FormView):
 
         return super().form_valid(form)
 
+    def dispatch(self, request, *args, **kwargs):
+        product = request.GET.get("product")
+        self.product = get_object_or_404(Product, id=product) if product else None
+        return super().dispatch(request, *args, **kwargs)
 
-@login_required
-@transaction.atomic
-def product_transfer(request):
-    form = TransferForm(None)
-    product = request.GET.get("product")
-    if product:
-        product = get_object_or_404(Product, id=product)
+class ProductTransferView(StaffRequiredMixin, FormView):
+    template_name = "products/transfer.html"
+    form_class = TransferForm
+    success_url = reverse_lazy("store:product_transfer")
 
-        if request.method == "POST":
-            form = TransferForm(product, request.POST)
-            if form.is_valid():
-                WarehouseEvent(
-                    product=product,
-                    warehouse=form.cleaned_data["from_warehouse"],
-                    quantity=-form.cleaned_data["quantity"],
-                    price=0,
-                    type=WarehouseEvent.EventType.TRANSFER_OUT,
-                    user=request.user,
-                ).save()
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["product"] = self.product
+        return ctx
 
-                WarehouseEvent(
-                    product=product,
-                    warehouse=form.cleaned_data["to_warehouse"],
-                    quantity=form.cleaned_data["quantity"],
-                    price=0,
-                    type=WarehouseEvent.EventType.TRANSFER_IN,
-                    user=request.user,
-                ).save()
+    @transaction.atomic
+    def form_valid(self, form):
+        from_warehouse = form.cleaned_data["from_warehouse"]
+        warehouse_state = WarehouseState.objects.get(warehouse=from_warehouse, product=self.product)
+        price = warehouse_state.total_price/warehouse_state.quantity
+        WarehouseEvent(
+            product=self.product,
+            warehouse=from_warehouse,
+            quantity=-form.cleaned_data["quantity"],
+            price=price,
+            type=WarehouseEvent.EventType.TRANSFER_OUT,
+            user=self.request.user,
+        ).save()
 
-                return redirect("store:product_transfer")
+        to_warehouse = form.cleaned_data["to_warehouse"]
+        WarehouseEvent(
+            product=self.product,
+            warehouse=to_warehouse,
+            quantity=form.cleaned_data["quantity"],
+            price=price,
+            type=WarehouseEvent.EventType.TRANSFER_IN,
+            user=self.request.user,
+        ).save()
+        return super().form_valid(form)
 
-    return render(request, "products/transfer.html", {"form": form, "product": product})
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["product"] = self.product
+        return kwargs
+
+    def dispatch(self, request, *args, **kwargs):
+        product = request.GET.get("product")
+        self.product = get_object_or_404(Product, id=product) if product else None
+        return super().dispatch(request, *args, **kwargs)
 
 
 class InventoryView(StaffRequiredMixin, TemplateView):

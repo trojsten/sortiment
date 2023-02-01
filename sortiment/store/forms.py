@@ -63,7 +63,7 @@ class TransferForm(Form):
         to_warehouse = self.cleaned_data["to_warehouse"]
         if from_warehouse == to_warehouse:
             raise ValidationError("Nemôžeš presunúť produkty v rámci jedného skladu.")
-        return from_warehouse
+        return to_warehouse
 
     def clean_quantity(self):
         quantity = self.cleaned_data["quantity"]
