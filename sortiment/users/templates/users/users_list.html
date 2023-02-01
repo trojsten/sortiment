@@ -22,6 +22,8 @@
                     bg-orange-200
                 {% elif user.credit > 1 %}
                     bg-green-200
+                {% elif user.credit > 0 %}
+                    bg-blue-200
                 {% else %}
                     bg-gray-200
                 {% endif %}
@@ -34,6 +36,8 @@
                     hover:bg-orange-600
                 {% elif user.credit > 1 %}
                     hover:bg-green-600
+                {% elif user.credit > 0 %}
+                    hover:bg-blue-600
                 {% else %}
                     hover:bg-gray-600
                 {% endif %}

@@ -10,7 +10,7 @@
 
         <h1 class="font-bold text-3xl text-center mb-6">Registrácia nového používateľa</h1>
 
-        <form method="post">
+        <form method="post" autocomplete="off">
             {% csrf_token %}
             <div class="space-y-2 max-w-md mx-auto mb-6">
                 {% for field in form %}

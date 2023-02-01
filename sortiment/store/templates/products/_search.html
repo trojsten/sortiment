@@ -1,7 +1,7 @@
 {% load icon %}
 {% if not product %}
 <form hx-target="#hx-search-results" hx-select="#hx-search-results"
-      hx-swap="outerHTML" hx-get="{% url 'store:product_search' %}">
+      hx-swap="outerHTML" hx-get="{% url 'store:product_search' %}" autocomplete="off">
     <input type="search" class="input" name="q" placeholder="Zadaj čiarový kód / názov produktu..."
            hx-get="{% url 'store:product_search' %}" hx-trigger="keyup changed delay:500ms" />
 

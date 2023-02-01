@@ -13,7 +13,9 @@ from .models import SortimentUser
 
 class UserListView(ListView):
     template_name = "users/users_list.html"
-    queryset = SortimentUser.objects.order_by("-is_guest", "username")
+    queryset = SortimentUser.objects\
+        .filter(is_active=True)\
+        .order_by("-is_guest", "username")
     context_object_name = "users"
 
 
