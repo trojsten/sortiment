@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0004_sortimentuser_is_guest'),
+        ("users", "0004_sortimentuser_is_guest"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='creditlog',
-            name='is_purchase',
+            model_name="creditlog",
+            name="is_purchase",
             field=models.BooleanField(default=True),
             preserve_default=False,
         ),

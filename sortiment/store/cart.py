@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 from django.http import HttpRequest
-
 from store.helpers import get_warehouse
 from store.models import Product
 from users.models import SortimentUser
@@ -31,18 +30,26 @@ class Cart:
         self.items.clear()
 
         for item in cart:
-            if item["product"] not in product_map and item["dummy"] != True:
+            if item["product"] not in product_map and not item["dummy"]:
                 continue
             if item["quantity"] <= 0:
                 continue
-            self.items.append(CartItem(product_map[item["product"]], item["quantity"], item["dummy"]))
+            self.items.append(
+                CartItem(product_map[item["product"]], item["quantity"], item["dummy"])
+            )
 
     def _save_session(self):
         data = []
         for item in self.items:
             if item.quantity <= 0:
                 continue
-            data.append({"product": item.product.id, "quantity": item.quantity, "dummy": item.dummy})
+            data.append(
+                {
+                    "product": item.product.id,
+                    "quantity": item.quantity,
+                    "dummy": item.dummy,
+                }
+            )
         self.request.session["cart"] = data
 
     def add_product(self, product: Product, quantity: int = 1, dummy: bool = False):
@@ -78,7 +85,6 @@ class Cart:
     def total_price(self):
         return sum([i.total_price for i in self.items])
 
-
     def checkout(self, request):
         if not isinstance(request.user, SortimentUser):
             return False
@@ -87,4 +93,3 @@ class Cart:
         for item in self.items:
             item.product.buy(item.quantity, get_warehouse(request), request.user)
         return True
-

@@ -1,8 +1,8 @@
 from django.contrib import admin
-from .models import *
+from store import models
 
-admin.site.register(Product)
-admin.site.register(Warehouse)
-admin.site.register(WarehouseState)
-admin.site.register(WarehouseEvent)
-admin.site.register(Tag)
+admin.site.register(models.Product)
+admin.site.register(models.Warehouse)
+admin.site.register(models.WarehouseState)
+admin.site.register(models.WarehouseEvent)
+admin.site.register(models.Tag)
