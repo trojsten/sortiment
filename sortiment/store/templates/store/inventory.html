@@ -23,7 +23,9 @@
       <tr class="even:bg-gray-100 h-16 odd:border-b border-gray-100">
         <td class="p-2">{{ product.name }}</td>
         <td class="p-2 flex justify-end border-r border-black">
-          <img src="https://picsum.photos/500" alt="{{ product.name }}" class="w-12 h-12 rounded">
+          <div class="w-12 h-12">
+            {% include "store/_item_image.html" %}
+          </div>
         </td>
         <td class="p-2 text-center border-r border-black"> {{ product.barcode }}</td>
         <td class="p-2 text-right border-r border-black">{{ product.price }}&nbsp;&euro;</td>

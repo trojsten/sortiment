@@ -276,13 +276,12 @@ def inventory(request):
     for p in Product.objects.all():
         stock = []
         for w in warehouses:
-            stockCount = WarehouseState.objects.filter(warehouse=w, product=p).first()
-            if stockCount:
-                stock.append(stockCount.quantity)
-            else:
-                stock.append(0)
+            stock_count = WarehouseState.objects.filter(warehouse=w, product=p).first()
+            stock.append(stock_count.quantity if stock_count else 0)
         total = sum(stock)
-        if total > 0:
+        if p.is_dummy:
+            continue
+        if total > 0 and not p.is_unlimited:
             products.append(
                 {
                     "name": p.name,
