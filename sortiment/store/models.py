@@ -70,7 +70,7 @@ class Product(models.Model):
             type=WarehouseEvent.EventType.PURCHASE,
             user=user,
         ).save()
-        user.make_credit_operation(-quantity * self.price)
+        user.make_credit_operation(-quantity * self.price, is_purchase=True)
 
     @staticmethod
     def generate_one_time_product(price, barcode):

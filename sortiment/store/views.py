@@ -76,7 +76,7 @@ def purchase_history(request):
         .filter(timestamp__gte=end)
     )
     credit_events = CreditLog.objects.filter(
-        user=request.user, timestamp__gte=end
+        user=request.user, timestamp__gte=end, is_purchase=False
     ).order_by("-timestamp")
 
     events = []

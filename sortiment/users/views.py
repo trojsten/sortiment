@@ -49,8 +49,8 @@ def credit(request):
                 if user2.id == user.id:
                     credit_movement_form.add_error("user", "Nemôžeš poslať peniaze samému sebe.")
                 else:
-                    user.make_credit_operation(-money)
-                    user2.make_credit_operation(money)
+                    user.make_credit_operation(-money, is_purchase=False)
+                    user2.make_credit_operation(money, is_purchase=False)
                     return HttpResponseRedirect(reverse("store:product_list"))
             else:
                 credit_movement_form.add_error("credit", "Nemáš na to dosť peňazí")
@@ -62,7 +62,7 @@ def credit(request):
                 return
             money = credit_add_and_withdrawal_form.cleaned_data.get("credit")
             if user.can_pay(money):
-                user.make_credit_operation(money)
+                user.make_credit_operation(money, is_purchase=False)
                 return HttpResponseRedirect(reverse("store:product_list"))
             else:
                 credit_add_and_withdrawal_form.add_error(
