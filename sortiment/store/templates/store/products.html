@@ -55,8 +55,8 @@
 {% for product in prods %}
     <div class="hover:bg-gray-50 p-2 rounded-lg cursor-pointer {% if product.qty <= 0 %} opacity-30 grayscale hover:opacity-100 {% endif %}" role="button" hx-post="{% url 'store:cart_add' product.id %}">
         {% include "store/_item_image.html" %}
-        <h2 class="text-xl font-bold mt-1">{{ product.name }}</h2>
-        <div class="flex text-gray-700">
+        <h2 class="text-lg font-bold mt-1">{{ product.name }}</h2>
+        <div class="flex text-sm text-gray-700">
             <div>{{ product.price }}&nbsp;&euro;</div>
             <div class="ml-auto">{{product.qty|safe}}/{{product.totqty|safe}}&nbsp;ks</div>
         </div>
