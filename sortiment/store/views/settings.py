@@ -6,7 +6,13 @@ from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, FormView, TemplateView
-from store.forms import DiscardForm, InsertForm, ProductForm, TransferForm
+from store.forms import (
+    CorrectionForm,
+    DiscardForm,
+    InsertForm,
+    ProductForm,
+    TransferForm,
+)
 from store.helpers import get_warehouse
 from store.models import Product, Warehouse, WarehouseEvent, WarehouseState
 from store.views.mixins import StaffRequiredMixin
@@ -53,6 +59,41 @@ class EditProductView(StaffRequiredMixin, ProductMixin, FormView):
 
     def form_valid(self, form):
         form.save()
+        return super().form_valid(form)
+
+
+class CorrectionView(StaffRequiredMixin, ProductMixin, FormView):
+    template_name = "products/correction.html"
+    form_class = CorrectionForm
+    success_url = reverse_lazy("store:correction")
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        state = WarehouseState.objects.filter(
+            warehouse=get_warehouse(self.request), product=self.product
+        ).first()
+        kw["initial"] = {"quantity": state.quantity if state else 0}
+        return kw
+
+    @transaction.atomic
+    def form_valid(self, form):
+        warehouse = get_warehouse(self.request)
+        new_quantity = form.cleaned_data["quantity"]
+
+        state = WarehouseState.objects.filter(
+            warehouse=warehouse, product=self.product
+        ).first()
+        old_quantity = state.quantity if state else 0
+
+        WarehouseEvent(
+            warehouse=warehouse,
+            product=self.product,
+            quantity=new_quantity - old_quantity,
+            type=WarehouseEvent.EventType.CORRECTION,
+            price=0,
+            user=self.request.user,
+        ).save()
+
         return super().form_valid(form)
 
 

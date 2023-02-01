@@ -17,5 +17,6 @@ urlpatterns = [
     path("products/edit/", settings.EditProductView.as_view(), name="product_edit"),
     path("products/transfer/", settings.ProductTransferView.as_view(), name="product_transfer"),
     path("products/import/", settings.ProductImportView.as_view(), name="product_import"),
+    path("products/correction/", settings.CorrectionView.as_view(), name="correction"),
     path("inventory/", settings.InventoryView.as_view(), name="inventory"),
 ]

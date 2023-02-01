@@ -74,3 +74,7 @@ class TransferForm(Form):
         if not ws or ws.quantity < quantity:
             raise ValidationError("V zdrojovom sklade nie je dostatočny počet kusov.")
         return quantity
+
+
+class CorrectionForm(Form):
+    quantity = IntegerField(label="Počet kusov")
