@@ -13,9 +13,9 @@
     setInterval(()=>document.getElementById("barcode").focus(), 2000);
 </script>
 
-<div class="sticky top-0 bg-white p-6 border-b">
+<div class="sticky top-0 bg-white p-6 border-b z-10">
     <form hx-post="{% url 'store:cart_add_barcode' %}" hx-target="#hx-cart" id="barcode-form">
-        <input type="text" class="input" id="barcode" name="barcode" placeholder="Načítaj čiarový kód" autocomplete="off">
+        <input type="text" class="input" id="barcode" name="barcode" placeholder="Načítaj čiarový kód" autocomplete="off" autofocus>
         <div id="hx-barcode-error"></div>
     </form>
     <script>
