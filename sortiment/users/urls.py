@@ -17,9 +17,14 @@ from django.urls import path
 from users import views
 
 urlpatterns = [
-    path("", views.user_list, name="user_list"),
-    path("login/<int:user_id>/", views.login_user, name='login'),
-    path("logout/", views.logout_user, name='logout'),
-    path("create/", views.create_user, name='create'),
-    path("credit/", views.credit, name='credit')
+    path("", views.UserListView.as_view(), name="user_list"),
+    path("login/<int:user_id>/", views.LoginUserView.as_view(), name="login"),
+    path("logout/", views.LogoutUserView.as_view(), name="logout"),
+    path("create/", views.CreateUserView.as_view(), name="create"),
+    path("creditmovement/", views.CreditMovementView.as_view(), name="creditmovement"),
+    path(
+        "credaddwithdrowal/",
+        views.CreditAddWithdrawalView.as_view(),
+        name="credaddwithdrowal",
+    ),
 ]
