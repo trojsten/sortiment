@@ -4,7 +4,6 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import SuspiciousOperation
-from django.db import transaction
 from django.db.models import Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -114,11 +113,7 @@ class StatsView(TemplateView):
         ctx["credit_sum"] = SortimentUser.get_credit_sum()
         ctx["total_profit"] = ctx["total_price_for_sale"] - ctx["total_price_when_buy"]
         ctx["local_profit"] = ctx["local_price_for_sale"] - ctx["local_price_when_buy"]
-        ctx["top_creditors"] = list(
-            enumerate(
-                SortimentUser.objects.filter(is_active=True).order_by("-credit")[:15]
-            )
-        )
+        ctx["top_creditors"] = list(enumerate(SortimentUser.objects.filter(is_active=True).order_by('-credit')[:15], 1))
         return ctx
 
 
