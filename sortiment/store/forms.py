@@ -9,14 +9,6 @@ class ProductForm(ModelForm):
     class Meta:
         model = Product
         fields = ["name", "barcode", "image", "is_unlimited", "tags", "price"]
-        labels = {
-            "name": "Názov",
-            "barcode": "Čiarový kód",
-            "image": "Obrázok",
-            "is_unlimited": "Neobmedzený predmet",
-            "tags": "Tagy",
-            "price": "Predajná cena",
-        }
         widgets = {
             "price": NumberInput(attrs={"min": 0, "step": 0.05}),
         }
