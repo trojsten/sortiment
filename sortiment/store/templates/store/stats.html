@@ -56,9 +56,9 @@
         <h2 class="font-bold text-3xl text-center m-3">Najväčší kreditori</h2>
 
         <div class="mx-auto text-xl text-center mx-auto m-3 space-y-2">
-            {% for row in top_creditors %}
+            {% for creditor in top_creditors %}
                 <div class="">
-                        {{ row.0 }}. {{ row.1.username }}
+                        {{ forloop.counter }}. {{ creditor.username }}
                 </div>
             {% endfor %}
         </div>
