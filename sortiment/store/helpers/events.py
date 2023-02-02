@@ -10,7 +10,7 @@ def get_average_price(product: Product) -> Decimal:
     prices = product.warehousestate_set.aggregate(
         quantity=Sum("quantity"), price=Sum("total_price")
     )
-    if prices["quantity"] is not None and prices["quantity"] != 0:
+    if prices["quantity"] is not None and prices["quantity"] > 0:
         average_price = Decimal(prices["price"] / prices["quantity"])
     return average_price
 
