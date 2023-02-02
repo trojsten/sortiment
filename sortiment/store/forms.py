@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.forms import DecimalField, Form, IntegerField, ModelForm
+from django.forms import DecimalField, Form, IntegerField, ModelForm, NumberInput
 
 from .models import Product, Warehouse, WarehouseState
 
@@ -17,8 +17,9 @@ class ProductForm(ModelForm):
             "tags": "Tagy",
             "price": "Predajná cena",
         }
-
-    price = forms.DecimalField(min_value=0)
+        widgets = {
+            "price": NumberInput(attrs={"min": 0, "step": 0.05}),
+        }
 
 
 class DiscardForm(Form):
