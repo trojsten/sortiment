@@ -77,5 +77,8 @@ class CreditChangeView(LoginRequiredMixin, FormView):
         user = self.request.user
         money = form.cleaned_data.get("credit")
         user.make_credit_operation(money, is_purchase=False)
-        messages.success(self.request, "Kredit bol nabitý.")
+        if money > 0:
+            messages.success(self.request, "Kredit bol nabitý.")
+        else:
+            messages.success(self.request, "Kredit bol vybratý.")
         return HttpResponseRedirect(reverse("store:product_list"))
