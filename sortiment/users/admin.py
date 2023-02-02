@@ -11,6 +11,11 @@ class UserCreationForm(forms.ModelForm):
     class Meta:
         model = SortimentUser
         fields = ("username", "first_name", "last_name", "barcode")
+        labels = {
+            "first_name": "Meno",
+            "last_name": "Priezvisko",
+            "barcode": "Čiarový kód"
+        }
 
 
 class UserChangeForm(forms.ModelForm):
