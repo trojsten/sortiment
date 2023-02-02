@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from django.contrib import messages
 from django.db import transaction
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404
@@ -39,10 +40,8 @@ class AddProductView(StaffRequiredMixin, CreateView):
     success_url = reverse_lazy("store:add_product")
 
     def form_valid(self, form):
-        product = form.save(commit=False)
-        product.price = form.cleaned_data["price"]
-        product.save()
-
+        form.save()
+        messages.success(self.request, "Produkt uložený.")
         return super().form_valid(form)
 
 
@@ -58,6 +57,8 @@ class EditProductView(StaffRequiredMixin, ProductMixin, FormView):
 
     def form_valid(self, form):
         form.save()
+
+        messages.success(self.request, "Produkt uložený.")
         return super().form_valid(form)
 
 
@@ -97,6 +98,7 @@ class CorrectionView(StaffRequiredMixin, ProductMixin, FormView):
             user=self.request.user,
         ).save()
 
+        messages.success(self.request, "Korekcia skladu bola úspešná.")
         return super().form_valid(form)
 
 
@@ -115,6 +117,8 @@ class DiscardView(StaffRequiredMixin, ProductMixin, FormView):
             type=WarehouseEvent.EventType.DISCARD,
             user=self.request.user,
         ).save()
+
+        messages.success(self.request, "Vyradenie tovaru bolo úspešné.")
         return super().form_valid(form)
 
     def get_form_kwargs(self):
@@ -160,6 +164,7 @@ class ProductImportView(StaffRequiredMixin, ProductMixin, FormView):
         self.product.price = form.cleaned_data["sell_price"]
         self.product.save()
 
+        messages.success(self.request, "Príjem tovaru bol úspešný.")
         return super().form_valid(form)
 
     def dispatch(self, request, *args, **kwargs):
@@ -203,6 +208,7 @@ class ProductTransferView(StaffRequiredMixin, FormView):
             type=WarehouseEvent.EventType.TRANSFER_IN,
             user=self.request.user,
         ).save()
+        messages.success(self.request, "Presun bol úspešný.")
         return super().form_valid(form)
 
     def get_form_kwargs(self):

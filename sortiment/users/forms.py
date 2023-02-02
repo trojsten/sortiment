@@ -4,7 +4,7 @@ from users.models import SortimentUser
 
 
 class CreditChangeForm(forms.Form):
-    credit = DecimalField(max_digits=6, decimal_places=2, label="Kredit")
+    credit = DecimalField(max_digits=6, decimal_places=2, label="Dobiť kredit")
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
