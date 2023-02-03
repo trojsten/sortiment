@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
-
 from store import models
+
 
 class ProductAdmin(ModelAdmin):
     list_display = (
@@ -11,13 +11,18 @@ class ProductAdmin(ModelAdmin):
         "is_unlimited",
         "is_dummy",
     )
-    list_filter = ("is_unlimited","is_dummy",)
+    list_filter = (
+        "is_unlimited",
+        "is_dummy",
+    )
+
 
 class WarehouseAdmin(ModelAdmin):
     list_display = (
         "name",
         "ip",
     )
+
 
 class WarehouseState(ModelAdmin):
     list_display = (
@@ -26,6 +31,7 @@ class WarehouseState(ModelAdmin):
         "quantity",
         "total_price",
     )
+
 
 class WarehouseEventAdmin(ModelAdmin):
     list_display = (
