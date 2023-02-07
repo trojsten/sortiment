@@ -12,6 +12,7 @@ django-debug-toolbar = "==3.8.1"
 django-htmx = "==1.13.0"
 django-ipware = "==4.0.2"
 django-widget-tweaks = "==1.4.12"
+sentry-sdk = "==1.15.0"
 
 [dev-packages]
 
