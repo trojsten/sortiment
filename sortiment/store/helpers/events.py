@@ -50,14 +50,15 @@ def new_purchase(
 def new_correction(
     user: SortimentUser, product: Product, warehouse: Warehouse, quantity: int
 ):
+    avg = get_average_price(product)
     WarehouseEvent.objects.create(
         user=user,
         product=product,
         warehouse=warehouse,
         type=WarehouseEvent.EventType.CORRECTION,
         quantity=quantity,
-        retail_price=0,
-        price=get_average_price(product),
+        retail_price=avg,
+        price=avg,
     )
 
 
@@ -71,7 +72,7 @@ def new_discard(
         type=WarehouseEvent.EventType.DISCARD,
         quantity=-quantity,
         retail_price=0,
-        price=0,
+        price=get_average_price(product),
     )
 
 
