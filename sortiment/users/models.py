@@ -22,11 +22,13 @@ class SortimentUserManager(BaseUserManager):
 
 
 class SortimentUser(AbstractUser):
-    password = models.CharField("password", max_length=128, blank=True)
-    first_name = models.CharField("first name", max_length=150)
-    last_name = models.CharField("last name", max_length=150)
-    credit = models.DecimalField(max_digits=6, decimal_places=2, default=0)
-    barcode = models.CharField(max_length=32, blank=True)
+    password = models.CharField(verbose_name="heslo", max_length=128, blank=True)
+    first_name = models.CharField(verbose_name="meno", max_length=150)
+    last_name = models.CharField(verbose_name="priezvisko", max_length=150)
+    credit = models.DecimalField(
+        verbose_name="kredit", max_digits=6, decimal_places=2, default=0
+    )
+    barcode = models.CharField(verbose_name="čiarový kód", max_length=32, blank=True)
     is_guest = models.BooleanField(default=False)
     REQUIRED_FIELDS = ["credit", "first_name", "last_name"]
 
