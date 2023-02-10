@@ -34,7 +34,9 @@ class DiscardForm(Form):
 
 class InsertForm(Form):
     quantity = IntegerField(label="Počet kusov", min_value=0)
-    unit_price = DecimalField(label="Jednotková cena", min_value=0, step_size=0.05)
+    unit_price = DecimalField(
+        label="Jednotková nákupná cena", min_value=0, step_size=0.05
+    )
     sell_price = DecimalField(label="Predajná cena", min_value=0, step_size=0.05)
 
 

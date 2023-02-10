@@ -27,7 +27,7 @@
                         {% render_field form.unit_price class="input mt-1" step="0.01" x-model="unit" @change="total = (unit*quantity).toFixed(2)" %}
                     </div>
                     <div>
-                        <label for="total_price" class="text-sm font-medium text-gray-700">Cena spolu:</label>
+                        <label for="total_price" class="text-sm font-medium text-gray-700">Nákupná cena spolu:</label>
                         <input type="number" class="input mt-1" id="total_price" step="0.01" x-model="total" @change="unit = (total/quantity).toFixed(2)">
                     </div>
                 </div>
