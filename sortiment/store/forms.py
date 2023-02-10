@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.forms import DecimalField, Form, IntegerField, ModelForm
+from django.forms import DecimalField, Form, IntegerField, ModelForm, NumberInput
 
 from .models import Product, Warehouse, WarehouseState
 
@@ -9,16 +9,9 @@ class ProductForm(ModelForm):
     class Meta:
         model = Product
         fields = ["name", "barcode", "image", "is_unlimited", "tags", "price"]
-        labels = {
-            "name": "Názov",
-            "barcode": "Čiarový kód",
-            "image": "Obrázok",
-            "is_unlimited": "Neobmedzený predmet",
-            "tags": "Tagy",
-            "price": "Predajná cena",
+        widgets = {
+            "price": NumberInput(attrs={"min": 0, "step": 0.05}),
         }
-
-    price = forms.DecimalField(min_value=0)
 
 
 class DiscardForm(Form):
@@ -41,8 +34,8 @@ class DiscardForm(Form):
 
 class InsertForm(Form):
     quantity = IntegerField(label="Počet kusov", min_value=0)
-    unit_price = DecimalField(label="Jednotková cena", min_value=0)
-    sell_price = DecimalField(label="Predajná cena", min_value=0)
+    unit_price = DecimalField(label="Jednotková cena", min_value=0, step_size=0.05)
+    sell_price = DecimalField(label="Predajná cena", min_value=0, step_size=0.05)
 
 
 class TransferForm(Form):

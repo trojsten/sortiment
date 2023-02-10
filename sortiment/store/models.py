@@ -50,12 +50,14 @@ class Tag(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=128)
-    barcode = models.CharField(max_length=32, unique=True)
-    image = models.FileField(blank=True, null=True)
-    price = models.DecimalField(max_digits=6, decimal_places=2)
-    is_unlimited = models.BooleanField()
-    tags = models.ManyToManyField(Tag, blank=True)
+    name = models.CharField(verbose_name="meno", max_length=128)
+    barcode = models.CharField(verbose_name="čiarový kód", max_length=32, unique=True)
+    image = models.FileField(verbose_name="obrázok", blank=True, null=True)
+    price = models.DecimalField(
+        verbose_name="predajná cena", max_digits=6, decimal_places=2
+    )
+    is_unlimited = models.BooleanField(verbose_name="neobmedzený predmet")
+    tags = models.ManyToManyField(Tag, verbose_name="tagy", blank=True)
     is_dummy = models.BooleanField(default=False)
 
     def __str__(self):

@@ -115,9 +115,7 @@ class StatsView(TemplateView):
         ctx["total_profit"] = ctx["total_price_for_sale"] - ctx["total_price_when_buy"]
         ctx["local_profit"] = ctx["local_price_for_sale"] - ctx["local_price_when_buy"]
         ctx["top_creditors"] = list(
-            enumerate(
-                SortimentUser.objects.filter(is_active=True).order_by("-credit")[:15]
-            )
+            SortimentUser.objects.filter(is_active=True).order_by("-credit")[:15]
         )
         return ctx
 
