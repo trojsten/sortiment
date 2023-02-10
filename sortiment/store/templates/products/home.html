@@ -6,11 +6,28 @@
 <h1 class="font-bold text-3xl text-center mb-6 mt-4">Správa sortimentu</h1>
 
 <div class="overflow-hidden rounded-md border divide-y mx-auto max-w-md">
-    <a href="{% url 'store:product_edit' %}" class="block p-3 hover:bg-gray-100">Úprava produktov</a>
-    <a href="{% url 'store:product_import' %}" class="block p-3 hover:bg-gray-100">Príjem tovaru</a>
-    <a href="{% url 'store:product_transfer' %}" class="block p-3 hover:bg-gray-100">Presun tovaru medzi skladmi</a>
-    <a href="{% url 'store:correction' %}" class="block p-3 hover:bg-gray-100">Korekcia skladu</a>
-    <a href="{% url 'store:product_discard' %}" class="block p-3 hover:bg-gray-100">Vyradenie tovaru</a>
+
+
+
+    <a href="{% url 'store:product_edit' %}" class="block p-3 hover:bg-gray-100">
+        <div>Úprava produktov</div>
+        <div class="text-xs text-gray-600">Pridanie nového produktu, úprava informácií o existujúcom produkte</div>
+    </a>
+    <a href="{% url 'store:product_import' %}" class="block p-3 hover:bg-gray-100">
+        <div>Príjem tovaru</div>
+        <div class="text-xs text-gray-600">Nahodenie kúpených produktov do bufetu</div>
+    </a>
+    <a href="{% url 'store:product_transfer' %}" class="block p-3 hover:bg-gray-100">
+        <div>Presun tovaru medzi skladmi</div>
+    </a>
+    <a href="{% url 'store:correction' %}" class="block p-3 hover:bg-gray-100">
+        <div>Korekcia skladu</div>
+        <div class="text-xs text-gray-600">Úprava chýb pri príjme tovaru</div>
+    </a>
+    <a href="{% url 'store:product_discard' %}" class="block p-3 hover:bg-gray-100">
+        <div>Vyradenie tovaru</div>
+        <div class="text-xs text-gray-600">Vyhodenie tovaru po záruke</div>
+    </a>
     <a href="{% url 'store:inventory' %}" class="block p-3 hover:bg-gray-100">Inventúra</a>
 </div>
 {% endblock %}
