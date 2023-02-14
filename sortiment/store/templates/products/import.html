@@ -12,7 +12,7 @@
     {% include "products/_search.html" %}
 
     {% if product %}
-        <form method="post">
+        <form method="post" autocomplete="off">
             {% csrf_token %}
             <div class="space-y-2 max-w-md mx-auto mb-6" x-data="{'quantity': 0, 'unit': 0, 'total': 0,
                 'current': {'price': '{{total.price|escapejs}}', 'quantity': '{{total.quantity|escapejs}}'}}">

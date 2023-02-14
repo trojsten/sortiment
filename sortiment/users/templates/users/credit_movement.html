@@ -12,7 +12,7 @@
         <a href="{% url 'credit_movement' %}" class="btn text-sm bg-blue-600 text-white">Presun</a>
     </div>
 
-    <form method="post" >
+    <form method="post" autocomplete="off">
         {% csrf_token %}
         <div class="space-y-2 max-w-md mx-auto mb-6">
             {% for field in form %}

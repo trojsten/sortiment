@@ -14,8 +14,8 @@
 </script>
 
 <div class="sticky top-0 bg-white p-6 border-b">
-    <form hx-post="{% url 'store:cart_add_barcode' %}" hx-target="#hx-cart" id="barcode-form">
-        <input type="text" class="input" id="barcode" name="barcode" placeholder="Načítaj čiarový kód" autocomplete="off">
+    <form hx-post="{% url 'store:cart_add_barcode' %}" hx-target="#hx-cart" id="barcode-form" autocomplete="off">
+        <input type="text" class="input" id="barcode" name="barcode" placeholder="Načítaj čiarový kód">
         <div id="hx-barcode-error"></div>
     </form>
     <script>
