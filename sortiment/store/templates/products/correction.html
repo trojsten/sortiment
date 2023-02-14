@@ -10,7 +10,7 @@
     {% include "products/_search.html" %}
 
     {% if product %}
-    <form method="post">
+    <form method="post" autocomplete="off">
         {% csrf_token %}
         <div class="space-y-2 mb-6">
             {% for field in form %}
