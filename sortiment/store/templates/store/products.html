@@ -14,8 +14,8 @@
 </script>
 
 <div class="sticky top-0 bg-white p-6 border-b z-10">
-    <form hx-post="{% url 'store:cart_add_barcode' %}" hx-target="#hx-cart" id="barcode-form">
-        <input type="text" class="input" id="barcode" name="barcode" placeholder="Načítaj čiarový kód" autocomplete="off" autofocus>
+    <form hx-post="{% url 'store:cart_add_barcode' %}" hx-target="#hx-cart" id="barcode-form" autocomplete="off">
+        <input type="text" class="input" id="barcode" name="barcode" placeholder="Načítaj čiarový kód" autofocus>
         <div id="hx-barcode-error"></div>
     </form>
     <script>
@@ -33,7 +33,7 @@
             event.preventDefault();
         }
     </script>
-    <form onsubmit="filter(event)">
+    <form onsubmit="filter(event)" autocomplete="off">
         <div class="mt-2 w-full flex flex-row space-x-2">
             {% for tag in tags %}
                 <div class="h-8 rounded-full bg-gray-200 flex items-center justify-center flex-row w-min p-2 transition-opacity cursor-default tag {% if not tag.active %}opacity-50{% endif %}" id="tag-{{ tag.name }}"
