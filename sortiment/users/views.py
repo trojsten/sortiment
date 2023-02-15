@@ -55,7 +55,7 @@ class CreditMovementView(LoginRequiredMixin, FormView):
     @transaction.atomic
     def form_valid(self, form):
         user = self.request.user
-        money = -form.cleaned_data.get("credit")
+        money = form.cleaned_data.get("credit")
         user2 = form.cleaned_data.get("user")
         user.make_credit_operation(-money, is_purchase=False)
         user2.make_credit_operation(money, is_purchase=False)
