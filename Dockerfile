@@ -31,7 +31,7 @@ COPY Pipfile Pipfile.lock ./
 RUN pipenv install --system --dev --deploy
 
 COPY sortiment ./sortiment
-COPY --from=cssbuild /app/sortiment/static/app.css /app/sortiment/static/app.css
+COPY --from=cssbuild /app/sortiment/static/* /app/sortiment/static/
 
 WORKDIR /app/sortiment
 CMD ["gunicorn", "sortiment.wsgi", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--log-file", "-", "--workers", "4"]
