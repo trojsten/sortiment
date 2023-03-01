@@ -10,7 +10,7 @@ COPY tailwind.config.js ./
 RUN npm run css-prod
 CMD ["npm", "run", "css-dev"]
 
-FROM python:3.10-slim-bullseye
+FROM python:3.11-slim-bullseye
 WORKDIR /app
 RUN useradd --create-home appuser
 
