@@ -31,7 +31,7 @@ class CreditMovementForm(forms.Form):
         .filter(is_guest=False),
         label="Používateľ",
     )
-    message = CharField(max_length=1000, label="Správa")
+    message = CharField(max_length=128, label="Správa")
 
     def remove_user_from_choices(self, user):
         self.fields["user"].queryset = self.fields["user"].queryset.exclude(id=user.id)
