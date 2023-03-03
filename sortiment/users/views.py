@@ -57,8 +57,10 @@ class CreditMovementView(LoginRequiredMixin, FormView):
         user = self.request.user
         money = form.cleaned_data.get("credit")
         user2 = form.cleaned_data.get("user")
-        user.make_credit_operation(-money, is_purchase=False)
-        user2.make_credit_operation(money, is_purchase=False)
+        message = form.cleaned_data.get("message")
+        message = f"{user}: {message}"
+        user.make_credit_operation(-money, is_purchase=False, message=message)
+        user2.make_credit_operation(money, is_purchase=False, message=message)
         messages.success(self.request, "Kredit bol presunutý.")
         return HttpResponseRedirect(reverse("store:product_list"))
 

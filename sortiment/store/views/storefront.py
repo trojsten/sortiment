@@ -93,7 +93,14 @@ class PurchaseHistoryView(LoginRequiredMixin, TemplateView):
         for e in wh_events:
             events.append({"event": e, "timestamp": e.timestamp, "type": "product"})
         for e in credit_events:
-            events.append({"event": e, "timestamp": e.timestamp, "type": "credit"})
+            events.append(
+                {
+                    "event": e,
+                    "timestamp": e.timestamp,
+                    "type": "credit",
+                    "message": e.message,
+                }
+            )
 
         events.sort(key=lambda x: x["timestamp"], reverse=True)
         ctx.update({"events": events, "cart": Cart(self.request)})
