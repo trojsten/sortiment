@@ -59,7 +59,7 @@ class CreditLog(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     is_purchase = models.BooleanField()
-    message = models.CharField(max_length=1000, default="")
+    message = models.CharField(max_length=128, default="")
 
     def __str__(self):
         return (
