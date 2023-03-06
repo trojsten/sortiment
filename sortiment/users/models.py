@@ -38,7 +38,7 @@ class SortimentUser(AbstractUser):
         print(-money, self.credit, -money <= self.credit)
         return -money <= self.credit
 
-    def make_credit_operation(self, money, is_purchase, message):
+    def make_credit_operation(self, money, is_purchase, message=""):
         if self.is_guest:
             return
         CreditLog(
