@@ -38,10 +38,12 @@ class SortimentUser(AbstractUser):
         print(-money, self.credit, -money <= self.credit)
         return -money <= self.credit
 
-    def make_credit_operation(self, money, is_purchase):
+    def make_credit_operation(self, money, is_purchase, message):
         if self.is_guest:
             return
-        CreditLog(user=self, price=money, is_purchase=is_purchase).save()
+        CreditLog(
+            user=self, price=money, is_purchase=is_purchase, message=message
+        ).save()
         self.credit += money
         self.save()
 
@@ -57,6 +59,7 @@ class CreditLog(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     is_purchase = models.BooleanField()
+    message = models.CharField(max_length=128, default="")
 
     def __str__(self):
         return (

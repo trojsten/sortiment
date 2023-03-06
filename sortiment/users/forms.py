@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.forms import DecimalField, ModelChoiceField, forms
+from django.forms import CharField, DecimalField, ModelChoiceField, forms
 from users.models import SortimentUser
 
 
@@ -31,6 +31,7 @@ class CreditMovementForm(forms.Form):
         .filter(is_guest=False),
         label="Používateľ",
     )
+    message = CharField(max_length=128, label="Správa")
 
     def remove_user_from_choices(self, user):
         self.fields["user"].queryset = self.fields["user"].queryset.exclude(id=user.id)
