@@ -138,7 +138,11 @@ class WarehouseEvent(models.Model):
 
     @property
     def abs_price(self):
-        return abs(self.price)
+        return abs(self.result_price)
+
+    @property
+    def result_price(self):
+        return abs(self.abs_quantity * self.retail_price)
 
     def save(self, *args, **kwargs):
         ws = WarehouseState.objects.filter(
