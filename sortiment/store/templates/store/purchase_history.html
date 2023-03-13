@@ -23,13 +23,13 @@
             </div>
             <div>
                 <div class="font-bold">{{ i.event.product.name }}</div>
-                <div class="text-sm">{{ i.event.abs_quantity }} × {{ i.event.product.price }} €</div>
+                <div class="text-sm">{{ i.event.abs_quantity }} × {{ i.event.retail_price }} €</div>
             </div>
             <div class="ml-auto text-right">
-                {% if i.event.price > 0 %}
-                <div class="font-bold text-red-700">-{{ i.event.price }} €</div>
+                {% if i.event.result_price > 0 %}
+                <div class="font-bold text-red-700">-{{ i.event.result_price }} €</div>
                 {% else %}
-                <div class="font-bold text-green-700">+{{ i.event.abs_price }} €</div>
+                <div class="font-bold text-green-700">+{{ i.event.abs_result_price }} €</div>
                 {% endif %}
                 <div class="text-sm">{{ i.event.timestamp|time }}</div>
             </div>
