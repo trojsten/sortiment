@@ -10,7 +10,7 @@ class ProductForm(ModelForm):
         model = Product
         fields = ["name", "barcode", "image", "is_unlimited", "tags", "price"]
         widgets = {
-            "price": NumberInput(attrs={"min": 0, "step": 0.05}),
+            "price": NumberInput(attrs={"min": 0, "step": 0.01}),
         }
 
 
@@ -35,9 +35,9 @@ class DiscardForm(Form):
 class InsertForm(Form):
     quantity = IntegerField(label="Počet kusov", min_value=0)
     unit_price = DecimalField(
-        label="Jednotková nákupná cena", min_value=0, step_size=0.05
+        label="Jednotková nákupná cena", min_value=0, step_size=0.01
     )
-    sell_price = DecimalField(label="Predajná cena", min_value=0, step_size=0.05)
+    sell_price = DecimalField(label="Predajná cena", min_value=0, step_size=0.01)
 
 
 class TransferForm(Form):
