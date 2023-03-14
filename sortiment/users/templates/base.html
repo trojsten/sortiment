@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'app.css' %}">
+    <link rel="stylesheet" href="{% static 'app.css' %}?v={{ SORTIMENT_VERSION }}">
     <title>{% block title %}{% endblock %} | Sortiment</title>
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
@@ -13,8 +13,8 @@
 
     {% include "_messages.html" %}
 
-    <script src="{% static "alpine.min.js" %}" defer></script>
-    <script src="{% static "htmx.min.js" %}" defer></script>
+    <script src="{% static "alpine.min.js" %}?v={{ SORTIMENT_VERSION }}" defer></script>
+    <script src="{% static "htmx.min.js" %}?v={{ SORTIMENT_VERSION }}" defer></script>
     {% django_htmx_script %}
     {% if debug %}
     <script>
