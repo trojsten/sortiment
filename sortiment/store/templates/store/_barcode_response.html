@@ -10,6 +10,6 @@
     {% if error %}Produkt s daným čiarovým kódom neexistuje.{% endif %}
 </div>
 
-{% if prods is not None %}
-    {% include "store/products_list.html" with prods=prods %}
+{% if update_prods %}
+    {% include "store/_products_list.html" with prods=prods %}
 {% endif %}

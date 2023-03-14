@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import timedelta
+from typing import List, Tuple
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -18,6 +19,34 @@ from store.models import Product, Tag, Warehouse, WarehouseEvent, WarehouseState
 from users.models import CreditLog, SortimentUser
 
 
+def get_inventory_state(warehouse_id: Warehouse):
+    w_states = WarehouseState.objects.filter(warehouse__exact=warehouse_id)
+
+    state_d = defaultdict(lambda: 0)
+    for st in w_states:
+        state_d[st.product_id] = st.quantity
+
+    all_states = (
+        WarehouseState.objects.values("product")
+        .annotate(totqty=Sum("quantity"))
+        .order_by()
+    )
+
+    all_state_d = defaultdict(lambda: 0)
+    for st in all_states:
+        all_state_d[st["product"]] = st["totqty"]
+
+    return state_d, all_state_d
+
+
+def annotate_products_with_qty(products, warehouse_id: Warehouse):
+    infty_string = "&#8734;"
+    state_d, all_state_d = get_inventory_state(warehouse_id)
+    for p in products:
+        p.qty = state_d[p.id] if not p.is_unlimited else infty_string
+        p.totqty = all_state_d[p.id] if not p.is_unlimited else infty_string
+
+
 class ProductListView(LoginRequiredMixin, TemplateView):
     template_name = "store/products.html"
 
@@ -32,31 +61,13 @@ class ProductListView(LoginRequiredMixin, TemplateView):
             )
         active_tags = [tag["name"] for tag in tags if tag["active"]]
 
-        w_states = WarehouseState.objects.filter(warehouse__exact=warehouse_id)
-        state_d = defaultdict(lambda: 0)
-        for st in w_states:
-            state_d[st.product_id] = st.quantity
-
-        all_states = (
-            WarehouseState.objects.values("product")
-            .annotate(totqty=Sum("quantity"))
-            .order_by()
-        )
-
-        all_state_d = defaultdict(lambda: 0)
-        for st in all_states:
-            all_state_d[st["product"]] = st["totqty"]
-
         # only show products that have all active tags
 
-        infty_string = "&#8734;"
         products = Product.objects.filter(is_dummy=False)
         for tag in active_tags:
             products = products.filter(tags__name__contains=tag)
-        for p in products:
-            p.qty = state_d[p.id] if not p.is_unlimited else infty_string
-            p.totqty = all_state_d[p.id] if not p.is_unlimited else infty_string
 
+        annotate_products_with_qty(products, warehouse_id)
         non_zero_prods = filter(lambda p: p.is_unlimited or p.totqty > 0, products)
         non_zero_prods = sorted(non_zero_prods, key=lambda x: x.name)
         non_zero_prods = sorted(
@@ -149,47 +160,59 @@ class CartAddView(LoginRequiredMixin, View):
         return render(request, "store/_cart.html", {"cart": cart})
 
 
-class CartAddBarcode(LoginRequiredMixin, View):
+def filter_products(request) -> Tuple[bool, bool, List[Product], bool]:
+    barcode = request.POST["barcode"].strip()
+    commit = barcode and "commit" in request.GET
+
+    filters = [
+        lambda: (False, Product.objects.filter(barcode=barcode)),
+        lambda: (
+            True,
+            [
+                Product.generate_one_time_product(price, barcode)
+                for price in [get_dummy_barcode_data(barcode)]
+                if price is not None
+            ],
+        ),
+        lambda: (
+            False,
+            Product.objects.filter(barcode__startswith=barcode)
+            | Product.objects.filter(name__icontains=barcode),
+        ),
+    ]
+    dummy, prods = False, []
+    for f in filters:
+        dummy, prods = f()
+        if prods:
+            break
+    error = not prods
+    return error, dummy, prods, commit
+
+
+class ProductListSearchbox(LoginRequiredMixin, View):
     def get(self, request):
         raise SuspiciousOperation("Only POST method allowed")
 
     def post(self, request):
         cart = Cart(request)
-        barcode = request.POST["barcode"].strip()
-        commit = barcode and "commit" in request.GET
-
-        filters = [
-            lambda: (False, Product.objects.filter(barcode=barcode)),
-            lambda: (
-                True,
-                [
-                    Product.generate_one_time_product(price, barcode)
-                    for price in [get_dummy_barcode_data(barcode)]
-                    if price is not None
-                ],
-            ),
-            lambda: (
-                False,
-                Product.objects.filter(barcode__startswith=barcode)
-                | Product.objects.filter(name__icontains=barcode),
-            ),
-        ]
-        error, dummy, prods = False, False, None
-        for f in filters:
-            dummy, prods = f()
-            if prods:
-                break
-
-        if not prods:
-            error = True
+        error, dummy, prods, commit = filter_products(request)
+        update_prods = None
+        if not error and commit:
+            cart.add_product(prods[0], 1, dummy)
+            update_prods = False
         else:
-            if commit:
-                cart.add_product(prods[0], 1, dummy)
-                prods = None
+            annotate_products_with_qty(prods, get_warehouse(request))
+            update_prods = True
         return render(
             request,
             "store/_barcode_response.html",
-            {"cart": cart, "error": error, "prods": prods, "clear_search": commit},
+            {
+                "cart": cart,
+                "error": error,
+                "prods": prods,
+                "update_prods": update_prods,
+                "clear_search": commit,
+            },
         )
 
 
