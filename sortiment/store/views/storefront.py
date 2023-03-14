@@ -160,10 +160,19 @@ class CartAddBarcode(LoginRequiredMixin, View):
 
         filters = [
             lambda: (False, Product.objects.filter(barcode=barcode)),
-            lambda: (True, [Product.generate_one_time_product(price, barcode)
-                     for price in [get_dummy_barcode_data(barcode)] if price is not None]),
-            lambda: (False, Product.objects.filter(barcode__startswith=barcode) |
-                    Product.objects.filter(name__icontains=barcode)),
+            lambda: (
+                True,
+                [
+                    Product.generate_one_time_product(price, barcode)
+                    for price in [get_dummy_barcode_data(barcode)]
+                    if price is not None
+                ],
+            ),
+            lambda: (
+                False,
+                Product.objects.filter(barcode__startswith=barcode)
+                | Product.objects.filter(name__icontains=barcode),
+            ),
         ]
         error, dummy, prods = False, False, None
         for f in filters:
@@ -178,8 +187,9 @@ class CartAddBarcode(LoginRequiredMixin, View):
                 cart.add_product(prods[0], 1, dummy)
                 prods = None
         return render(
-            request, "store/_barcode_response.html",
-            {"cart": cart, "error": error, "prods": prods, "clear_search": commit}
+            request,
+            "store/_barcode_response.html",
+            {"cart": cart, "error": error, "prods": prods, "clear_search": commit},
         )
 
 
