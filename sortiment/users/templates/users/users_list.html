@@ -14,7 +14,7 @@
             {% for user in users %}
                 <a href="login/{{ user.id }}/" class="px-4 py-2 rounded
 
-                {% if user.credit > 50%}
+                {% if user.credit > 50 %}
                     bg-pink-200
                 {% elif user.credit > 25 %}
                     bg-red-200
@@ -28,7 +28,7 @@
                     bg-gray-200
                 {% endif %}
 
-                {% if user.credit > 50%}
+                {% if user.credit > 50 %}
                     hover:bg-pink-600
                 {% elif user.credit > 25 %}
                     hover:bg-red-600
