@@ -156,19 +156,30 @@ class CartAddBarcode(LoginRequiredMixin, View):
     def post(self, request):
         cart = Cart(request)
         barcode = request.POST["barcode"].strip()
-        product = Product.objects.filter(barcode=barcode).first()
-        error = False
-        if product is None:
-            price = get_dummy_barcode_data(barcode)
-            if price is not None:
-                product = Product.generate_one_time_product(price, barcode)
-                cart.add_product(product, 1, True)
-            else:
-                error = True
+        commit = barcode and "commit" in request.GET
+
+        filters = [
+            lambda: (False, Product.objects.filter(barcode=barcode)),
+            lambda: (True, [Product.generate_one_time_product(price, barcode)
+                     for price in [get_dummy_barcode_data(barcode)] if price is not None]),
+            lambda: (False, Product.objects.filter(barcode__startswith=barcode) |
+                    Product.objects.filter(name__icontains=barcode)),
+        ]
+        error, dummy, prods = False, False, None
+        for f in filters:
+            dummy, prods = f()
+            if prods:
+                break
+
+        if not prods:
+            error = True
         else:
-            cart.add_product(product, 1, False)
+            if commit:
+                cart.add_product(prods[0], 1, dummy)
+                prods = None
         return render(
-            request, "store/_barcode_response.html", {"cart": cart, "error": error}
+            request, "store/_barcode_response.html",
+            {"cart": cart, "error": error, "prods": prods, "clear_search": commit}
         )
 
 

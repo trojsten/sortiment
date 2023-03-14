@@ -1,0 +1,14 @@
+<div hx-swap-oob="true" id="hx-products-list">
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 p-6" hx-target="#hx-cart" hx-swap="outerHTML">
+    {% for product in prods %}
+        <div class="hover:bg-gray-50 p-2 rounded-lg cursor-pointer {% if product.qty <= 0 %} opacity-30 grayscale hover:opacity-100 {% endif %}" role="button" hx-post="{% url 'store:cart_add' product.id %}">
+            {% include "store/_item_image.html" %}
+            <h2 class="text-lg font-bold mt-1">{{ product.name }}</h2>
+            <div class="flex text-sm text-gray-700">
+                <div>{{ product.price }}&nbsp;&euro;</div>
+                <div class="ml-auto">{{product.qty|safe}}/{{product.totqty|safe}}&nbsp;ks</div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
