@@ -1,5 +1,15 @@
 {% include "store/_cart.html" %}
 
+{% if clear_search %}
+    <script>
+        document.getElementById("barcode-form").reset()
+    </script>
+{% endif %}
+
 <div hx-swap-oob="true" id="hx-barcode-error" class="mt-1 text-sm text-red-600">
     {% if error %}Produkt s daným čiarovým kódom neexistuje.{% endif %}
 </div>
+
+{% if prods is not None %}
+    {% include "store/products_list.html" with prods=prods %}
+{% endif %}

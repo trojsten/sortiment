@@ -14,15 +14,15 @@
             {% endif %}
         </div>
         <div class="flex w-full justify-around pt-1 pb-4 px-3">
-            <a href="{% url 'store:product_list' %}" class="text-gray-700 hover:text-gray-900">{% icon "shopping-cart" class="w-6 h-6" %}</a>
+            <a href="{% url 'store:product_list' %}" class={% include "store/_button_style.html" with color="blue" page_name="/store/" %} title="Zoznam produktov">{% icon "shopping-cart" class="w-6 h-6" %}</a>
             {% if not user.is_guest %}
-                <a href="{% url 'store:purchase_history' %}" class="text-gray-700 hover:text-gray-900">{% icon "activity" class="w-6 h-6" %}</a>
-                <a href="{% url 'credit_change' %}" class="text-gray-700 hover:text-gray-900">{% icon "dollar-sign" class="w-6 h-6" %}</a>
+                <a href="{% url 'store:purchase_history' %}" class={% include "store/_button_style.html" with color="blue" page_name="/store/purchases/" %} title="História nákupov">{% icon "activity" class="w-6 h-6" %}</a>
+                <a href="{% url 'credit_change' %}" class={% include "store/_button_style.html" with color="blue" page_name="/users/credit/change/" %} title="Kreditové operácie">{% icon "dollar-sign" class="w-6 h-6" %}</a>
                 {% if user.is_staff %}
-                <a href="{% url 'store:product_management' %}" class="text-gray-700 hover:text-gray-900">{% icon "edit-2" class="w-6 h-6" %}</a>
+                <a href="{% url 'store:product_management' %}" class={% include "store/_button_style.html" with color="blue" page_name="/store/products/" %} title="Správa sortimentu">{% icon "edit-2" class="w-6 h-6" %}</a>
                 {% endif %}
             {% endif %}
-            <a href="{% url 'logout' %}" class="text-red-700 hover:text-red-900">{% icon "log-out" class="w-6 h-6" %}</a>
+            <a href="{% url 'logout' %}" class={% include "store/_button_style.html" with color="red" page_name="" %} title="Odhlásenie">{% icon "log-out" class="w-6 h-6" %}</a>
         </div>
         {% include "store/_cart.html" %}
     </div>

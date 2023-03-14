@@ -7,15 +7,16 @@
 
 <script>
     document.body.addEventListener("htmx:afterSwap", (evt) => {
-        document.getElementById("barcode-form").reset()
         document.getElementById("barcode").focus()
     });
     setInterval(()=>document.getElementById("barcode").focus(), 2000);
 </script>
 
 <div class="sticky top-0 bg-white p-6 border-b z-10">
-    <form hx-post="{% url 'store:cart_add_barcode' %}" hx-target="#hx-cart" id="barcode-form" autocomplete="off">
-        <input type="text" class="input" id="barcode" name="barcode" placeholder="Načítaj čiarový kód" autofocus>
+    <form hx-post="{% url 'store:cart_add_barcode' %}?commit" hx-target="#hx-cart" id="barcode-form" autocomplete="off">
+        <input type="search" class="input" id="barcode" name="barcode"
+            placeholder="Načítaj čiarový kód alebo vyhladávaj podľa názvu (pridaj prvé do košíka s ENTERom)"
+            hx-post="{% url 'store:cart_add_barcode' %}" hx-trigger="keyup changed delay:100ms" autofocus>
         <div id="hx-barcode-error"></div>
     </form>
     <script>
@@ -51,16 +52,6 @@
     </form>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 p-6" hx-target="#hx-cart" hx-swap="outerHTML">
-{% for product in prods %}
-    <div class="hover:bg-gray-50 p-2 rounded-lg cursor-pointer {% if product.qty <= 0 %} opacity-30 grayscale hover:opacity-100 {% endif %}" role="button" hx-post="{% url 'store:cart_add' product.id %}">
-        {% include "store/_item_image.html" %}
-        <h2 class="text-lg font-bold mt-1">{{ product.name }}</h2>
-        <div class="flex text-sm text-gray-700">
-            <div>{{ product.price }}&nbsp;&euro;</div>
-            <div class="ml-auto">{{product.qty|safe}}/{{product.totqty|safe}}&nbsp;ks</div>
-        </div>
-    </div>
-{% endfor %}
-</div>
+{% include "store/products_list.html" %}
+
 {% endblock %}
