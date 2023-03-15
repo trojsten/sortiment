@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import List, Tuple
 
 from django.contrib import messages
@@ -36,15 +36,29 @@ def get_inventory_state(warehouse_id: Warehouse):
     for st in all_states:
         all_state_d[st["product"]] = st["totqty"]
 
-    return state_d, all_state_d
+    purchases_d = defaultdict(list)
+    for event in WarehouseEvent.objects.filter(
+        warehouse__exact=warehouse_id, type__exact=WarehouseEvent.EventType.PURCHASE
+    ):
+        purchases_d[event.product.name].append((event.timestamp, event.quantity))
+
+    return state_d, all_state_d, purchases_d
 
 
-def annotate_products_with_qty(products, warehouse_id: Warehouse):
+def annotate_products(products, warehouse_id: Warehouse):
     infty_string = "&#8734;"
-    state_d, all_state_d = get_inventory_state(warehouse_id)
+    now, datetime_min = timezone.now(), timezone.make_aware(datetime.min)
+    state_d, all_state_d, purchases_d = get_inventory_state(warehouse_id)
     for p in products:
         p.qty = state_d[p.id] if not p.is_unlimited else infty_string
         p.totqty = all_state_d[p.id] if not p.is_unlimited else infty_string
+        p.timestamp = max(purchases_d.get(p.name, [(datetime_min, 0)]))[0]
+        # q will be negative, low priority will be at the top of the list
+        p.priority = sum(q * 0.95 ** (now - t).days for t, q in purchases_d[p.name])
+
+
+def product_list_sort_key(p):
+    return p.priority, -p.timestamp.timestamp(), p.name
 
 
 class ProductListView(LoginRequiredMixin, TemplateView):
@@ -67,12 +81,9 @@ class ProductListView(LoginRequiredMixin, TemplateView):
         for tag in active_tags:
             products = products.filter(tags__name__contains=tag)
 
-        annotate_products_with_qty(products, warehouse_id)
+        annotate_products(products, warehouse_id)
         non_zero_prods = filter(lambda p: p.is_unlimited or p.totqty > 0, products)
-        non_zero_prods = sorted(non_zero_prods, key=lambda x: x.name)
-        non_zero_prods = sorted(
-            non_zero_prods, key=lambda x: not (isinstance(x.qty, int) and x.qty > 0)
-        )
+        non_zero_prods = sorted(non_zero_prods, key=product_list_sort_key)
 
         ctx["prods"] = non_zero_prods
         ctx["user"] = self.request.user
@@ -201,7 +212,10 @@ class ProductListSearchbox(LoginRequiredMixin, View):
             cart.add_product(prods[0], 1, dummy)
             update_prods = False
         else:
-            annotate_products_with_qty(prods, get_warehouse(request))
+            warehouse_id = get_warehouse(request)
+            annotate_products(prods, warehouse_id)
+            prods = filter(lambda p: p.is_unlimited or p.totqty > 0, prods)
+            prods = sorted(prods, key=product_list_sort_key)
             update_prods = True
         return render(
             request,
