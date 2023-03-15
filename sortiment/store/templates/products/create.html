@@ -2,6 +2,10 @@
 {% load forms %}
 {% load widget_tweaks %}
 
+{% block back_site %}
+{% url 'store:product_management' as home_url %}
+{{ request.META.HTTP_REFERER|default:home_url|escape }}
+{% endblock %}
 {% block title %}Vytvor produkt{% endblock %}
 
 {% block setting %}
