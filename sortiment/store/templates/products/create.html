@@ -3,8 +3,11 @@
 {% load widget_tweaks %}
 
 {% block back_site %}
-{% url 'store:product_management' as home_url %}
-{{ request.META.HTTP_REFERER|default:home_url|escape }}
+{% if request.META.HTTP_REFERER and request.META.HTTP_REFERER != request.build_absolute_uri %}
+    {{ request.META.HTTP_REFERER|escape }}
+{% else %}
+    {% url 'store:product_management' %}
+{% endif %}
 {% endblock %}
 {% block title %}Vytvor produkt{% endblock %}
 
