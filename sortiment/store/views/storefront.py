@@ -58,7 +58,18 @@ def annotate_products(products, warehouse_id: Warehouse):
 
 
 def product_list_sort_key(p):
-    return p.priority, -p.timestamp.timestamp(), p.name
+    if p.is_unlimited or p.qty > 0:
+        availability = -1
+    elif p.totqty > 0:
+        availability = 0
+    else:
+        availability = 1
+    return (
+        availability,
+        p.priority,
+        -p.timestamp.timestamp(),
+        p.name,
+    )
 
 
 class ProductListView(LoginRequiredMixin, TemplateView):
@@ -82,10 +93,9 @@ class ProductListView(LoginRequiredMixin, TemplateView):
             products = products.filter(tags__name__contains=tag)
 
         annotate_products(products, warehouse_id)
-        non_zero_prods = filter(lambda p: p.is_unlimited or p.totqty > 0, products)
-        non_zero_prods = sorted(non_zero_prods, key=product_list_sort_key)
+        products = sorted(products, key=product_list_sort_key)
 
-        ctx["prods"] = non_zero_prods
+        ctx["prods"] = products
         ctx["user"] = self.request.user
         ctx["tags"] = tags
         ctx["cart"] = Cart(self.request)
@@ -214,7 +224,6 @@ class ProductListSearchbox(LoginRequiredMixin, View):
         else:
             warehouse_id = get_warehouse(request)
             annotate_products(prods, warehouse_id)
-            prods = filter(lambda p: p.is_unlimited or p.totqty > 0, prods)
             prods = sorted(prods, key=product_list_sort_key)
             update_prods = True
         return render(
