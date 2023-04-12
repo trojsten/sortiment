@@ -23,14 +23,15 @@
         </div>
     </div>
 
-    <div class="p-3 mt-auto border-t">
+    <div class="p-3 mt-auto border-t flex space-x-2 justify-between">
         {% if cart.total_price > user.credit and not user.is_guest %}
-            <div class="bg-red-600 btn text-lg cursor-not-allowed text-white">Nedostatok kreditu</div>
+            <div class="w-full bg-red-600 btn text-lg cursor-not-allowed text-white">Nedostatok kreditu</div>
         {% else %}
             <a {% if user.is_guest %}
                 onclick="if(!confirm('Naozaj si zaplatil?')) event.preventDefault();"
             {% endif %}
-            href="{% url 'store:checkout' %}" class="bg-blue-600 hover:bg-blue-700 btn text-lg text-white">Zaplatiť {{ cart.total_price|floatformat:2 }} €</a>
+            href="{% url 'store:checkout' %}" class="w-full bg-blue-600 hover:bg-blue-700 btn text-lg text-white">Zaplatiť {{ cart.total_price|floatformat:2 }} €</a>
         {% endif %}
+        <a href="{% url 'logout' %}" class={% include "store/_button_style.html" with color="red" page_name="" %} title="Odhlásenie">{% icon "log-out" class="w-6 h-6" %}</a>
     </div>
 </div>

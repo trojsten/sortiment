@@ -19,7 +19,7 @@ urlpatterns = [
     path("cart/<int:product>/add/", storefront.CartAddView.as_view(), name="cart_add"),
     path(
         "cart/add_barcode/",
-        storefront.CartAddBarcode.as_view(),
+        storefront.ProductListSearchbox.as_view(),
         name="cart_add_barcode",
     ),
     path("products/search/", settings.SearchView.as_view(), name="product_search"),
