@@ -37,8 +37,11 @@ def get_inventory_state(warehouse_id: Warehouse):
         all_state_d[st["product"]] = st["totqty"]
 
     purchases_d = defaultdict(list)
+    time_cutoff = timezone.now() - timedelta(days=60)
     for event in WarehouseEvent.objects.filter(
-        warehouse__exact=warehouse_id, type__exact=WarehouseEvent.EventType.PURCHASE
+        warehouse__exact=warehouse_id,
+        type__exact=WarehouseEvent.EventType.PURCHASE,
+        timestamp__gte=time_cutoff,
     ):
         purchases_d[event.product.name].append((event.timestamp, event.quantity))
 
