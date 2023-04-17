@@ -20,7 +20,7 @@ from users.models import CreditLog, SortimentUser
 
 
 def get_inventory_state(warehouse_id: Warehouse):
-    w_states = WarehouseState.objects.filter(warehouse__exact=warehouse_id)
+    w_states = WarehouseState.objects.filter(warehouse=warehouse_id)
 
     state_d = defaultdict(lambda: 0)
     for st in w_states:
@@ -38,11 +38,12 @@ def get_inventory_state(warehouse_id: Warehouse):
 
     purchases_d = defaultdict(list)
     time_cutoff = timezone.now() - timedelta(days=60)
-    for event in WarehouseEvent.objects.filter(
-        warehouse__exact=warehouse_id,
-        type__exact=WarehouseEvent.EventType.PURCHASE,
+    events = WarehouseEvent.objects.filter(
+        warehouse=warehouse_id,
+        type=WarehouseEvent.EventType.PURCHASE,
         timestamp__gte=time_cutoff,
-    ):
+    ).select_related("product")
+    for event in events:
         purchases_d[event.product.name].append((event.timestamp, event.quantity))
 
     return state_d, all_state_d, purchases_d
