@@ -42,23 +42,32 @@ def get_inventory_state(warehouse_id: Warehouse):
         warehouse=warehouse_id,
         type=WarehouseEvent.EventType.PURCHASE,
         timestamp__gte=time_cutoff,
-    ).select_related("product")
+    ).select_related("product", "user")
     for event in events:
-        purchases_d[event.product.name].append((event.timestamp, event.quantity))
+        purchases_d[event.product.name].append(
+            (event.timestamp, event.quantity, event.user)
+        )
 
     return state_d, all_state_d, purchases_d
 
 
-def annotate_products(products, warehouse_id: Warehouse):
+def annotate_products(products, warehouse_id: Warehouse, user=None):
     infty_string = "&#8734;"
-    now, datetime_min = timezone.now(), timezone.make_aware(datetime.min)
     state_d, all_state_d, purchases_d = get_inventory_state(warehouse_id)
+    now, datetime_min = timezone.now(), timezone.make_aware(datetime.min)
+
+    def p_func(t, q):
+        return q * 0.95 ** (now - t).days
+
     for p in products:
         p.qty = state_d[p.id] if not p.is_unlimited else infty_string
         p.totqty = all_state_d[p.id] if not p.is_unlimited else infty_string
         p.timestamp = max(purchases_d.get(p.name, [(datetime_min, 0)]))[0]
         # q will be negative, low priority will be at the top of the list
-        p.priority = sum(q * 0.95 ** (now - t).days for t, q in purchases_d[p.name])
+        p.priority = sum(p_func(t, q) for t, q, _ in purchases_d[p.name])
+        p.user_priority = sum(
+            p_func(t, q) for t, q, u in purchases_d[p.name] if u == user
+        )
 
 
 def product_list_sort_key(p):
@@ -70,6 +79,7 @@ def product_list_sort_key(p):
         availability = 1
     return (
         availability,
+        p.user_priority,
         p.priority,
         -p.timestamp.timestamp(),
         p.name,
@@ -96,7 +106,7 @@ class ProductListView(LoginRequiredMixin, TemplateView):
         for tag in active_tags:
             products = products.filter(tags__name__contains=tag)
 
-        annotate_products(products, warehouse_id)
+        annotate_products(products, warehouse_id, self.request.user)
         products = sorted(products, key=product_list_sort_key)
 
         ctx["prods"] = products
@@ -227,7 +237,7 @@ class ProductListSearchbox(LoginRequiredMixin, View):
             update_prods = False
         else:
             warehouse_id = get_warehouse(request)
-            annotate_products(prods, warehouse_id)
+            annotate_products(prods, warehouse_id, self.request.user)
             prods = sorted(prods, key=product_list_sort_key)
             update_prods = True
         return render(
