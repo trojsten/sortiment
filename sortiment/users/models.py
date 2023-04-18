@@ -30,6 +30,7 @@ class SortimentUser(AbstractUser):
     )
     barcode = models.CharField(verbose_name="čiarový kód", max_length=32, blank=True)
     is_guest = models.BooleanField(default=False)
+    shortcut = models.CharField(verbose_name="klavesová skratka", max_length=1, blank=True)
     REQUIRED_FIELDS = ["credit", "first_name", "last_name"]
 
     def can_pay(self, money):
