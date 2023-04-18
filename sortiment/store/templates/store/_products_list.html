@@ -6,10 +6,12 @@
             <h2 class="text-lg font-bold mt-1">{{ product.name }}</h2>
             <div class="flex text-sm text-gray-700">
                 <div>{{ product.price }}&nbsp;&euro;</div>
-                {% comment %} <div>#{{ product.priority|floatformat:2 }}</div>
-                <div>#{{ product.timestamp.time }} {{ product.timestamp.date }}</div> {% endcomment %}
                 <div class="ml-auto">{{product.qty|safe}}/{{product.totqty|safe}}&nbsp;ks</div>
             </div>
+            {% comment %} <div class="flex flex-wrap text-sm text-gray-700">
+                <div>pr: {{ product.priority|floatformat:2 }} # upr: {{ product.user_priority|floatformat:2 }}</div>
+                <div>last: {{ product.timestamp.time }} {{ product.timestamp.date }}</div>
+            </div> {% endcomment %}
         </div>
     {% endfor %}
     </div>
