@@ -15,30 +15,25 @@
                 <a href="login/{{ user.id }}/" class="px-4 py-2 rounded
 
                 {% if user.credit > 50 %}
-                    bg-pink-200
-                {% elif user.credit > 25 %}
-                    bg-red-200
-                {% elif user.credit > 5 %}
                     bg-orange-200
-                {% elif user.credit > 1 %}
-                    bg-green-200
-                {% elif user.credit > 0 %}
+                    hover:bg-orange-600
+                {% elif user.credit > 25 %}
+                    bg-rose-200
+                    hover:bg-rose-600
+                {% elif user.credit > 10 %}
+                    bg-purple-200
+                    hover:bg-purple-600
+                {% elif user.credit > 5 %}
                     bg-blue-200
+                    hover:bg-blue-600
+                {% elif user.credit > 1 %}
+                    bg-cyan-200
+                    hover:bg-cyan-600
+                {% elif user.credit > 0 %}
+                    bg-green-200
+                    hover:bg-green-600
                 {% else %}
                     bg-gray-200
-                {% endif %}
-
-                {% if user.credit > 50 %}
-                    hover:bg-pink-600
-                {% elif user.credit > 25 %}
-                    hover:bg-red-600
-                {% elif user.credit > 5 %}
-                    hover:bg-orange-600
-                {% elif user.credit > 1 %}
-                    hover:bg-green-600
-                {% elif user.credit > 0 %}
-                    hover:bg-blue-600
-                {% else %}
                     hover:bg-gray-600
                 {% endif %}
 
