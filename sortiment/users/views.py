@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
+from django.db.models.functions import Lower
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
@@ -15,7 +16,7 @@ from .models import SortimentUser
 class UserListView(ListView):
     template_name = "users/users_list.html"
     queryset = SortimentUser.objects.filter(is_active=True).order_by(
-        "-is_guest", "username"
+        "-is_guest", Lower("username")
     )
     context_object_name = "users"
 
