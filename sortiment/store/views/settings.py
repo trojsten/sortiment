@@ -211,8 +211,9 @@ class InventoryView(StaffRequiredMixin, TemplateView):
             for w in warehouses:
                 stock.append(state_map[(p.id, w.id)])
             total = sum(stock)
+            has_any_nonzero = any(map(lambda x: x != 0, stock))
 
-            if total > 0:
+            if has_any_nonzero:
                 rows.append(
                     {
                         "name": p.name,
