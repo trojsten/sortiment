@@ -35,7 +35,6 @@ class SortimentUser(AbstractUser):
     def can_pay(self, money):
         if self.is_guest:
             return True
-        print(money, self.credit, money <= self.credit)
         return money <= self.credit
 
     def make_credit_operation(self, money, is_purchase, message=""):

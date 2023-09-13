@@ -18,7 +18,7 @@ class CreditChangeForm(forms.Form):
 
     def clean_credit(self):
         credit = self.cleaned_data["credit"]
-        if not self.user.can_pay(credit):
+        if not self.user.can_pay(-credit):
             raise ValidationError("Nemáš dostatok kreditu.")
         return credit
 
