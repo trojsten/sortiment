@@ -2,8 +2,9 @@ from collections import defaultdict
 
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Q, Sum
-from django.shortcuts import get_object_or_404
+from django.db.models import F, Q, Sum
+from django.forms import Form
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, FormView, TemplateView
 from store.forms import (
@@ -15,7 +16,7 @@ from store.forms import (
 )
 from store.helpers import get_warehouse
 from store.helpers.events import new_correction, new_discard, new_import, new_transfer
-from store.models import Product, Warehouse, WarehouseState
+from store.models import Product, Reset, Warehouse, WarehouseState
 from store.views.mixins import StaffRequiredMixin
 
 
@@ -225,6 +226,12 @@ class InventoryView(StaffRequiredMixin, TemplateView):
         ctx["warehouses"] = warehouses
         ctx["wh_count"] = len(warehouses) + 1
         ctx["rows"] = rows
+        totals = WarehouseState.objects.aggregate(
+            retail_price=Sum(F("quantity") * F("product__price")),
+            import_price=Sum("total_price"),
+        )
+        ctx["totals"] = totals
+        ctx["diff"] = totals["retail_price"] - totals["import_price"]
         return ctx
 
 
@@ -240,3 +247,26 @@ class SearchView(StaffRequiredMixin, TemplateView):
             )[0:10]
         ctx["query"] = query
         return ctx
+
+
+class ResetView(StaffRequiredMixin, FormView):
+    template_name = "store/reset.html"
+    form_class = Form
+
+    @transaction.atomic
+    def form_valid(self, form):
+        totals = WarehouseState.objects.aggregate(
+            retail_price=Sum(F("quantity") * F("product__price")),
+            import_price=Sum("total_price"),
+        )
+        diff = totals["retail_price"] - totals["import_price"]
+
+        Reset.objects.create(user=self.request.user, price_diff=diff)
+
+        states = WarehouseState.objects.select_related("product")
+        for state in states:
+            state.total_price = state.quantity * state.product.price
+            state.save()
+
+        messages.success(self.request, f"Reset bol úspešný: {diff}.")
+        return redirect("store:product_management")

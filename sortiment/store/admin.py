@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 from store import models
+from store.models import Reset
 
 
 class ProductAdmin(ModelAdmin):
@@ -44,6 +45,11 @@ class WarehouseEventAdmin(ModelAdmin):
         "user",
     )
     list_filter = ("type",)
+
+
+@admin.register(Reset)
+class ResetAdmin(admin.ModelAdmin):
+    list_display = ["created_at", "user", "price_diff"]
 
 
 admin.site.register(models.Product, ProductAdmin)

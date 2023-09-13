@@ -44,5 +44,22 @@
             {% endfor %}
             </tbody>
         </table>
+
+        <table class="w-full mt-10">
+            <tbody class="divide-y">
+                <tr>
+                    <td class="p-3">Súčet nákupných cien</td>
+                    <td class="p-3 text-right tabular-nums">{{ totals.import_price }}</td>
+                </tr>
+                <tr>
+                    <td class="p-3">Súčet predajných cien</td>
+                    <td class="p-3 text-right tabular-nums">{{ totals.retail_price }}</td>
+                </tr>
+                <tr class="font-bold">
+                    <td class="p-3">Zisk</td>
+                    <td class="p-3 text-right tabular-nums">{{ diff }}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 {% endblock %}

@@ -5,6 +5,7 @@ app_name = "store"
 urlpatterns = [
     path("", storefront.ProductListView.as_view(), name="product_list"),
     path("products/", settings.EventView.as_view(), name="product_management"),
+    path("reset/", settings.ResetView.as_view(), name="reset"),
     path("add_product/", settings.AddProductView.as_view(), name="add_product"),
     path(
         "purchases/", storefront.PurchaseHistoryView.as_view(), name="purchase_history"

@@ -165,3 +165,10 @@ class WarehouseEvent(models.Model):
 
     def __str__(self):
         return f"{self.warehouse}; {self.product}; {self.timestamp}"
+
+
+class Reset(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
+    price_diff = models.DecimalField(max_digits=16, decimal_places=2, default=0)
+    # positive diff means profit

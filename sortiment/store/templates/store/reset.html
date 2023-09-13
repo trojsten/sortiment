@@ -1,0 +1,17 @@
+{% extends 'settings_base.html' %}
+{% load forms %}
+
+{% block title %}Reset skladových cien{% endblock %}
+
+{% block setting %}
+<h1 class="font-bold text-3xl text-center mb-6 mt-4">Reset skladových cien</h1>
+
+<div class="max-w-md mx-auto">
+    <form method="post" enctype="multipart/form-data" autocomplete="off">
+        {% csrf_token %}
+        <div class="flex flex-wrap justify-center mt-2">
+            <button class='btn bg-red-600 hover:bg-red-700 text-white' type="submit">TOTO VYRESETUJE SKLADOVÉ CENY!!!!!!</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

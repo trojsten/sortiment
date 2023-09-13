@@ -31,6 +31,11 @@
                         <input type="number" class="input mt-1" id="total_price" step="0.01" x-model="total" @change="unit = (total/quantity).toFixed(2)">
                     </div>
                 </div>
+
+                <p class="text-red-700 font-bold" x-show="unit == 0">
+                    Príjem s nulovou nákupnou cenou! Si si naozaj istý/istá?
+                </p>
+
                 {% field form.sell_price %}
                 <p class="text-sm text-gray-700">Odporúčaná minimálna predajná cena: <b>
                     <span x-text="((parseFloat(current.price) + parseFloat(total)) / (parseInt(quantity) + parseInt(current.quantity))).toFixed(3)">0.000</span> €
