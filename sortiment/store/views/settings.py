@@ -220,6 +220,7 @@ class InventoryView(StaffRequiredMixin, TemplateView):
                         "price": p.price,
                         "stock": stock,
                         "total": total,
+                        "image": p.image,
                     }
                 )
 
