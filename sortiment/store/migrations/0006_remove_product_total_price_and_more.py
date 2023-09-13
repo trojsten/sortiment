@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("store", "0005_warehouse_ip_alter_product_barcode"),
     ]

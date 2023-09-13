@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("store", "0007_warehousestate_whstate_wh_prod_unique"),
     ]
