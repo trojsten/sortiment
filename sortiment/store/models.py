@@ -52,7 +52,7 @@ class Tag(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=128, verbose_name="názov")
     barcode = models.CharField(max_length=32, unique=True, verbose_name="čiarový kód")
-    image = models.FileField(blank=True, null=True, verbose_name="obrázok")
+    image = models.FileField(null=True, verbose_name="obrázok")
     price = models.DecimalField(
         max_digits=6, decimal_places=2, verbose_name="predajná cena"
     )
