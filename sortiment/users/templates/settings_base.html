@@ -1,12 +1,13 @@
-{% extends "base.html" %}
-{% load icon %}
-
-{% block content %}
+{% extends "base.html" %} {% load icon %} {% block content %}
 <div class="p-6 md:py-10">
-    <div class="mx-auto max-w-3xl">
-        <a href="{% block back_site %}{% url 'store:product_management' %}{% endblock %}" class="flex items-center gap-1 text-blue-800 hover:underline">{% icon "arrow-left" class="w-5 h-5" %} Späť</a>
+  <div class="mx-auto max-w-3xl">
+    <a
+      href="{% block back_site %}{% url 'store:product_management' %}{% endblock %}"
+      class="flex items-center gap-1 text-blue-800 hover:underline"
+      >{% icon "arrow-left" class="w-5 h-5" %} Späť</a
+    >
 
-        {% block setting %}{% endblock %}
-    </div>
+    {% block setting %}{% endblock %}
+  </div>
 </div>
 {% endblock %}
