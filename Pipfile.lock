@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4b2d0df5fbe625224895e132c3958cfee4c528757549ee87560cddf2f45a5694"
+            "sha256": "14e5c20d2eec1fc9156af0f088403d4b6984612ba45295ca488a4479aaf960e3"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -66,11 +66,12 @@
         },
         "django-ipware": {
             "hashes": [
-                "sha256:4fa5607ee85e12ee5e158bc7569ff1e134fb1579681aa1ff3f0ed04be21be153",
-                "sha256:80b52a3f571a371519cc552798f1015b934dd5dd7738bfad87e101e861bd21b8"
+                "sha256:0233341eddcc19de44f463dd3e53c87ef9dcc519fc74a99911cebe9b58197549",
+                "sha256:a596cdab22e6ca2dd53016d31450d371cac91485f9082cfb723a49ea203d8eef"
             ],
             "index": "pypi",
-            "version": "==5.0.0"
+            "markers": "python_version >= '3.8'",
+            "version": "==6.0.1"
         },
         "django-widget-tweaks": {
             "hashes": [
@@ -153,6 +154,14 @@
             ],
             "index": "pypi",
             "version": "==2.9.8"
+        },
+        "python-ipware": {
+            "hashes": [
+                "sha256:802858aa13308d572876d1883edae0eae380fe70a51fdefcb46c8a2099240862",
+                "sha256:a52757123c718342f74b16ab2d9d4a531888d69d10b8197c073164635df0a13b"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==2.0.0"
         },
         "sentry-sdk": {
             "hashes": [
