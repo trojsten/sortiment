@@ -11,7 +11,7 @@ funkcionality Trojstenových interných bufetov.
 
 ## Prerekvizity
 
-- [Python 3.10](https://www.python.org/downloads/)
+- [Python 3.12](https://www.python.org/downloads/)
 - [Pipenv](https://pypi.org/project/pipenv/) (`pip install pipenv`)
 - [Docker](https://docs.docker.com/engine/install/)
 - [docker-compose](https://docs.docker.com/compose/install/)
