@@ -1,3 +1,1 @@
-#!/command/with-contenv sh
-cd /app/sortiment
-python manage.py migrate
+/command/with-contenv sh -c "cd /app/sortiment; python manage.py migrate"
