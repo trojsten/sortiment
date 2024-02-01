@@ -41,9 +41,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      # - name: Deploy to production
-      #   uses: fjogeleit/http-request-action@v1
-      #   with:
-      #     url: https://semaphore.ttt.trojsten.sk/api/project/1/tasks
-      #     data: '{"template_id": 9}'
-      #     bearerToken: ${{ secrets.SEMAPHORE_KEY }}
+      - name: Deploy to production
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: https://semaphore.ttt.trojsten.sk/api/project/1/tasks
+          data: '{"template_id": 9, "environment": "{\"sortiment_version\": \"${{ github.ref_name }}\"}"}'
+          bearerToken: ${{ secrets.SEMAPHORE_KEY }}
