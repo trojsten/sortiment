@@ -1,0 +1,3 @@
+#!/command/execlineb -P
+cd /app/sortiment
+python manage.py migrate
