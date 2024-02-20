@@ -62,7 +62,10 @@ def annotate_products(products, warehouse_id: Warehouse, user=None):
     for p in products:
         p.qty = state_d[p.id] if not p.is_unlimited else infty_string
         p.totqty = all_state_d[p.id] if not p.is_unlimited else infty_string
-        p.timestamp = max(purchases_d.get(p.name, [(datetime_min, 0)]))[0]
+        purchases = purchases_d.get(p.name)
+        if not purchases:
+            purchases = [(datetime_min, 0)]
+        p.timestamp = max(purchases)[0]
         p.priority = sum(p_func(t, q) for t, q, _ in purchases_d[p.name])
         p.user_priority = sum(
             p_func(t, q) for t, q, u in purchases_d[p.name] if u == user
