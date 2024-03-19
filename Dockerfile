@@ -26,11 +26,11 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && apt -y clean \
     && rm -rf /var/lib/apt/lists/*
 
-ARG S6_OVERLAY_VERSION=3.1.6.2
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
-RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
-RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
+ARG MULTIRUN_VERSION=1.1.3
+ADD https://github.com/nicolas-van/multirun/releases/download/${MULTIRUN_VERSION}/multirun-x86_64-linux-gnu-${MULTIRUN_VERSION}.tar.gz /tmp
+RUN tar -xf /tmp/multirun-x86_64-linux-gnu-${MULTIRUN_VERSION}.tar.gz \
+    && mv multirun /bin \
+    && rm /tmp/*
 
 RUN chown appuser:appuser /app
 
@@ -43,9 +43,9 @@ RUN pipenv install --system --dev --deploy
 COPY sortiment ./sortiment
 COPY --from=cssbuild /app/sortiment/static/* /app/sortiment/static/
 
-COPY docker/s6 /etc/s6-overlay/s6-rc.d
+COPY docker/start.sh /app/start.sh
 COPY docker/Caddyfile /app/Caddyfile
 
 WORKDIR /app/sortiment
 RUN python manage.py collectstatic --no-input
-CMD ["/init"]
+CMD ["/bin/multirun", "caddy run --adapter caddyfile --config /app/Caddyfile", "/app/start.sh"]
