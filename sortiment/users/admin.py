@@ -41,13 +41,14 @@ class UserAdmin(BaseUserAdmin):
         "is_staff",
         "credit",
         "barcode",
+        "shortcut",
     )
     list_filter = ("is_staff",)
     fieldsets = (
         (None, {"fields": ("username", "password", "credit")}),
         (
             "Personal info",
-            {"fields": ("first_name", "last_name", "barcode", "is_guest")},
+            {"fields": ("first_name", "last_name", "barcode", "shortcut", "is_guest")},
         ),
         (
             "Permissions",
@@ -67,7 +68,7 @@ class UserAdmin(BaseUserAdmin):
         (None, {"fields": ("username", "password", "credit")}),
         (
             "Personal info",
-            {"fields": ("first_name", "last_name", "barcode", "is_guest")},
+            {"fields": ("first_name", "last_name", "barcode", "shortcut", "is_guest")},
         ),
         (
             "Permissions",
