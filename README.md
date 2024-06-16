@@ -41,3 +41,9 @@ alebo
 1. [localhost:8000](http://localhost:8000/store/)
 2. Zvoliť konto s právami (admin používateľ)
 3. Ikona ceruzky
+
+### Infrastructure model
+![Infrastructure main model](.infragenie/infrastructure_main_model.svg)
+- [web component model](.infragenie/web_component_model.svg)
+
+---
