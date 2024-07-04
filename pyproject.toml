@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "sortiment"
+version = "0.1.0"
+description = ""
+authors = ["Adam Zahradník <adam@zahradnik.xyz>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "5.0.6"
+gunicorn = "22.0.0"
+django-feather = "0.3.0"
+django-debug-toolbar = "4.4.2"
+django-htmx = "1.17.3"
+django-ipware = "7.0.1"
+django-widget-tweaks = "1.5.0"
+sentry-sdk = "2.5.1"
+django-stubs = "5.0.2"
+psycopg = {version = "3.1.17", extras = ["binary"]}
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.5.0"
+pre-commit = "^3.7.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "N", "DJ", "T20", "Q"]
+
+[tool.bumpver]
+current_version = "2024.7"
+version_pattern = "YYYY.INC1"
+commit_message = "bump version {old_version} -> {new_version}"
+commit = true
+tag = true
+push = true
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'current_version = "{version}"',
+]
+"sortiment/sortiment/__init__.py" = [
+    'VERSION = "{version}"',
+]

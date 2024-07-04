@@ -18,7 +18,6 @@ RUN useradd --create-home appuser
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONFAULTHANDLER 1
-ENV PATH=/home/appuser/.local/bin:$PATH
 
 RUN export DEBIAN_FRONTEND=noninteractive \
     && apt update \
@@ -35,11 +34,12 @@ RUN tar -xf /tmp/multirun-x86_64-linux-gnu-${MULTIRUN_VERSION}.tar.gz \
 
 RUN chown appuser:appuser /app
 
-USER appuser
+ENV POETRY_VIRTUALENVS_CREATE 0
+RUN pip install --upgrade poetry
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --no-root
 
-RUN pip install --upgrade pipenv
-COPY Pipfile Pipfile.lock ./
-RUN pipenv install --system --dev --deploy
+USER appuser
 
 COPY sortiment ./sortiment
 COPY --from=cssbuild /app/sortiment/static/* /app/sortiment/static/
