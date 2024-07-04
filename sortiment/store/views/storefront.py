@@ -1,120 +1,57 @@
-from collections import defaultdict
-from datetime import datetime, timedelta
-from typing import List, Tuple
+from datetime import timedelta
 
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
-from django.db.models import Sum
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views import View
 from django.views.generic import TemplateView
-from store.cart import Cart
+from store.cart import Cart, CartContext
 from store.helpers import get_dummy_barcode_data, get_warehouse
-from store.models import Product, Tag, Warehouse, WarehouseEvent, WarehouseState
+from store.logic import get_product_list
+from store.models import Product, Tag, Warehouse, WarehouseEvent
 from users.models import CreditLog, SortimentUser
 
 
-def get_inventory_state(warehouse_id: Warehouse):
-    w_states = WarehouseState.objects.filter(warehouse=warehouse_id)
-
-    state_d = defaultdict(lambda: 0)
-    for st in w_states:
-        state_d[st.product_id] = st.quantity
-
-    all_states = (
-        WarehouseState.objects.values("product")
-        .annotate(totqty=Sum("quantity"))
-        .order_by()
-    )
-
-    all_state_d = defaultdict(lambda: 0)
-    for st in all_states:
-        all_state_d[st["product"]] = st["totqty"]
-
-    purchases_d = defaultdict(list)
-    time_cutoff = timezone.now() - timedelta(days=60)
-    events = WarehouseEvent.objects.filter(
-        warehouse=warehouse_id,
-        type=WarehouseEvent.EventType.PURCHASE,
-        timestamp__gte=time_cutoff,
-    ).select_related("product", "user")
-    for event in events:
-        purchases_d[event.product.name].append(
-            (event.timestamp, event.quantity, event.user)
-        )
-
-    return state_d, all_state_d, purchases_d
-
-
-def annotate_products(products, warehouse_id: Warehouse, user=None):
-    infty_string = "&#8734;"
-    state_d, all_state_d, purchases_d = get_inventory_state(warehouse_id)
-    now, datetime_min = timezone.now(), timezone.make_aware(datetime.min)
-
-    def p_func(t, q):
-        return -q * 0.95 ** (now - t).days
-
-    for p in products:
-        p.qty = state_d[p.id] if not p.is_unlimited else infty_string
-        p.totqty = all_state_d[p.id] if not p.is_unlimited else infty_string
-        purchases = purchases_d.get(p.name)
-        if not purchases:
-            purchases = [(datetime_min, 0)]
-        p.timestamp = max(purchases)[0]
-        p.priority = sum(p_func(t, q) for t, q, _ in purchases_d[p.name])
-        p.user_priority = sum(
-            p_func(t, q) for t, q, u in purchases_d[p.name] if u == user
-        )
-
-
-def product_list_sort_key(p):
-    if p.is_unlimited or p.qty > 0:
-        availability = 1
-    elif p.totqty > 0:
-        availability = 0
-    else:
-        availability = -1
-    return (
-        availability,
-        p.user_priority,
-        p.priority,
-        p.timestamp.timestamp(),
-        p.name,
-    )
-
-
-class ProductListView(LoginRequiredMixin, TemplateView):
+class ProductListView(LoginRequiredMixin, CartContext, TemplateView):
     template_name = "store/products.html"
+
+    def get_queryset(self):
+        products = Product.objects.filter(is_dummy=False)
+
+        query = self.request.GET.get("query")
+        if query:
+            exact = Product.objects.filter(barcode=query)
+            if exact.exists():
+                return exact
+
+            dummy_price = get_dummy_barcode_data(query)
+            if dummy_price:
+                dummy_obj = Product.generate_one_time_product(dummy_price, query)
+                return Product.objects.filter(id=dummy_obj.id)
+
+            products = products.filter(
+                Q(name__unaccent__icontains=query) | Q(barcode__startswith=query)
+            )
+
+        # only show products that have active tag
+        tag = self.request.GET.get("tag")
+        if tag:
+            products = products.filter(tags__name=tag)
+
+        return products
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         warehouse_id = get_warehouse(self.request)
 
-        tags = []
-        for tag in Tag.objects.all():
-            tags.append(
-                {"name": tag.name, "active": "tag-%s" % tag.name in self.request.GET}
-            )
-        active_tags = [tag["name"] for tag in tags if tag["active"]]
-
-        # only show products that have all active tags
-
-        products = Product.objects.filter(is_dummy=False)
-        for tag in active_tags:
-            products = products.filter(tags__name__contains=tag)
-
-        annotate_products(products, warehouse_id, self.request.user)
-        products = sorted(products, key=product_list_sort_key, reverse=True)
-
-        ctx["prods"] = products
-        ctx["user"] = self.request.user
-        ctx["tags"] = tags
-        ctx["cart"] = Cart(self.request)
+        products = self.get_queryset()
+        ctx["products"] = get_product_list(products, warehouse_id, self.request.user)
+        ctx["tags"] = Tag.objects.all()
+        ctx["show_dummy_hint"] = self.request.GET.get("query", "").startswith("55")
 
         return ctx
 
@@ -176,9 +113,6 @@ class StatsView(TemplateView):
 
 
 class CartRemoveView(LoginRequiredMixin, View):
-    def get(self, request, product):
-        raise SuspiciousOperation("Only POST method allowed")
-
     def post(self, request, product):
         cart = Cart(request)
         product = get_object_or_404(Product, id=product)
@@ -187,9 +121,6 @@ class CartRemoveView(LoginRequiredMixin, View):
 
 
 class CartAddView(LoginRequiredMixin, View):
-    def get(self, request, product):
-        raise SuspiciousOperation("Only POST method allowed")
-
     def post(self, request, product):
         cart = Cart(request)
         product = get_object_or_404(Product, id=product)
@@ -197,70 +128,13 @@ class CartAddView(LoginRequiredMixin, View):
         return render(request, "store/_cart.html", {"cart": cart})
 
 
-def filter_products(request) -> Tuple[bool, bool, List[Product], bool]:
-    barcode = request.POST["barcode"].strip()
-    commit = barcode and "commit" in request.GET
-
-    filters = [
-        lambda: (False, Product.objects.filter(barcode=barcode)),
-        lambda: (
-            True,
-            [
-                Product.generate_one_time_product(price, barcode)
-                for price in [get_dummy_barcode_data(barcode)]
-                if price is not None
-            ],
-        ),
-        lambda: (
-            False,
-            Product.objects.filter(barcode__startswith=barcode)
-            | Product.objects.filter(name__icontains=barcode),
-        ),
-    ]
-    dummy, prods = False, []
-    for f in filters:
-        dummy, prods = f()
-        if prods:
-            break
-    error = not prods
-    return error, dummy, prods, commit
-
-
-class ProductListSearchbox(LoginRequiredMixin, View):
-    def get(self, request):
-        raise SuspiciousOperation("Only POST method allowed")
-
-    def post(self, request):
-        cart = Cart(request)
-        error, dummy, prods, commit = filter_products(request)
-        update_prods = None
-        if not error and commit:
-            cart.add_product(prods[0], 1, dummy)
-            update_prods = False
-        else:
-            warehouse_id = get_warehouse(request)
-            annotate_products(prods, warehouse_id, self.request.user)
-            prods = sorted(prods, key=product_list_sort_key, reverse=True)
-            update_prods = True
-        return render(
-            request,
-            "store/_barcode_response.html",
-            {
-                "cart": cart,
-                "error": error,
-                "prods": prods,
-                "update_prods": update_prods,
-                "clear_search": commit,
-            },
-        )
-
-
 class CheckoutView(LoginRequiredMixin, View):
     @transaction.atomic
-    def get(self, request):
+    def post(self, request):
         ok = Cart(request).checkout(request)
         if ok:
             messages.success(request, "Nákup bol úspešný!")
-            return HttpResponseRedirect(reverse("logout"))
+            logout(request)
+            return redirect("user_list")
         else:
-            raise SuspiciousOperation("Not enough credit")
+            return redirect("store:product_list")

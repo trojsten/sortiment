@@ -50,6 +50,7 @@ class Tag(models.Model):
 
 
 class Product(models.Model):
+    id: int
     name = models.CharField(max_length=128, verbose_name="názov")
     barcode = models.CharField(max_length=32, unique=True, verbose_name="čiarový kód")
     image = models.FileField(null=True, verbose_name="obrázok")
@@ -80,9 +81,11 @@ class WarehouseState(models.Model):
     warehouse = models.ForeignKey(
         Warehouse, on_delete=models.CASCADE, verbose_name="sklad"
     )
+    warehouse_id: int
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, verbose_name="produkt"
     )
+    product_id: int
     quantity = models.IntegerField(verbose_name="počet")
     total_price = models.DecimalField(
         max_digits=16, decimal_places=2, default=0, verbose_name="skladová cena"

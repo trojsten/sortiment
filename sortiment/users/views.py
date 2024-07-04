@@ -7,6 +7,9 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, FormView, ListView
+from store.cart import CartContext
+
+from sortiment.turbo import Form422Mixin
 
 from .admin import UserCreationForm
 from .forms import CreditChangeForm, CreditMovementForm
@@ -29,12 +32,12 @@ class LoginUserView(View):
 
 
 class LogoutUserView(View):
-    def get(self, request):
+    def post(self, request):
         logout(request)
         return HttpResponseRedirect(reverse("user_list"))
 
 
-class CreateUserView(CreateView):
+class CreateUserView(Form422Mixin, CreateView):
     template_name = "users/create.html"
     form_class = UserCreationForm
     success_url = reverse_lazy("user_list")
@@ -44,7 +47,7 @@ class CreateUserView(CreateView):
         return super().form_valid(form)
 
 
-class CreditMovementView(LoginRequiredMixin, FormView):
+class CreditMovementView(LoginRequiredMixin, CartContext, Form422Mixin, FormView):
     form_class = CreditMovementForm
     template_name = "users/credit_movement.html"
 
@@ -66,7 +69,7 @@ class CreditMovementView(LoginRequiredMixin, FormView):
         return HttpResponseRedirect(reverse("store:product_list"))
 
 
-class CreditChangeView(LoginRequiredMixin, FormView):
+class CreditChangeView(LoginRequiredMixin, CartContext, Form422Mixin, FormView):
     form_class = CreditChangeForm
     template_name = "users/credit_change.html"
 

@@ -4,54 +4,28 @@
 {% block title %}Obchod{% endblock %}
 
 {% block cartright %}
+<div data-controller="barcode">
+    <div class="sticky top-0 bg-white p-6 border-b z-10">
+        <form action="{% url "store:product_list" %}" autocomplete="off"
+        data-barcode-target="form" data-turbo-stream data-turbo-frame="turbo-products">
+            <input type="search" class="input" name="query"
+                placeholder="Načítaj čiarový kód alebo vyhladávaj podľa názvu (pridaj prvé do košíka s ENTERom)"
+                value="{{ request.GET.query }}"
+                data-barcode-target="field"
+                data-action="input->barcode#search keydown.enter->barcode#select" autofocus>
+        </form>
 
-<script>
-    document.body.addEventListener("htmx:afterSwap", (evt) => {
-        document.getElementById("barcode").focus()
-    });
-    setInterval(()=>document.getElementById("barcode").focus(), 2000);
-</script>
-
-<div class="sticky top-0 bg-white p-6 border-b z-10">
-    <form hx-post="{% url 'store:cart_add_barcode' %}?commit" hx-target="#hx-cart" id="barcode-form" autocomplete="off">
-        <input type="search" class="input" id="barcode" name="barcode"
-            placeholder="Načítaj čiarový kód alebo vyhladávaj podľa názvu (pridaj prvé do košíka s ENTERom)"
-            hx-post="{% url 'store:cart_add_barcode' %}" hx-trigger="keyup changed delay:100ms" autofocus>
-        <div id="hx-barcode-error"></div>
-    </form>
-    <script>
-        function filter(event) {
-            let tags = document.getElementsByClassName("tag");
-
-            let target = window.location.href.split("?")[0] + "?";
-            for (let i = 0; i < tags.length; i++) {
-                if (!tags[i].classList.contains("opacity-50")) {
-                    target += "&tag-" + tags[i].id.split("-")[1] + "=1";
-                }
-            }
-
-            window.location.href = target;
-            event.preventDefault();
-        }
-    </script>
-    <form onsubmit="filter(event)" autocomplete="off">
-        <div class="mt-2 w-full flex flex-row space-x-2">
+        <div class="mt-2 w-full flex flex-row gap-2">
             {% for tag in tags %}
-                <div class="h-8 rounded-full bg-gray-200 flex items-center justify-center flex-row w-min p-2 transition-opacity cursor-default tag {% if not tag.active %}opacity-50{% endif %}" id="tag-{{ tag.name }}"
-                     onclick="if(this.classList.contains('opacity-50')) {
-                         this.classList.remove('opacity-50');
-                     } else {
-                         this.classList.add('opacity-50');
-                     }
-                     document.getElementById('filter-form-submit').click();">
-                    <span class="text-gray-700 font-bold">{{ tag.name }}</span>
-                </div>
+                <a href="?{% if tag.name != request.GET.tag %}tag={{ tag.name }}{% endif %}" class="rounded-md {% if tag.name == request.GET.tag %}bg-blue-600 text-white font-bold{% else %}bg-gray-200 text-gray-700{% endif %} px-2 py-1 text-sm">
+                    #{{ tag.name }}
+                </a>
             {% endfor %}
-            <input id="filter-form-submit" type="submit" value="Filter" class="hidden">
         </div>
-    </form>
+    </div>
+
+    <turbo-frame id="turbo-products" data-barcode-target="productFrame">
+        {% include "store/_products_list.html" %}
+    </turbo-frame>
 </div>
-
-{% include "store/_products_list.html" %}
-
 {% endblock %}

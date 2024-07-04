@@ -14,31 +14,35 @@
     {% if product %}
         <form method="post" autocomplete="off">
             {% csrf_token %}
-            <div class="space-y-2 max-w-md mx-auto mb-6" x-data="{'quantity': 0, 'unit': 0, 'total': 0,
-                'current': {'price': '{{total.price|escapejs}}', 'quantity': '{{total.quantity|escapejs}}'}}">
+            <div class="space-y-2 max-w-md mx-auto mb-6" data-controller="import"
+                data-import-current-price-value="{{total.price|floatformat}}"
+                data-import-current-quantity-value="{{total.quantity|floatformat}}">
                 <div>
                     <label for="{{ form.quantity.id_for_label }}" class="text-sm font-medium text-gray-700">{{ form.quantity.label }}:</label>
-                    {% render_field form.quantity class="input mt-1" x-model="quantity" @change="unit=0; total=0" %}
+                    {% render_field form.quantity class="input mt-1" data-import-target="quantity" data-action="import#reset" %}
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label for="{{ form.unit_price.id_for_label }}" class="text-sm font-medium text-gray-700">{{ form.unit_price.label }}:</label>
-                        {% render_field form.unit_price class="input mt-1" step="0.01" x-model="unit" @change="total = (unit*quantity).toFixed(2)" %}
+                        {% render_field form.unit_price class="input mt-1" step="0.01" data-import-target="unitPrice" data-action="import#updateTotalPrice" %}
                     </div>
                     <div>
                         <label for="total_price" class="text-sm font-medium text-gray-700">Nákupná cena spolu:</label>
-                        <input type="number" class="input mt-1" id="total_price" step="0.01" x-model="total" @change="unit = (total/quantity).toFixed(2)">
+                        <input type="number" class="input mt-1" id="total_price" step="0.01"
+                            data-import-target="totalPrice" data-action="import#updateUnitPrice">
                     </div>
                 </div>
 
-                <p class="text-red-700 font-bold" x-show="unit == 0">
-                    Príjem s nulovou nákupnou cenou! Si si naozaj istý/istá?
+                <p class="bg-red-100 p-3 rounded-md border border-red-700 text-red-800 text-sm" data-import-target="zero">
+                    <b>Naozaj je nákupná cena nulová?</b>
+                    To znamená, že si daný produkt získal zadarmo.
+                    Uveď prosím ťa cenu, za ktorú si produkt nakúpil.
                 </p>
 
                 {% field form.sell_price %}
                 <p class="text-sm text-gray-700">Odporúčaná minimálna predajná cena: <b>
-                    <span x-text="((parseFloat(current.price) + parseFloat(total)) / (parseInt(quantity) + parseInt(current.quantity))).toFixed(3)">0.000</span> €
+                    <span data-import-target="suggestion">0.000</span> €
                 </b></p>
             </div>
             <div class="flex flex-wrap justify-center mt-2">

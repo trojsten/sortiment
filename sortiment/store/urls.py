@@ -18,11 +18,6 @@ urlpatterns = [
         name="cart_remove",
     ),
     path("cart/<int:product>/add/", storefront.CartAddView.as_view(), name="cart_add"),
-    path(
-        "cart/add_barcode/",
-        storefront.ProductListSearchbox.as_view(),
-        name="cart_add_barcode",
-    ),
     path("products/search/", settings.SearchView.as_view(), name="product_search"),
     path("products/discard/", settings.DiscardView.as_view(), name="product_discard"),
     path("products/edit/", settings.EditProductView.as_view(), name="product_edit"),

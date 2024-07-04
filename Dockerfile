@@ -2,13 +2,14 @@ FROM node:21.7.1-alpine AS cssbuild
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm install
+COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm
+RUN pnpm install
 
 COPY sortiment ./sortiment
 COPY tailwind.config.js ./
-RUN npm run css-prod
-CMD ["npm", "run", "css-dev"]
+RUN pnpm run prod
+CMD ["pnpm", "run", "dev"]
 
 FROM python:3.12-slim-bookworm
 

@@ -2,10 +2,14 @@
 {% load icon %}
 
 {% block content %}
-<div class="w-full h-screen flex">
-    <div class="w-72 bg-gray-100 shrink-0 h-screen max-h-screen border-r flex flex-col">
-        <div class="bg-blue-600 text-white font-bold text-center text-xl p-2">
-            Sortiment
+<div class="w-full h-screen flex" data-controller="menu-toggle" data-menu-toggle-toggle-class="hidden">
+    <div class="w-full hidden flex fixed inset-0 sm:relative sm:w-72 bg-gray-100 z-20 sm:shrink-0 h-screen max-h-screen border-r sm:flex flex-col"
+        data-menu-toggle-target="menu">
+        <div class="bg-blue-600 text-white font-bold text-xl p-3 flex items-center">
+            <span>Sortiment</span>
+            <button class="sm:hidden ml-auto hover:bg-black/20 p-2 text-blue-200 -m-2 rounded-full shrink-0" data-action="menu-toggle#toggleMenu">
+                {% icon "x" class="w-6 h-6" %}
+            </button>
         </div>
         <div class="p-3 flex text-lg items-baseline">
             <div class="font-bold">{{ user.username }}</div>
@@ -13,7 +17,7 @@
                 <div class="ml-auto text-sm">Kredit: {{ user.credit }} &euro;</div>
             {% endif %}
         </div>
-        <div class="flex w-full justify-around pt-1 pb-4 px-3">
+        <div class="flex w-full justify-around pt-1 pb-4 px-3 gap-1">
             <a href="{% url 'store:product_list' %}" class={% include "store/_button_style.html" with color="blue" page_name="/store/" %} title="Zoznam produktov">{% icon "shopping-cart" class="w-6 h-6" %}</a>
             {% if not user.is_guest %}
                 <a href="{% url 'store:purchase_history' %}" class={% include "store/_button_style.html" with color="blue" page_name="/store/purchases/" %} title="História nákupov">{% icon "activity" class="w-6 h-6" %}</a>
@@ -22,11 +26,18 @@
                 <a href="{% url 'store:product_management' %}" class={% include "store/_button_style.html" with color="blue" page_name="/store/products/" %} title="Správa sortimentu">{% icon "edit-2" class="w-6 h-6" %}</a>
                 {% endif %}
             {% endif %}
-            <a href="{% url 'logout' %}" class={% include "store/_button_style.html" with color="red" page_name="" %} title="Odhlásenie">{% icon "log-out" class="w-6 h-6" %}</a>
+            <a href="{% url 'logout' %}" class={% include "store/_button_style.html" with color="red" page_name="" %} title="Odhlásenie" data-turbo-method="post">{% icon "log-out" class="w-6 h-6" %}</a>
         </div>
         {% include "store/_cart.html" %}
     </div>
     <div class="overflow-y-auto max-h-screen flex-1">
+        <div class="bg-blue-600 text-white font-bold text-xl p-3 flex items-center sm:hidden">
+            <span>Sortiment</span>
+            <button class="sm:hidden ml-auto hover:bg-black/20 p-2 text-blue-200 -m-2 rounded-full shrink-0" data-action="menu-toggle#toggleMenu">
+                {% icon "menu" class="w-6 h-6" %}
+            </button>
+        </div>
+
         {% block cartright %}{% endblock %}
     </div>
 </div>

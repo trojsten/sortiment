@@ -19,6 +19,8 @@ from store.helpers.events import new_correction, new_discard, new_import, new_tr
 from store.models import Product, Reset, Warehouse, WarehouseState
 from store.views.mixins import StaffRequiredMixin
 
+from sortiment.turbo import Form422Mixin
+
 
 class ProductMixin:
     def get_context_data(self, **kwargs):
@@ -36,7 +38,7 @@ class EventView(StaffRequiredMixin, TemplateView):
     template_name = "products/home.html"
 
 
-class AddProductView(StaffRequiredMixin, CreateView):
+class AddProductView(StaffRequiredMixin, Form422Mixin, CreateView):
     template_name = "products/create.html"
     form_class = ProductForm
     success_url = reverse_lazy("store:add_product")
@@ -47,7 +49,7 @@ class AddProductView(StaffRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class EditProductView(StaffRequiredMixin, ProductMixin, FormView):
+class EditProductView(StaffRequiredMixin, ProductMixin, Form422Mixin, FormView):
     template_name = "products/edit.html"
     form_class = ProductForm
     success_url = reverse_lazy("store:product_edit")
@@ -64,7 +66,7 @@ class EditProductView(StaffRequiredMixin, ProductMixin, FormView):
         return super().form_valid(form)
 
 
-class CorrectionView(StaffRequiredMixin, ProductMixin, FormView):
+class CorrectionView(StaffRequiredMixin, ProductMixin, Form422Mixin, FormView):
     template_name = "products/correction.html"
     form_class = CorrectionForm
     success_url = reverse_lazy("store:correction")
@@ -95,7 +97,7 @@ class CorrectionView(StaffRequiredMixin, ProductMixin, FormView):
         return super().form_valid(form)
 
 
-class DiscardView(StaffRequiredMixin, ProductMixin, FormView):
+class DiscardView(StaffRequiredMixin, ProductMixin, Form422Mixin, FormView):
     template_name = "products/discard.html"
     form_class = DiscardForm
     success_url = reverse_lazy("store:product_discard")
@@ -117,7 +119,7 @@ class DiscardView(StaffRequiredMixin, ProductMixin, FormView):
         return kwargs
 
 
-class ProductImportView(StaffRequiredMixin, ProductMixin, FormView):
+class ProductImportView(StaffRequiredMixin, ProductMixin, Form422Mixin, FormView):
     template_name = "products/import.html"
     form_class = InsertForm
     success_url = reverse_lazy("store:product_import")
@@ -160,7 +162,7 @@ class ProductImportView(StaffRequiredMixin, ProductMixin, FormView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class ProductTransferView(StaffRequiredMixin, FormView):
+class ProductTransferView(StaffRequiredMixin, Form422Mixin, FormView):
     template_name = "products/transfer.html"
     form_class = TransferForm
     success_url = reverse_lazy("store:product_transfer")
@@ -245,13 +247,13 @@ class SearchView(StaffRequiredMixin, TemplateView):
         query = self.request.GET.get("q")
         if query:
             ctx["products"] = Product.objects.filter(
-                Q(barcode=query) | Q(name__icontains=query)
+                Q(barcode=query) | Q(name__unaccent__icontains=query)
             )[0:10]
         ctx["query"] = query
         return ctx
 
 
-class ResetView(StaffRequiredMixin, FormView):
+class ResetView(StaffRequiredMixin, Form422Mixin, FormView):
     template_name = "store/reset.html"
     form_class = Form
 

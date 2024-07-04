@@ -97,3 +97,10 @@ class Cart:
             new_purchase(request.user, item.product, warehouse, item.quantity)
         request.user.make_credit_operation(-self.total_price, is_purchase=True)
         return True
+
+
+class CartContext:
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx["cart"] = Cart(self.request)
+        return ctx
