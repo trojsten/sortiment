@@ -6,6 +6,7 @@ from typing import Iterable
 from django.contrib.auth.models import AbstractUser, User
 from django.db.models import Sum
 from django.utils import timezone
+
 from store.models import Product, Warehouse, WarehouseEvent, WarehouseState
 
 

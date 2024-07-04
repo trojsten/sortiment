@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 
 from django.http import HttpRequest
+from users.models import SortimentUser
+
 from store.helpers import get_warehouse
 from store.helpers.events import new_purchase
 from store.models import Product
-from users.models import SortimentUser
 
 
 @dataclass

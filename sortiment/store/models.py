@@ -6,6 +6,9 @@ class Warehouse(models.Model):
     name = models.CharField(max_length=32)
     ip = models.GenericIPAddressField(unique=True)
 
+    def __str__(self):
+        return self.name
+
     def get_products_price_for_sale_sum(self):
         return sum(
             state.quantity * state.product.price
@@ -38,9 +41,6 @@ class Warehouse(models.Model):
             if not state.product.is_dummy and not state.product.is_unlimited
         )
 
-    def __str__(self):
-        return self.name
-
 
 class Tag(models.Model):
     name = models.CharField(max_length=64)
@@ -66,7 +66,6 @@ class Product(models.Model):
 
     @staticmethod
     def generate_one_time_product(price, barcode):
-        # TODO: fotka?
         product, created = Product.objects.get_or_create(
             price=price,
             name="Jednorazová položka",
@@ -135,17 +134,8 @@ class WarehouseEvent(models.Model):
         verbose_name="používateľ",
     )
 
-    @property
-    def abs_quantity(self):
-        return abs(self.quantity)
-
-    @property
-    def abs_price(self):
-        return abs(self.result_price)
-
-    @property
-    def result_price(self):
-        return abs(self.abs_quantity * self.retail_price)
+    def __str__(self):
+        return f"{self.warehouse}; {self.product}; {self.timestamp}"
 
     def save(self, *args, **kwargs):
         ws = WarehouseState.objects.filter(
@@ -166,8 +156,17 @@ class WarehouseEvent(models.Model):
 
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return f"{self.warehouse}; {self.product}; {self.timestamp}"
+    @property
+    def abs_quantity(self):
+        return abs(self.quantity)
+
+    @property
+    def abs_price(self):
+        return abs(self.result_price)
+
+    @property
+    def result_price(self):
+        return abs(self.abs_quantity * self.retail_price)
 
 
 class Reset(models.Model):
@@ -175,3 +174,6 @@ class Reset(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
     price_diff = models.DecimalField(max_digits=16, decimal_places=2, default=0)
     # positive diff means profit
+
+    def __str__(self) -> str:
+        return f"Reset @ {self.created_at}"

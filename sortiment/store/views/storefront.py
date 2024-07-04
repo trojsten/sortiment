@@ -9,11 +9,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views import View
 from django.views.generic import TemplateView
+from users.models import CreditLog, SortimentUser
+
 from store.cart import Cart, CartContext
 from store.helpers import get_dummy_barcode_data, get_warehouse
 from store.logic import get_product_list
 from store.models import Product, Tag, Warehouse, WarehouseEvent
-from users.models import CreditLog, SortimentUser
 
 
 class ProductListView(LoginRequiredMixin, CartContext, TemplateView):
