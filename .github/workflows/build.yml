@@ -1,13 +1,13 @@
-name: Create and publish a Docker image
+name: Build and deploy Docker image
 
 on:
   push:
     tags:
       - "*"
+  workflow_dispatch:
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
 
 jobs:
   build-and-push-image:
@@ -23,18 +23,18 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@eb539f44b153603ccbfbd98e2ab9d4d0dcaf23a4
         with:
           context: .
           push: true
@@ -44,6 +44,8 @@ jobs:
       - name: Deploy to production
         uses: fjogeleit/http-request-action@v1
         with:
-          url: https://semaphore.ttt.trojsten.sk/api/project/1/tasks
-          data: '{"template_id": 9, "environment": "{\"sortiment_version\": \"${{ github.ref_name }}\"}"}'
-          bearerToken: ${{ secrets.SEMAPHORE_KEY }}
+          url: ${{ vars.DEPLOY_KEEL_URL }}
+          data: '{"name": "${{ env.IMAGE_NAME }}", "tag": "${{ github.ref_name }}"}'
+          username: keel
+          password: ${{ secrets.DEPLOY_KEEL_PASSWORD }}
+          httpsCA: ${{ vars.DEPLOY_KEEL_CA }}
