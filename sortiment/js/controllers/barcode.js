@@ -39,5 +39,9 @@ export default class extends Controller {
 
     this.shouldSelect = false
     this.firstProductTarget.click()
+
+    if ("exactMatch" in this.firstProductTarget.dataset) {
+      this.fieldTarget.value = ""
+    }
   }
 }
