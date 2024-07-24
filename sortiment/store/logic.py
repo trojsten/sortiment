@@ -42,7 +42,7 @@ def get_purchases(warehouse: Warehouse) -> dict[int, list[WarehouseEvent]]:
         timestamp__gte=cutoff,
     ).order_by("-timestamp")
     for event in events:
-        purchases[event.product.id].append(event)
+        purchases[event.product_id].append(event)
 
     return purchases
 
@@ -80,7 +80,7 @@ def annotate_products(
             ap.last_purchase = purchase_log[0].timestamp
 
             ap.global_priority = sum(map(get_priority_value, purchase_log))
-            user_purchases = list(filter(lambda e: e.user == user, purchase_log))
+            user_purchases = list(filter(lambda e: e.user_id == user.id, purchase_log))
             if user_purchases:
                 ap.user_priority = sum(map(get_priority_value, user_purchases))
 
