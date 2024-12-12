@@ -9,6 +9,7 @@ from store.models import Warehouse
 
 def get_warehouse(request: HttpRequest) -> Warehouse:
     ip, _ = get_client_ip(request)
+    print(ip)
     warehouse = Warehouse.objects.filter(ip=ip).first()
     if not warehouse:
         raise PermissionDenied()

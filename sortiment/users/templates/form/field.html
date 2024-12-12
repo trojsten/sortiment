@@ -2,16 +2,16 @@
 
 <div>
 {% if field.field.widget.input_type == "checkbox" %}
-    <label class="flex items-center gap-1.5">{{ field|add_class:"checkbox" }} <span class="text-sm font-medium text-gray-700">{{ field.label }}</span></label>
+    <label class="flex items-center gap-1.5">{{ field|add_class:"checkbox" }} <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ field.label }}</span></label>
 {% elif field.field.widget.input_type == "file" %}
-    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}:</label>
+    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ field.label }}:</label>
     {% render_field field class="mt-1" %}
 {% else %}
-    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}:</label>
+    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ field.label }}:</label>
     {% if not field.errors %}
-        {% render_field field class="input mt-1" %}
+        {% render_field field class="input mt-1 dark:bg-gray-800 dark:border-0" %}
     {% else %}
-        {% render_field field class="input mt-1 border-red-600 placeholder-red-600" %}
+        {% render_field field class="input mt-1 border-red-600 placeholder-red-600 dark:bg-gray-800" %}
     {% endif %}
 {% endif %}
 

@@ -1,6 +1,6 @@
 {% load icon %}
 
-<turbo-frame class="flex flex-col flex-1 min-h-0 border-t" id="turbo-cart">
+<turbo-frame class="flex flex-col flex-1 min-h-0 border-t dark:border-gray-700" id="turbo-cart">
     <div class="pl-3 pr-2 py-2 overflow-y-auto">
         <div class="font-bold">Môj nákup</div>
 
@@ -15,7 +15,7 @@
                     <div class="text-xs">{{ item.quantity }} × {{ item.product.price }} €</div>
                 </div>
 
-                <div class="text-blue-700 text-sm ml-auto shrink-0">{{ item.total_price|floatformat:2 }} €</div>
+                <div class="text-blue-700 dark:text-blue-500 text-sm ml-auto shrink-0">{{ item.total_price|floatformat:2 }} €</div>
                 <a class="hover:bg-red-400/20 text-red-700 p-3 -m-2 rounded-full shrink-0 -ml-3 cursor-pointer" role="button" href="{% url 'store:cart_remove' item.product.id %}" data-turbo-method="post">
                     {% icon "x" class="w-6 h-6" %}
                 </a>
@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    <div class="p-3 mt-auto border-t flex space-x-2 justify-between">
+    <div class="p-3 mt-auto border-t dark:border-gray-700 flex space-x-2 justify-between">
         {% if cart.total_price > user.credit and not user.is_guest %}
             <div class="w-full bg-red-600 btn text-lg cursor-not-allowed text-white">Nedostatok kreditu</div>
         {% else %}

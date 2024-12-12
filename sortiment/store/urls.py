@@ -12,6 +12,7 @@ urlpatterns = [
         "purchases/", storefront.PurchaseHistoryView.as_view(), name="purchase_history"
     ),
     path("stats/", storefront.StatsView.as_view(), name="stats"),
+    path("stats/<str:graph>/data", storefront.StatsDataView.as_view(), name="stats_data"),
     path("checkout/", storefront.CheckoutView.as_view(), name="checkout"),
     path(
         "cart/<int:product>/remove/",

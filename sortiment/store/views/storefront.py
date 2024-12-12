@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 
 from django.contrib import messages
@@ -5,8 +6,11 @@ from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q
+from django.db.models.aggregates import Count, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.timezone import now
 from django.views import View
 from django.views.generic import TemplateView
 from users.models import CreditLog, SortimentUser
@@ -110,7 +114,40 @@ class StatsView(TemplateView):
         ctx["top_creditors"] = list(
             SortimentUser.objects.filter(is_active=True).order_by("-credit")[:15]
         )
+
         return ctx
+
+class StatsDataView(View):
+
+    def get(self, request, graph):
+        warehouse = get_warehouse(self.request)
+        data = {}
+        if graph == "products_alltime":
+            data['title'] = 'Počet'
+            data['data'] = []
+            res = list(
+                WarehouseEvent.objects.filter(warehouse=warehouse, quantity__lte=0).values('product__name').annotate(total_count=Sum("quantity")).order_by("total_count")[:15]
+            )
+            for row in res:
+                data['data'].append({
+                    'label': row['product__name'],
+                    'value': -row['total_count'],
+                })
+        elif graph == "products_lastmonth":
+            date = now().date().replace(day=1)
+            data['title'] = 'Počet'
+            data['data'] = []
+            res = list(
+                WarehouseEvent.objects.filter(warehouse=warehouse, timestamp__gte=date, quantity__lte=0).values('product__name').annotate(
+                    total_count=Sum("quantity")).order_by("total_count")[:15]
+            )
+
+            for row in res:
+                data['data'].append({
+                    'label': row['product__name'],
+                    'value': -row['total_count'],
+                })
+        return HttpResponse(json.dumps(data), content_type="application/json")
 
 
 class CartRemoveView(LoginRequiredMixin, View):
