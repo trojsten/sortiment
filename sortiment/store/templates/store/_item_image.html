@@ -1,7 +1,7 @@
 {% load icon %}
 <div class="w-full flex items-center justify-center aspect-square rounded-md bg-white border overflow-hidden">
     {% if product.image %}
-        <img class="max-w-full max-h-full" src="{{ product.image.url }}">
+        <img class="max-w-full max-h-full" src="{{ product.image.url }}" loading="lazy">
     {% else %}
         {% icon "help-circle" class="w-1/2 h-1/2 text-blue-300" %}
     {% endif %}

@@ -153,6 +153,13 @@ MEDIA_URL = "/uploads/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+        "OPTIONS": {"MAX_ENTRIES": 5000},
+    }
+}
 
 if DEBUG:
     import socket

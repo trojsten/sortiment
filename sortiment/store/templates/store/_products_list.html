@@ -1,22 +1,26 @@
+{% load cache %}
+
 {% if products %}
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 p-6">
     {% for p in products %}
-        <a class="hover:bg-gray-50 p-2 rounded-lg cursor-pointer {% if not p.product.is_unlimited and p.local_quantity <= 0 %} opacity-30 grayscale hover:opacity-100 {% endif %}" role="button" href="{% url 'store:cart_add' p.product.id %}" data-turbo-method="post" data-turbo-frame="turbo-cart" {% if forloop.first %}data-barcode-target="firstProduct"{% endif %}
-        {% if request.GET.query == p.product.barcode %}data-exact-match="1"{% endif %}>
-            {% include "store/_item_image.html" with product=p.product %}
-            <h2 class="text-lg font-bold mt-1">{{ p.product.name }}</h2>
+        {% cache 3600 "product_detail" p.product.id p.global_quantity %}
+            <a class="hover:bg-gray-50 p-2 rounded-lg cursor-pointer {% if not p.product.is_unlimited and p.local_quantity <= 0 %} opacity-30 grayscale hover:opacity-100 {% endif %}" role="button" href="{% url 'store:cart_add' p.product.id %}" data-turbo-method="post" data-turbo-frame="turbo-cart" {% if forloop.first %}data-barcode-target="firstProduct"{% endif %}
+            {% if request.GET.query == p.product.barcode %}data-exact-match="1"{% endif %}>
+                {% include "store/_item_image.html" with product=p.product %}
+                <h2 class="text-lg font-bold mt-1">{{ p.product.name }}</h2>
 
-            <div class="flex text-sm text-gray-700">
-                <div>{{ p.product.price }}&nbsp;&euro;</div>
-                <div class="ml-auto">
-                    {% if p.product.is_unlimited %}
-                        &infin;&nbsp;ks
-                    {% else %}
-                        {{ p.local_quantity }}/{{ p.total_quantity }}&nbsp;ks
-                    {% endif %}
+                <div class="flex text-sm text-gray-700">
+                    <div>{{ p.product.price }}&nbsp;&euro;</div>
+                    <div class="ml-auto">
+                        {% if p.product.is_unlimited %}
+                            &infin;&nbsp;ks
+                        {% else %}
+                            {{ p.local_quantity }}/{{ p.total_quantity }}&nbsp;ks
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
-        </a>
+            </a>
+        {% endcache %}
     {% endfor %}
     </div>
 {% else %}

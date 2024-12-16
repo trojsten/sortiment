@@ -16,6 +16,7 @@ services:
       - "8000:8000"
     volumes:
       - ./sortiment/:/app/sortiment/
+      - ./sortiment/uploads/:/app/uploads/
     environment:
       - DEBUG=True
     depends_on:

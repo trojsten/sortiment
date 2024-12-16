@@ -3,8 +3,9 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Iterable
 
-from django.contrib.auth.models import AbstractUser, User
-from django.db.models import Sum
+from django.contrib.auth.models import User
+from django.db.models import F, FloatField, Max, Q, Sum
+from django.db.models.functions import ExtractDay
 from django.utils import timezone
 
 from store.models import Product, Warehouse, WarehouseEvent, WarehouseState
@@ -19,30 +20,59 @@ class InventoryQuantities:
 def get_inventory_quantities(warehouse: Warehouse) -> dict[int, InventoryQuantities]:
     quantities = defaultdict(lambda: InventoryQuantities(0, 0))
 
-    local_states = WarehouseState.objects.filter(warehouse=warehouse)
-    for state in local_states:
-        quantities[state.product_id].local = state.quantity
-
-    global_states = WarehouseState.objects.values("product_id").annotate(
-        total=Sum("quantity")
+    states = WarehouseState.objects.values("product_id").annotate(
+        local=Sum("quantity", filter=Q(warehouse=warehouse), default=0),
+        total=Sum("quantity"),
     )
-    for state in global_states:
-        quantities[state["product_id"]].total = state["total"]
+
+    for state in states:
+        quantities[state["product_id"]] = InventoryQuantities(
+            state["local"], state["total"]
+        )
 
     return quantities
 
 
-def get_purchases(warehouse: Warehouse) -> dict[int, list[WarehouseEvent]]:
-    purchases = defaultdict(list)
+@dataclass
+class PurchaseStats:
+    global_priority: float = 0
+    user_priority: float = 0
+    last_purchase: datetime = datetime.min
+
+
+def get_purchases(warehouse: Warehouse, user: User) -> dict[int, PurchaseStats]:
+    purchases = defaultdict(lambda: PurchaseStats())
 
     cutoff = timezone.now() - timedelta(days=60)
-    events = WarehouseEvent.objects.filter(
-        warehouse=warehouse,
-        type=WarehouseEvent.EventType.PURCHASE,
-        timestamp__gte=cutoff,
-    ).order_by("-timestamp")
+
+    events = (
+        WarehouseEvent.objects.filter(
+            warehouse=warehouse,
+            type=WarehouseEvent.EventType.PURCHASE,
+            timestamp__gte=cutoff,
+        )
+        .values("product_id")
+        .annotate(
+            global_priority=Sum(
+                -F("quantity")
+                * 0.95 ** ExtractDay(timezone.now().date() - F("timestamp")),
+                output_field=FloatField(),
+            ),
+            user_priority=Sum(
+                -F("quantity")
+                * 0.95 ** ExtractDay(timezone.now().date() - F("timestamp")),
+                output_field=FloatField(),
+                filter=Q(user=user),
+                default=0,
+            ),
+            last_purchase=Max("timestamp"),
+        )
+    )
+
     for event in events:
-        purchases[event.product_id].append(event)
+        purchases[event["product_id"]] = PurchaseStats(
+            event["global_priority"], event["user_priority"], event["last_purchase"]
+        )
 
     return purchases
 
@@ -50,11 +80,9 @@ def get_purchases(warehouse: Warehouse) -> dict[int, list[WarehouseEvent]]:
 @dataclass
 class AnnotatedProduct:
     product: Product
+    stats: PurchaseStats
     local_quantity: int = 0
     total_quantity: int = 0
-    last_purchase: datetime | None = None
-    global_priority: float = 0
-    user_priority: float = 0
 
 
 def get_priority_value(e: WarehouseEvent):
@@ -62,27 +90,18 @@ def get_priority_value(e: WarehouseEvent):
 
 
 def annotate_products(
-    products: Iterable[Product], warehouse: Warehouse, user: AbstractUser | None = None
+    products: Iterable[Product], warehouse: Warehouse, user: User
 ) -> list[AnnotatedProduct]:
     quantities = get_inventory_quantities(warehouse)
-    purchases = get_purchases(warehouse)
+    purchases = get_purchases(warehouse, user)
 
     annotated: list[AnnotatedProduct] = []
     for p in products:
-        ap = AnnotatedProduct(p)
+        ap = AnnotatedProduct(p, purchases[p.id])
 
         if not p.is_unlimited:
             ap.local_quantity = quantities[p.id].local
             ap.total_quantity = quantities[p.id].total
-
-        purchase_log = purchases[p.id]
-        if purchase_log:
-            ap.last_purchase = purchase_log[0].timestamp
-
-            ap.global_priority = sum(map(get_priority_value, purchase_log))
-            user_purchases = list(filter(lambda e: e.user_id == user.id, purchase_log))
-            if user_purchases:
-                ap.user_priority = sum(map(get_priority_value, user_purchases))
 
         annotated.append(ap)
     return annotated
@@ -98,15 +117,15 @@ def product_sort_key(p: AnnotatedProduct):
 
     return (
         availability,
-        p.user_priority,
-        p.global_priority,
-        p.last_purchase if p.last_purchase else datetime.min,
+        p.stats.user_priority,
+        p.stats.global_priority,
+        p.stats.last_purchase,
         p.product.name,
     )
 
 
 def get_product_list(
-    products: Iterable[Product], warehouse: Warehouse, user: User | None = None
+    products: Iterable[Product], warehouse: Warehouse, user: User
 ) -> list[AnnotatedProduct]:
     annotated = annotate_products(products, warehouse, user)
     return sorted(annotated, key=product_sort_key, reverse=True)
