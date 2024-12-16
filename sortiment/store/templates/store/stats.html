@@ -78,6 +78,11 @@
                 <canvas class="text-xl text-center graph w-full" id="products_alltime">
                 </canvas>
             </div>
+            <div class="w-1/2">
+                <h2 class="font-bold text-3xl text-center m-3">Najväčší míňači</h2>
+                <canvas class="text-xl text-center graph w-full" id="users_spending">
+                </canvas>
+            </div>
         </div>
     </div>
 
@@ -87,7 +92,7 @@
                 const res = await (await fetch("/store/stats/" + graph.id + "/data")).json()
                 console.log(res)
                 new Chart(graph, {
-                    type: 'bar',
+                    type: res.type ?? 'bar',
                     data: {
                         labels: res['data'].map(row => row.label),
                         datasets: [

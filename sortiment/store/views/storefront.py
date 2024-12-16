@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, F
 from django.db.models.aggregates import Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -124,6 +124,7 @@ class StatsDataView(View):
         data = {}
         if graph == "products_alltime":
             data['title'] = 'Počet'
+            data['type'] = 'bar'
             data['data'] = []
             res = list(
                 WarehouseEvent.objects.filter(warehouse=warehouse, quantity__lte=0).values('product__name').annotate(total_count=Sum("quantity")).order_by("total_count")[:15]
@@ -134,8 +135,9 @@ class StatsDataView(View):
                     'value': -row['total_count'],
                 })
         elif graph == "products_lastmonth":
-            date = now().date().replace(day=1)
+            date = now().date() - timedelta(days=30)
             data['title'] = 'Počet'
+            data['type'] = 'bar'
             data['data'] = []
             res = list(
                 WarehouseEvent.objects.filter(warehouse=warehouse, timestamp__gte=date, quantity__lte=0).values('product__name').annotate(
@@ -147,6 +149,24 @@ class StatsDataView(View):
                     'label': row['product__name'],
                     'value': -row['total_count'],
                 })
+
+        elif graph == "users_spending":
+            date = now().date() - timedelta(days=30)
+            data['title'] = '€'
+            data['type'] = 'pie'
+            data['data'] = []
+            res = list(
+                WarehouseEvent.objects.filter(warehouse=warehouse, timestamp__gte=date, quantity__lte=0).values('user__username').annotate(
+                    total_spent=Sum(F('quantity') * F('price'))
+                ).order_by('total_spent')
+            )
+
+            for row in res:
+                data['data'].append({
+                    'label': row['user__username'],
+                    'value': -float(row['total_spent']),
+                })
+
         return HttpResponse(json.dumps(data), content_type="application/json")
 
 
