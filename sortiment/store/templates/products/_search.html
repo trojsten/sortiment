@@ -1,11 +1,11 @@
 {% load icon %}
 {% if not product %}
     <form action="{% url 'store:product_search' %}" method="get" autocomplete="off" data-turbo-frame="product-search">
-        <input type="search" class="input" name="q" placeholder="Zadaj čiarový kód / názov produktu..." autofocus />
+        <input type="search" class="input dark:bg-gray-900 dark:border-gray-700" name="q" placeholder="Zadaj čiarový kód / názov produktu..." autofocus />
 
         <turbo-frame id="product-search" target="_top">
-            <div class="mt-4 bg-gray-50 p-2 rounded-md space-y-2">
-                <a href="{% url 'store:add_product' %}" class="flex items-center gap-2 hover:bg-gray-100 rounded p-2" >
+            <div class="mt-4 bg-gray-50 dark:bg-gray-950 p-2 rounded-md space-y-2">
+                <a href="{% url 'store:add_product' %}" class="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded p-2" >
                     <div class="w-12 h-12 bg-green-500 rounded text-white flex items-center justify-center">
                         {% icon "plus" %}
                     </div>
@@ -15,7 +15,7 @@
 
                 {% if query %}
                     {% for product in products %}
-                        <a href="?product={{ product.id }}" class="flex items-center gap-2 hover:bg-gray-100 rounded p-2">
+                        <a href="?product={{ product.id }}" class="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded p-2">
                             <div class="w-12">
                                 {% include "store/_item_image.html" %}
                             </div>
@@ -31,7 +31,7 @@
         </turbo-frame>
     </form>
 {% else %}
-    <div class="flex items-center gap-2 p-4 bg-gray-100 rounded mb-4">
+    <div class="flex items-center gap-2 p-4 dark:bg-gray-900 bg-gray-100 rounded mb-4">
         <div class="w-12">
             {% include "store/_item_image.html" %}
         </div>
