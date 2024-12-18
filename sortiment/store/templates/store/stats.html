@@ -90,7 +90,6 @@
         document.addEventListener("DOMContentLoaded", async ()=> {
             for (const graph of document.getElementsByClassName("graph")) {
                 const res = await (await fetch("/store/stats/" + graph.id + "/data")).json()
-                console.log(res)
                 new Chart(graph, {
                     type: res.type ?? 'bar',
                     data: {

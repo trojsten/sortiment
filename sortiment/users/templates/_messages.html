@@ -5,29 +5,29 @@
         id="js-messages"
     >
         {% for message in messages %}
-        <div
-            class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg dark:bg-gray-950 dark:text-white bg-white shadow-lg ring-1 ring-black ring-opacity-5"
-        >
-            <div class="p-4">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                        {% icon "check-circle" class="text-green-600" %} {% elif
-                        message.level == DEFAULT_MESSAGE_LEVELS.WARNING %} {%
-                        icon "alert-circle" class="text-amber-600" %} {% elif
-                        message.level == DEFAULT_MESSAGE_LEVELS.ERROR %} {% icon
-                        "x-circle" class="text-red-600" %} {% elif message.level
-                        == DEFAULT_MESSAGE_LEVELS.INFO %} {% icon "info"
-                        class="text-blue-600" %} {% endif %}
-                    </div>
-                    <div
-                        class="ml-3 flex-1 text-sm text-gray-900 dark:text-gray-100"
-                    >
-                        {{ message }}
+            <div
+                class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg dark:bg-gray-950 dark:text-white bg-white shadow-lg ring-1 ring-black ring-opacity-5"
+            >
+                <div class="p-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                            {% icon "check-circle" class="text-green-600" %} {% elif
+                            message.level == DEFAULT_MESSAGE_LEVELS.WARNING %} {%
+                            icon "alert-circle" class="text-amber-600" %} {% elif
+                            message.level == DEFAULT_MESSAGE_LEVELS.ERROR %} {% icon
+                            "x-circle" class="text-red-600" %} {% elif message.level
+                            == DEFAULT_MESSAGE_LEVELS.INFO %} {% icon "info"
+                            class="text-blue-600" %} {% endif %}
+                        </div>
+                        <div
+                            class="ml-3 flex-1 text-sm text-gray-900 dark:text-gray-100"
+                        >
+                            {{ message }}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         {% endfor %}
 
         <script>
