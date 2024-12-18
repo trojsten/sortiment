@@ -3,18 +3,19 @@
 {% block title %}Štatistiky{% endblock %}
 
 {% block content %}
-<div class="w-full min-h-screen bg-blue-600 p-8">
-    <div class="bg-white p-8 rounded-md shadow-xl">
+<div class="w-full min-h-screen bg-blue-600 dark:bg-blue-800 p-8">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <div class="bg-white dark:bg-gray-950 p-8 rounded-md shadow-xl">
 
-        <a class='px-4 py-2 rounded bg-gray-200 hover:bg-gray-600 hover:text-white text-xl' href="{% url 'user_list' %}">Späť</a>
+        <a class='px-4 py-2 rounded bg-gray-200 dark:bg-gray-800 hover:bg-gray-600 hover:text-white text-xl' href="{% url 'user_list' %}">Späť</a>
 
         <h1 class="font-bold text-3xl text-center m-6">Štatistiky</h1>
 
         <h1 class="font-bold text-xl text-center m-6">Hodnota tovaru</h1>
 
-        <table class="mx-auto">
+        <table class="mx-auto rounded">
             <thead>
-                <tr class="bg-blue-100">
+                <tr class="bg-blue-100 dark:bg-blue-900">
                     <th></th>
                     <th class="text-center p-4">Lokálne</th>
                     <th class="text-center p-4">Celkovo</th>
@@ -22,29 +23,33 @@
             </thead>
             <tbody>
                 <tr>
-                    <th class="text-center p-4 bg-blue-100">Nákupná:</th>
+                    <th class="text-center p-4 bg-blue-100 dark:bg-blue-900">Nákupná:</th>
                     <td class="text-center p-2">{{ local_price_when_buy }}€</td>
                     <td class="text-center p-2">{{ total_price_when_buy }}€</td>
                 </tr>
                 <tr>
-                    <th class="text-center p-4 bg-blue-100">Predajná:</th>
+                    <th class="text-center p-4 bg-blue-100 dark:bg-blue-900">Predajná:</th>
                     <td class="text-center p-2">{{ local_price_for_sale }}€</td>
                     <td class="text-center p-2">{{ total_price_for_sale }}€</td>
                 </tr>
                 <tr>
-                    <th class="text-center p-4 bg-blue-100">Zisk:</th>
+                    <th class="text-center p-4 bg-blue-100 dark:bg-blue-900">Zisk:</th>
                     <td class="text-center p-2
                     {% if local_profit >= 0 %}
                         bg-green-200
+                        dark:bg-green-800
                     {% else %}
                         bg-red-200
+                        dark:bg-red-800
                     {% endif %}
                     ">{{ local_profit }}€</td>
                     <td class="text-center p-2
                     {% if total_profit >= 0 %}
                         bg-green-200
+                        dark:bg-green-800
                     {% else %}
                         bg-red-200
+                        dark:bg-red-800
                     {% endif %}
                     ">{{ total_profit }}€</td>
                 </tr>
@@ -52,16 +57,53 @@
         </table>
 
         <h2 class="font-bold text-xl text-center m-3">Suma kreditov: {{ credit_sum }}€</h2>
-
-        <h2 class="font-bold text-3xl text-center m-3">Najväčší kreditori</h2>
-
-        <div class="mx-auto text-xl text-center mx-auto m-3 space-y-2">
-            {% for creditor in top_creditors %}
-                <div class="">
-                        {{ forloop.counter }}. {{ creditor.username }}
+        <hr class="dark:bg-gray-700" />
+        <div class="flex flex-wrap">
+            <div class="w-1/2">
+                <h2 class="font-bold text-3xl text-center m-3">Najväčší kreditori</h2>
+                <div class="text-xl text-center mx-auto m-3 space-y-2">
+                    {% for creditor in top_creditors %}
+                        <div class="">
+                                {{ forloop.counter }}. {{ creditor.username }}
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
+            </div>
+            <div class="w-1/2">
+                <h2 class="font-bold text-3xl text-center m-3">Najlepšie produkty</h2>
+                <h4>Posledný mesiac</h4>
+                <canvas class="text-xl text-center graph w-full" id="products_lastmonth">
+                </canvas>
+                <h4>Celý čas</h4>
+                <canvas class="text-xl text-center graph w-full" id="products_alltime">
+                </canvas>
+            </div>
+            <div class="w-1/2">
+                <h2 class="font-bold text-3xl text-center m-3">Najväčší míňači</h2>
+                <canvas class="text-xl text-center graph w-full" id="users_spending">
+                </canvas>
+            </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async ()=> {
+            for (const graph of document.getElementsByClassName("graph")) {
+                const res = await (await fetch("/store/stats/" + graph.id + "/data")).json()
+                new Chart(graph, {
+                    type: res.type ?? 'bar',
+                    data: {
+                        labels: res['data'].map(row => row.label),
+                        datasets: [
+                            {
+                                label: res['title'],
+                                data: res['data'].map(row => row.value)
+                            }
+                        ]
+                    }
+                })
+            }
+        })
+    </script>
 </div>
 {% endblock %}

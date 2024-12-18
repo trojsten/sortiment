@@ -3,9 +3,9 @@
 
 {% block content %}
 <div class="w-full h-screen flex" data-controller="menu-toggle" data-menu-toggle-toggle-class="hidden">
-    <div class="w-full hidden flex fixed inset-0 sm:relative sm:w-72 bg-gray-100 z-20 sm:shrink-0 h-screen max-h-screen border-r sm:flex flex-col"
+    <div class="w-full hidden flex fixed inset-0 sm:relative sm:w-72 bg-gray-100 dark:bg-gray-800 dark:text-gray-100 z-20 sm:shrink-0 h-screen max-h-screen border-r dark:border-gray-700 sm:flex flex-col"
         data-menu-toggle-target="menu">
-        <div class="bg-blue-600 text-white font-bold text-xl p-3 flex items-center">
+        <div class="bg-blue-600 dark:bg-blue-800 text-white dark:text-gray-300 font-bold text-xl p-3 flex items-center">
             <span>Sortiment</span>
             <button class="sm:hidden ml-auto hover:bg-black/20 p-2 text-blue-200 -m-2 rounded-full shrink-0" data-action="menu-toggle#toggleMenu">
                 {% icon "x" class="w-6 h-6" %}
@@ -31,7 +31,7 @@
         {% include "store/_cart.html" %}
     </div>
     <div class="overflow-y-auto max-h-screen flex-1">
-        <div class="bg-blue-600 text-white font-bold text-xl p-3 flex items-center sm:hidden">
+        <div class="bg-blue-600 dark:bg-blue-800 text-white font-bold text-xl p-3 flex items-center sm:hidden">
             <span>Sortiment</span>
             <button class="sm:hidden ml-auto hover:bg-black/20 p-2 text-blue-200 -m-2 rounded-full shrink-0" data-action="menu-toggle#toggleMenu">
                 {% icon "menu" class="w-6 h-6" %}

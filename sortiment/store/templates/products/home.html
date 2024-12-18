@@ -6,27 +6,27 @@
 {% block setting %}
 <h1 class="font-bold text-3xl text-center mb-6 mt-4">Správa sortimentu</h1>
 
-<div class="overflow-hidden rounded-md border divide-y mx-auto max-w-md">
-    <a href="{% url 'store:product_edit' %}" class="block p-3 hover:bg-gray-100">
+<div class="overflow-hidden rounded-md border dark:border-gray-700 dark:*:border-gray-700 divide-y mx-auto max-w-md">
+    <a href="{% url 'store:product_edit' %}" class="block p-3 hover:bg-gray-100 dark:hover:bg-gray-800">
         <div>Úprava produktov</div>
-        <div class="text-xs text-gray-600">Pridanie nového produktu, úprava informácií o existujúcom produkte</div>
+        <div class="text-xs text-gray-600 dark:text-gray-400">Pridanie nového produktu, úprava informácií o existujúcom produkte</div>
     </a>
-    <a href="{% url 'store:product_import' %}" class="block p-3 hover:bg-gray-100">
+    <a href="{% url 'store:product_import' %}" class="block p-3 hover:bg-gray-100 dark:hover:bg-gray-800">
         <div>Príjem tovaru</div>
-        <div class="text-xs text-gray-600">Nahodenie kúpených produktov do bufetu</div>
+        <div class="text-xs text-gray-600 dark:text-gray-400">Nahodenie kúpených produktov do bufetu</div>
     </a>
-    <a href="{% url 'store:product_transfer' %}" class="block p-3 hover:bg-gray-100">
+    <a href="{% url 'store:product_transfer' %}" class="block p-3 hover:bg-gray-100 dark:hover:bg-gray-800">
         <div>Presun tovaru medzi skladmi</div>
     </a>
-    <a href="{% url 'store:correction' %}" class="block p-3 hover:bg-gray-100">
+    <a href="{% url 'store:correction' %}" class="block p-3 hover:bg-gray-100 dark:hover:bg-gray-800">
         <div>Korekcia skladu</div>
-        <div class="text-xs text-gray-600">Úprava chýb pri príjme tovaru</div>
+        <div class="text-xs text-gray-600 dark:text-gray-400">Úprava chýb pri príjme tovaru</div>
     </a>
-    <a href="{% url 'store:product_discard' %}" class="block p-3 hover:bg-gray-100">
+    <a href="{% url 'store:product_discard' %}" class="block p-3 hover:bg-gray-100 dark:hover:bg-gray-800">
         <div>Vyradenie tovaru</div>
-        <div class="text-xs text-gray-600">Vyhodenie tovaru po záruke</div>
+        <div class="text-xs text-gray-600 dark:text-gray-400">Vyhodenie tovaru po záruke</div>
     </a>
-    <a href="{% url 'store:inventory' %}" class="block p-3 hover:bg-gray-100">Inventúra</a>
-    <a href="{% url 'store:reset' %}" class="block p-3 hover:bg-red-100 text-red-700 font-bold">RESET skladu</a>
+    <a href="{% url 'store:inventory' %}" class="block p-3 hover:bg-gray-100 dark:hover:bg-gray-800">Inventúra</a>
+    <a href="{% url 'store:reset' %}" class="block p-3 hover:bg-red-100 dark:hover:bg-red-950 text-red-700 font-bold">RESET skladu</a>
 </div>
 {% endblock %}
