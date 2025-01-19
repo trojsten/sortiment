@@ -5,14 +5,14 @@
 
 {% block content %}
     <div class="max-w-5xl mx-auto print:max-w-full p-6 print:p-0">
-        <a href="{% url 'store:product_management' %}" class="print:hidden flex items-center gap-1 text-blue-800 hover:underline mb-4">{% icon "arrow-left" class="w-5 h-5" %} Späť</a>
+        <a href="{% url 'store:product_management' %}" class="print:hidden flex items-center gap-1 text-blue-800 dark:text-blue-200 hover:underline mb-4">{% icon "arrow-left" class="w-5 h-5" %} Späť</a>
 
         <h1 class="font-bold text-2xl">Inventúra</h1>
         <p class="mb-6">Vygenerované {% now "d.m.Y H:i" %}</p>
 
         <table class="w-full">
-            <thead class="border-b-2 border-gray-500">
-                <tr class="bg-gray-200 text-left">
+            <thead class="border-b-2 border-gray-500 dark:border-gray-600">
+                <tr class="bg-gray-200 dark:bg-gray-800 text-left">
                     <th class="p-2">Produkt</th>
                     <th class="p-2">Čiarový kód</th>
                     {% for wh in warehouses %}
@@ -21,9 +21,9 @@
                     <th class="p-2 text-center">&sum;</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-500">
+            <tbody class="divide-y divide-gray-500 dark:divide-gray-600">
             {% for product in rows %}
-                <tr class="even:bg-gray-100">
+                <tr class="even:bg-gray-100 dark:even:bg-gray-900">
                     <td class="p-2">
                         <div class="flex items-center gap-2">
                             <div class="w-10 h-10">
@@ -46,7 +46,7 @@
         </table>
 
         <table class="w-full mt-10">
-            <tbody class="divide-y">
+            <tbody class="divide-y dark:divide-gray-600">
                 <tr>
                     <td class="p-3">Súčet nákupných cien</td>
                     <td class="p-3 text-right tabular-nums">{{ totals.import_price }}</td>
