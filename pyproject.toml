@@ -23,7 +23,7 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.5.0"
-pre-commit = "^3.7.1"
+pre-commit = "^4.1.0"
 bumpver = "^2023.1129"
 
 [build-system]
