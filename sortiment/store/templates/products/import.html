@@ -18,18 +18,18 @@
                 data-import-current-price-value="{{total.price|floatformat}}"
                 data-import-current-quantity-value="{{total.quantity|floatformat}}">
                 <div>
-                    <label for="{{ form.quantity.id_for_label }}" class="text-sm font-medium text-gray-700">{{ form.quantity.label }}:</label>
-                    {% render_field form.quantity class="input mt-1" data-import-target="quantity" data-action="import#reset" %}
+                    <label for="{{ form.quantity.id_for_label }}" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.quantity.label }}:</label>
+                    {% render_field form.quantity class="input mt-1 dark:bg-gray-800 dark:border-0" data-import-target="quantity" data-action="import#reset" %}
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label for="{{ form.unit_price.id_for_label }}" class="text-sm font-medium text-gray-700">{{ form.unit_price.label }}:</label>
-                        {% render_field form.unit_price class="input mt-1" step="0.01" data-import-target="unitPrice" data-action="import#updateTotalPrice" %}
+                        <label for="{{ form.unit_price.id_for_label }}" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.unit_price.label }}:</label>
+                        {% render_field form.unit_price class="input mt-1 dark:bg-gray-800 dark:border-0" step="0.01" data-import-target="unitPrice" data-action="import#updateTotalPrice" %}
                     </div>
                     <div>
-                        <label for="total_price" class="text-sm font-medium text-gray-700">Nákupná cena spolu:</label>
-                        <input type="number" class="input mt-1" id="total_price" step="0.01"
+                        <label for="total_price" class="text-sm font-medium text-gray-700 dark:text-gray-300">Nákupná cena spolu:</label>
+                        <input type="number" class="input mt-1 dark:bg-gray-800 dark:border-0" id="total_price" step="0.01"
                             data-import-target="totalPrice" data-action="import#updateUnitPrice">
                     </div>
                 </div>
