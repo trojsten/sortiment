@@ -15,8 +15,8 @@
         <form method="post" autocomplete="off">
             {% csrf_token %}
             <div class="space-y-2 max-w-md mx-auto mb-6" data-controller="import"
-                data-import-current-price-value="{{total.price|floatformat}}"
-                data-import-current-quantity-value="{{total.quantity|floatformat}}">
+                data-import-current-price-value="{{total.price|stringformat:".2f"}}"
+                data-import-current-quantity-value="{{total.quantity|stringformat:".2f"}}">
                 <div>
                     <label for="{{ form.quantity.id_for_label }}" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ form.quantity.label }}:</label>
                     {% render_field form.quantity class="input mt-1 dark:bg-gray-800 dark:border-0" data-import-target="quantity" data-action="import#reset" %}
