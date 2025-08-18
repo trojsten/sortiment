@@ -11,7 +11,7 @@ COPY tailwind.config.js ./
 RUN pnpm run prod
 CMD ["pnpm", "run", "dev"]
 
-FROM python:3.12-slim-bookworm
+FROM python:3.13-slim-bookworm
 
 WORKDIR /app
 RUN useradd --create-home appuser
