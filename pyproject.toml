@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-django = "^5.0.6"
+django = "^5.1.6"
 gunicorn = "^23.0.0"
 django-feather = "^0.3.0"
 django-debug-toolbar = "^4.4.6"
