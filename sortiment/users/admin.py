@@ -85,6 +85,18 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
 
+@admin.register(CreditLog)
+class CreditLogAdmin(admin.ModelAdmin):
+    list_filter = ["warehouse", "is_purchase", "user"]
+    list_display = [
+        "timestamp",
+        "user",
+        "price",
+        "is_purchase",
+        "warehouse",
+        "message",
+    ]
+
+
 admin.site.register(SortimentUser, UserAdmin)
 admin.site.unregister(Group)
-admin.site.register(CreditLog)

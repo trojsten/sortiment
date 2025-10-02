@@ -8,6 +8,7 @@ from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, FormView, ListView
 from store.cart import CartContext
+from store.helpers import get_warehouse
 
 from sortiment.turbo import Form422Mixin
 
@@ -58,13 +59,18 @@ class CreditMovementView(LoginRequiredMixin, CartContext, Form422Mixin, FormView
 
     @transaction.atomic
     def form_valid(self, form):
+        warehouse = get_warehouse(self.request)
         user = self.request.user
         money = form.cleaned_data.get("credit")
         user2 = form.cleaned_data.get("user")
         message = form.cleaned_data.get("message")
         message = f"{user}: {message}"
-        user.make_credit_operation(-money, is_purchase=False, message=message)
-        user2.make_credit_operation(money, is_purchase=False, message=message)
+        user.make_credit_operation(
+            -money, is_purchase=False, warehouse=warehouse, message=message
+        )
+        user2.make_credit_operation(
+            money, is_purchase=False, warehouse=warehouse, message=message
+        )
         messages.success(self.request, "Kredit bol presunutý.")
         return HttpResponseRedirect(reverse("store:product_list"))
 
@@ -80,9 +86,10 @@ class CreditChangeView(LoginRequiredMixin, CartContext, Form422Mixin, FormView):
 
     @transaction.atomic
     def form_valid(self, form):
+        warehouse = get_warehouse(self.request)
         user = self.request.user
         money = form.cleaned_data.get("credit")
-        user.make_credit_operation(money, is_purchase=False)
+        user.make_credit_operation(money, warehouse=warehouse, is_purchase=False)
         if money > 0:
             messages.success(self.request, "Kredit bol nabitý.")
         else:

@@ -1,6 +1,7 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from store.models import Warehouse
 
 from sortiment import settings
 
@@ -37,11 +38,17 @@ class SortimentUser(AbstractUser):
             return True
         return money <= self.credit
 
-    def make_credit_operation(self, money, is_purchase, message=""):
+    def make_credit_operation(
+        self, money, is_purchase, warehouse: Warehouse | None = None, message=""
+    ):
         if self.is_guest:
             return
         CreditLog(
-            user=self, price=money, is_purchase=is_purchase, message=message
+            user=self,
+            price=money,
+            is_purchase=is_purchase,
+            warehouse=warehouse,
+            message=message,
         ).save()
         self.credit += money
         self.save()
@@ -59,6 +66,14 @@ class CreditLog(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     is_purchase = models.BooleanField()
     message = models.CharField(max_length=128, default="")
+
+    warehouse = models.ForeignKey(
+        Warehouse,
+        on_delete=models.SET_NULL,
+        verbose_name="sklad",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return (

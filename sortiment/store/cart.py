@@ -96,7 +96,9 @@ class Cart:
         warehouse = get_warehouse(request)
         for item in self.items:
             new_purchase(request.user, item.product, warehouse, item.quantity)
-        request.user.make_credit_operation(-self.total_price, is_purchase=True)
+        request.user.make_credit_operation(
+            -self.total_price, is_purchase=True, warehouse=warehouse
+        )
         return True
 
 

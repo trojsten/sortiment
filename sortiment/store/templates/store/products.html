@@ -37,7 +37,10 @@
             clearTimeout(timeout);
             zaplat.pause();
             timeout = setTimeout(() => {
-                zaplat.play();
+                if (window.location.pathname.endsWith('/store/')) {
+                    zaplat.currentTime = 0;
+                    zaplat.play();
+                }
             }, 5000);
         }
         document.addEventListener('keydown', resetTimer);
