@@ -1,4 +1,5 @@
 {% extends "store/cart_base.html" %}
+{% load static %}
 {% load icon %}
 
 {% block title %}Obchod{% endblock %}
@@ -27,5 +28,21 @@
     <turbo-frame id="turbo-products" data-barcode-target="productFrame">
         {% include "store/_products_list.html" %}
     </turbo-frame>
+
+    <audio id="inactivity-sound" loop src="{% static 'zaplat.mp3' %}"></audio>
+    <script>
+        let timeout;
+        const zaplat = document.getElementById('inactivity-sound');
+        function resetTimer() {
+            clearTimeout(timeout);
+            zaplat.pause();
+            timeout = setTimeout(() => {
+                zaplat.play();
+            }, 5000);
+        }
+        document.addEventListener('keydown', resetTimer);
+        document.addEventListener('click', resetTimer);
+        // resetTimer();
+    </script>
 </div>
 {% endblock %}
