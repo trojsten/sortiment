@@ -11,6 +11,11 @@ urlpatterns = [
     path(
         "purchases/", storefront.PurchaseHistoryView.as_view(), name="purchase_history"
     ),
+    path(
+        "history/",
+        storefront.WarehouseTransactionHistoryView.as_view(),
+        name="warehouse_history",
+    ),
     path("stats/", storefront.StatsView.as_view(), name="stats"),
     path(
         "stats/<str:graph>/data", storefront.StatsDataView.as_view(), name="stats_data"

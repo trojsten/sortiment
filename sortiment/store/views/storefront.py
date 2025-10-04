@@ -202,6 +202,60 @@ class CartAddView(LoginRequiredMixin, View):
         return render(request, "store/_cart.html", {"cart": cart})
 
 
+class WarehouseTransactionHistoryView(TemplateView):
+    template_name = "store/warehouse_history.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        warehouse = get_warehouse(self.request)
+        end = timezone.now() - timedelta(days=60)
+
+        filter_type = self.request.GET.get("filter", "all")
+
+        events = []
+
+        if filter_type in ["all", "warehouse"]:
+            wh_events = (
+                WarehouseEvent.objects.filter(warehouse=warehouse)
+                .order_by("-timestamp")
+                .select_related("product", "user")
+                .filter(timestamp__gte=end)
+            )
+            for e in wh_events:
+                events.append(
+                    {"event": e, "timestamp": e.timestamp, "type": "warehouse"}
+                )
+
+        if filter_type in ["all", "credit"]:
+            credit_events = (
+                CreditLog.objects.filter(
+                    warehouse=warehouse, timestamp__gte=end, is_purchase=False
+                )
+                .order_by("-timestamp")
+                .select_related("user")
+            )
+            for e in credit_events:
+                events.append(
+                    {
+                        "event": e,
+                        "timestamp": e.timestamp,
+                        "type": "credit",
+                        "message": e.message,
+                    }
+                )
+
+        events.sort(key=lambda x: x["timestamp"], reverse=True)
+
+        ctx.update(
+            {
+                "events": events,
+                "filter": filter_type,
+                "warehouse": warehouse,
+            }
+        )
+        return ctx
+
+
 class CheckoutView(LoginRequiredMixin, View):
     @transaction.atomic
     def post(self, request):

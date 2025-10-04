@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load icon %}
+
+{% block title %}História{% endblock %}
+
+{% block content %}
+<div class="w-full min-h-screen bg-blue-600 dark:bg-blue-800 p-8">
+    <div class="bg-white dark:bg-gray-950 p-8 rounded-md shadow-xl max-w-4xl mx-auto">
+        
+        <a class='px-4 py-2 rounded bg-gray-200 dark:bg-gray-800 hover:bg-gray-600 hover:text-white text-xl mb-6 inline-block' href="{% url 'user_list' %}">Späť</a>
+        
+        <h2 class="font-bold text-2xl text-center mb-6">História - {{ warehouse.name }}</h2>
+        
+        <!-- Filter tabs -->
+        <div class="flex space-x-1 mb-6 bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
+            <a href="?filter=all" class="flex-1 text-center py-2 px-3 rounded-md text-sm font-medium transition-colors
+                {% if filter == 'all' %}bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm{% else %}text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white{% endif %}">
+                Všetko
+            </a>
+            <a href="?filter=warehouse" class="flex-1 text-center py-2 px-3 rounded-md text-sm font-medium transition-colors
+                {% if filter == 'warehouse' %}bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm{% else %}text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white{% endif %}">
+                Skladové operácie
+            </a>
+            <a href="?filter=credit" class="flex-1 text-center py-2 px-3 rounded-md text-sm font-medium transition-colors
+                {% if filter == 'credit' %}bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm{% else %}text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white{% endif %}">
+                Kreditové operácie
+            </a>
+        </div>
+
+        <div class="space-y-2">
+        {% for i in events %}
+            {% ifchanged i.timestamp.date %}
+            <div class="font-bold text-lg pt-3">
+                {{ i.timestamp|date }}
+            </div>
+            {% endifchanged %}
+
+            {% if i.type == "warehouse" %}
+            <div class="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div class="w-12 shrink-0">
+                    {% include "store/_item_image.html" with product=i.event.product %}
+                </div>
+                <div class="flex-1">
+                    <div class="font-bold">{{ i.event.product.name }}</div>
+                    <div class="text-sm">
+                        {{ i.event.get_type_display }} • {{ i.event.user.username|default:"Neznámy" }}
+                    </div>
+                    <div class="text-sm">
+                        {% if i.event.quantity > 0 %}+{% endif %}{{ i.event.quantity }} ks
+                        {% if i.event.price %}• {{ i.event.price }} €/ks{% endif %}
+                    </div>
+                </div>
+                <div class="ml-auto text-right">
+                    {% if i.event.quantity < 0 %}
+                    <div class="font-bold text-red-700">{{ i.event.abs_quantity }} × {{ i.event.retail_price }} €</div>
+                    {% else %}
+                    <div class="font-bold text-green-700">+{{ i.event.quantity }} ks</div>
+                    {% endif %}
+                    <div class="text-sm">{{ i.event.timestamp|time }}</div>
+                </div>
+            </div>
+            {% else %}
+            <div class="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div class="w-12 h-12 shrink-0 flex items-center justify-center rounded-md bg-gray-300 dark:bg-gray-700">
+                    {% icon "dollar-sign" class="w-1/2 h-1/2 text-white" %}
+                </div>
+                <div class="flex-1">
+                    <div class="font-bold">Kreditová operácia</div>
+                    <div class="text-sm">{{ i.event.user.username|default:"Neznámy" }}</div>
+                    {% if i.message %}
+                    <div class="text-sm">{{ i.message }}</div>
+                    {% endif %}
+                </div>
+                <div class="ml-auto text-right">
+                    {% if i.event.price > 0 %}
+                    <div class="font-bold text-green-700">+{{ i.event.price }} €</div>
+                    {% else %}
+                    <div class="font-bold text-red-700">{{ i.event.price }} €</div>
+                    {% endif %}
+                    <div class="text-sm">{{ i.event.timestamp|time }}</div>
+                </div>
+            </div>
+            {% endif %}
+        {% empty %}
+            <p class="text-md text-center mt-6 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                {% if filter == 'warehouse' %}Zatiaľ neboli žiadne skladové operácie.{% elif filter == 'credit' %}Zatiaľ neboli žiadne kreditové operácie.{% else %}Zatiaľ neboli žiadne operácie.{% endif %}
+            </p>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
