@@ -1,13 +1,13 @@
 import json
 from datetime import timedelta
-from django.db.models import F, Q
-from django.db.models.functions import TruncWeek, TruncMonth
-from django.db.models.aggregates import Sum, Count
 
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
+from django.db.models import F, Q
+from django.db.models.aggregates import Sum
+from django.db.models.functions import TruncMonth, TruncWeek
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -105,6 +105,7 @@ class StatsView(TemplateView):
         ctx = super().get_context_data(**kwargs)
         warehouse = get_warehouse(self.request)
 
+        # Basic financial stats
         ctx["total_price_when_buy"] = Warehouse.get_global_products_price_when_buy_sum()
         ctx["total_price_for_sale"] = Warehouse.get_global_products_price_for_sale_sum()
         ctx["local_price_when_buy"] = warehouse.get_products_price_when_buy_sum()
@@ -112,77 +113,140 @@ class StatsView(TemplateView):
         ctx["credit_sum"] = SortimentUser.get_credit_sum()
         ctx["total_profit"] = ctx["total_price_for_sale"] - ctx["total_price_when_buy"]
         ctx["local_profit"] = ctx["local_price_for_sale"] - ctx["local_price_when_buy"]
+
+        # User statistics
         ctx["top_creditors"] = list(
             SortimentUser.objects.filter(is_active=True).order_by("-credit")[:15]
         )
-
         return ctx
 
 
 class StatsDataView(View):
+    def get_products_data(self, warehouse, time_period):
+        """Get product sales data for monthly or all-time"""
+        data = {"title": "Počet kusov", "type": "bar", "data": []}
+
+        queryset = WarehouseEvent.objects.filter(
+            warehouse=warehouse, quantity__lte=0, type=WarehouseEvent.EventType.PURCHASE
+        )
+
+        if time_period == "monthly":
+            queryset = queryset.filter(timestamp__gte=now().date() - timedelta(days=30))
+
+        res = list(
+            queryset.values("product__name")
+            .annotate(total_count=Sum("quantity"))
+            .order_by("total_count")[:15]
+        )
+
+        for row in res:
+            data["data"].append(
+                {
+                    "label": row["product__name"],
+                    "value": -row["total_count"],
+                }
+            )
+
+        return data
+
+    def get_users_spending_data(self, warehouse):
+        """Get top users by spending for last month"""
+        data = {"title": "€", "type": "pie", "data": []}
+        date = now().date() - timedelta(days=30)
+
+        res = list(
+            WarehouseEvent.objects.filter(
+                warehouse=warehouse,
+                timestamp__gte=date,
+                quantity__lte=0,
+                type=WarehouseEvent.EventType.PURCHASE,
+            )
+            .values("user__username")
+            .annotate(total_spent=Sum(F("quantity") * F("price")))
+            .order_by("total_spent")[:10]
+        )
+
+        for row in res:
+            data["data"].append(
+                {
+                    "label": row["user__username"],
+                    "value": -float(row["total_spent"]),
+                }
+            )
+
+        return data
+
+    def get_revenue_trends_data(self, warehouse):
+        """Get revenue trends over last 6 months"""
+        data = {"title": "Príjmy (€)", "type": "line", "data": []}
+        start_date = now().date() - timedelta(days=180)
+
+        res = list(
+            WarehouseEvent.objects.filter(
+                warehouse=warehouse,
+                timestamp__gte=start_date,
+                quantity__lte=0,
+                type=WarehouseEvent.EventType.PURCHASE,
+            )
+            .annotate(month=TruncMonth("timestamp"))
+            .values("month")
+            .annotate(revenue=Sum(F("quantity") * F("price")))
+            .order_by("month")
+        )
+
+        for row in res:
+            data["data"].append(
+                {
+                    "label": row["month"].strftime("%m/%Y"),
+                    "value": -float(row["revenue"]),
+                }
+            )
+
+        return data
+
+    def get_category_sales_data(self, warehouse):
+        """Get sales by product category for last month"""
+        data = {"title": "Predaj podľa kategórií", "type": "pie", "data": []}
+        date = now().date() - timedelta(days=30)
+
+        res = list(
+            WarehouseEvent.objects.filter(
+                warehouse=warehouse,
+                type=WarehouseEvent.EventType.PURCHASE,
+                timestamp__gte=date,
+                quantity__lte=0,
+                product__tags__isnull=False,
+            )
+            .values("product__tags__name")
+            .annotate(total_count=Sum("quantity"))
+            .order_by("total_count")[:10]
+        )
+
+        for row in res:
+            data["data"].append(
+                {
+                    "label": row["product__tags__name"] or "Bez kategórie",
+                    "value": -row["total_count"],
+                }
+            )
+
+        return data
+
     def get(self, request, graph):
         warehouse = get_warehouse(self.request)
-        data = {}
+
         if graph == "products_alltime":
-            data["title"] = "Počet"
-            data["type"] = "bar"
-            data["data"] = []
-            res = list(
-                WarehouseEvent.objects.filter(warehouse=warehouse, quantity__lte=0)
-                .values("product__name")
-                .annotate(total_count=Sum("quantity"))
-                .order_by("total_count")[:15]
-            )
-            for row in res:
-                data["data"].append(
-                    {
-                        "label": row["product__name"],
-                        "value": -row["total_count"],
-                    }
-                )
+            data = self.get_products_data(warehouse, "alltime")
         elif graph == "products_lastmonth":
-            date = now().date() - timedelta(days=30)
-            data["title"] = "Počet"
-            data["type"] = "bar"
-            data["data"] = []
-            res = list(
-                WarehouseEvent.objects.filter(
-                    warehouse=warehouse, timestamp__gte=date, quantity__lte=0
-                )
-                .values("product__name")
-                .annotate(total_count=Sum("quantity"))
-                .order_by("total_count")[:15]
-            )
-
-            for row in res:
-                data["data"].append(
-                    {
-                        "label": row["product__name"],
-                        "value": -row["total_count"],
-                    }
-                )
-
+            data = self.get_products_data(warehouse, "monthly")
         elif graph == "users_spending":
-            date = now().date() - timedelta(days=30)
-            data["title"] = "€"
-            data["type"] = "pie"
-            data["data"] = []
-            res = list(
-                WarehouseEvent.objects.filter(
-                    warehouse=warehouse, timestamp__gte=date, quantity__lte=0
-                )
-                .values("user__username")
-                .annotate(total_spent=Sum(F("quantity") * F("price")))
-                .order_by("total_spent")
-            )
-
-            for row in res:
-                data["data"].append(
-                    {
-                        "label": row["user__username"],
-                        "value": -float(row["total_spent"]),
-                    }
-                )
+            data = self.get_users_spending_data(warehouse)
+        elif graph == "revenue_trends":
+            data = self.get_revenue_trends_data(warehouse)
+        elif graph == "category_sales":
+            data = self.get_category_sales_data(warehouse)
+        else:
+            data = {"title": "", "type": "bar", "data": []}
 
         return HttpResponse(json.dumps(data), content_type="application/json")
 

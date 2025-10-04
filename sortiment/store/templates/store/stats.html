@@ -3,107 +3,219 @@
 {% block title %}Štatistiky{% endblock %}
 
 {% block content %}
-<div class="w-full min-h-screen bg-blue-600 dark:bg-blue-800 p-8">
+<div class="w-full min-h-screen bg-blue-600 dark:bg-blue-800 dark:text-gray-50 p-8">
     <div class="bg-white dark:bg-gray-950 p-8 rounded-md shadow-xl">
+        <div class="mb-6 flex flex-wrap gap-2">
+            <a class='px-4 py-2 rounded bg-gray-200 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-600 dark:hover:bg-gray-400 hover:text-white text-xl' href="{% url 'user_list' %}">Späť</a>
+        </div>
 
-        <a class='px-4 py-2 rounded bg-gray-200 dark:bg-gray-800 hover:bg-gray-600 hover:text-white text-xl' href="{% url 'user_list' %}">Späť</a>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="text-center">
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Lokálny zisk</p>
+                    <p class="text-2xl font-bold {% if local_profit >= 0 %}text-green-600 dark:text-green-400{% else %}text-red-600 dark:text-red-400{% endif %}">
+                        {{ local_profit }}€
+                    </p>
+                </div>
+            </div>
 
-        <h1 class="font-bold text-3xl text-center m-6">Štatistiky</h1>
+            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="text-center">
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Celkový zisk</p>
+                    <p class="text-2xl font-bold {% if total_profit >= 0 %}text-green-600 dark:text-green-400{% else %}text-red-600 dark:text-red-400{% endif %}">
+                        {{ total_profit }}€
+                    </p>
+                </div>
+            </div>
 
-        <h1 class="font-bold text-xl text-center m-6">Hodnota tovaru</h1>
+            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="text-center">
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Suma kreditov</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ credit_sum }}€</p>
+                </div>
+            </div>
 
-        <table class="mx-auto rounded">
-            <thead>
-                <tr class="bg-blue-100 dark:bg-blue-900">
-                    <th></th>
-                    <th class="text-center p-4">Lokálne</th>
-                    <th class="text-center p-4">Celkovo</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th class="text-center p-4 bg-blue-100 dark:bg-blue-900">Nákupná:</th>
-                    <td class="text-center p-2">{{ local_price_when_buy }}€</td>
-                    <td class="text-center p-2">{{ total_price_when_buy }}€</td>
-                </tr>
-                <tr>
-                    <th class="text-center p-4 bg-blue-100 dark:bg-blue-900">Predajná:</th>
-                    <td class="text-center p-2">{{ local_price_for_sale }}€</td>
-                    <td class="text-center p-2">{{ total_price_for_sale }}€</td>
-                </tr>
-                <tr>
-                    <th class="text-center p-4 bg-blue-100 dark:bg-blue-900">Zisk:</th>
-                    <td class="text-center p-2
-                    {% if local_profit >= 0 %}
-                        bg-green-200
-                        dark:bg-green-800
-                    {% else %}
-                        bg-red-200
-                        dark:bg-red-800
-                    {% endif %}
-                    ">{{ local_profit }}€</td>
-                    <td class="text-center p-2
-                    {% if total_profit >= 0 %}
-                        bg-green-200
-                        dark:bg-green-800
-                    {% else %}
-                        bg-red-200
-                        dark:bg-red-800
-                    {% endif %}
-                    ">{{ total_profit }}€</td>
-                </tr>
-            </tbody>
-        </table>
+            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="text-center">
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Hodnota tovaru</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_price_for_sale }}€</p>
+                </div>
+            </div>
+        </div>
 
-        <h2 class="font-bold text-xl text-center m-3">Suma kreditov: {{ credit_sum }}€</h2>
-        <hr class="dark:bg-gray-700" />
-        <div class="flex flex-wrap">
-            <div class="w-1/2">
-                <h2 class="font-bold text-3xl text-center m-3">Najväčší kreditori</h2>
-                <div class="text-xl text-center mx-auto m-3 space-y-2">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h3 class="font-bold text-xl text-center mb-4">Najpredávanejšie produkty (mesiac)</h3>
+                <canvas class="w-full" id="products_lastmonth" style="max-height: 250px;"></canvas>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h3 class="font-bold text-xl text-center mb-4">Najpredávanejšie produkty (celkovo)</h3>
+                <canvas class="w-full" id="products_alltime" style="max-height: 250px;"></canvas>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h3 class="font-bold text-xl text-center mb-4">Najväčší míňači (mesiac)</h3>
+                <canvas class="w-full" id="users_spending" style="max-height: 250px;"></canvas>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h3 class="font-bold text-xl text-center mb-4">Najväčší kreditori</h3>
+                <div class="space-y-2 max-h-64 overflow-y-auto">
                     {% for creditor in top_creditors %}
-                        <div class="">
-                                {{ forloop.counter }}. {{ creditor.username }}
+                        <div class="flex items-center justify-between p-2 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
+                            <div class="flex items-center">
+                                <span class="text-lg font-semibold text-gray-500 dark:text-gray-400 w-6">{{ forloop.counter }}.</span>
+                                <span class="font-medium text-gray-900 dark:text-white">{{ creditor.username }}</span>
+                            </div>
+                            <span class="font-bold text-blue-600 dark:text-blue-400">{{ creditor.credit }}€</span>
                         </div>
+                    {% empty %}
+                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">Žiadni kreditori</p>
                     {% endfor %}
                 </div>
             </div>
-            <div class="w-1/2">
-                <h2 class="font-bold text-3xl text-center m-3">Najlepšie produkty</h2>
-                <h4>Posledný mesiac</h4>
-                <canvas class="text-xl text-center graph w-full" id="products_lastmonth">
-                </canvas>
-                <h4>Celý čas</h4>
-                <canvas class="text-xl text-center graph w-full" id="products_alltime">
-                </canvas>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h3 class="font-bold text-xl text-center mb-4">Trendy príjmov (posledných 6 mesiacov)</h3>
+                <canvas class="w-full" id="revenue_trends" style="max-height: 250px;"></canvas>
             </div>
-            <div class="w-1/2">
-                <h2 class="font-bold text-3xl text-center m-3">Najväčší míňači</h2>
-                <canvas class="text-xl text-center graph w-full" id="users_spending">
-                </canvas>
+
+            <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h3 class="font-bold text-xl text-center mb-4">Predaj podľa kategórií (mesiac)</h3>
+                <canvas class="w-full" id="category_sales" style="max-height: 250px;"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+            <h3 class="font-bold text-xl text-center mb-6">Detailné štatistiky hodnoty tovaru</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-300 dark:border-gray-600">
+                            <th class="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Kategória</th>
+                            <th class="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Lokálne</th>
+                            <th class="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Celkovo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <td class="py-3 px-4 font-medium text-gray-900 dark:text-white">Nákupná cena</td>
+                            <td class="text-center py-3 px-4 text-gray-700 dark:text-gray-300">{{ local_price_when_buy }}€</td>
+                            <td class="text-center py-3 px-4 text-gray-700 dark:text-gray-300">{{ total_price_when_buy }}€</td>
+                        </tr>
+                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <td class="py-3 px-4 font-medium text-gray-900 dark:text-white">Predajná cena</td>
+                            <td class="text-center py-3 px-4 text-gray-700 dark:text-gray-300">{{ local_price_for_sale }}€</td>
+                            <td class="text-center py-3 px-4 text-gray-700 dark:text-gray-300">{{ total_price_for_sale }}€</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 font-medium text-gray-900 dark:text-white">Zisk</td>
+                            <td class="text-center py-3 px-4">
+                                <span class="inline-flex px-3 py-1 rounded-full text-sm font-medium
+                                    {% if local_profit >= 0 %}
+                                        bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200
+                                    {% else %}
+                                        bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200
+                                    {% endif %}">
+                                    {{ local_profit }}€
+                                </span>
+                            </td>
+                            <td class="text-center py-3 px-4">
+                                <span class="inline-flex px-3 py-1 rounded-full text-sm font-medium
+                                    {% if total_profit >= 0 %}
+                                        bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200
+                                    {% else %}
+                                        bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200
+                                    {% endif %}">
+                                    {{ total_profit }}€
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-
-    <script>
-        Chart.defaults.color = '#fff';
-        document.addEventListener("turbo:load", async ()=> {
-            for (const graph of document.getElementsByClassName("graph")) {
-                const res = await (await fetch("/store/stats/" + graph.id + "/data")).json()
-                new Chart(graph, {
-                    type: res.type ?? 'bar',
-                    data: {
-                        labels: res['data'].map(row => row.label),
-                        datasets: [
-                            {
-                                label: res['title'],
-                                data: res['data'].map(row => row.value)
-                            }
-                        ]
-                    }
-                })
-            }
-        })
-    </script>
 </div>
+
+<script>
+document.addEventListener("turbo:load", async () => {
+    // Set default chart colors for the existing theme
+    Chart.defaults.color = '#fff';
+    
+    const chartIds = ['products_lastmonth', 'products_alltime', 'users_spending', 'revenue_trends', 'category_sales'];
+    
+    for (const chartId of chartIds) {
+        const canvas = document.getElementById(chartId);
+        if (!canvas) continue;
+
+        try {
+            const res = await (await fetch("/store/stats/" + chartId + "/data")).json();
+            
+            const backgroundColors = [
+                'rgba(59, 130, 246, 0.6)',
+                'rgba(16, 185, 129, 0.6)', 
+                'rgba(251, 146, 60, 0.6)',
+                'rgba(147, 51, 234, 0.6)',
+                'rgba(236, 72, 153, 0.6)',
+                'rgba(250, 204, 21, 0.6)',
+                'rgba(14, 165, 233, 0.6)',
+                'rgba(168, 85, 247, 0.6)',
+            ];
+            
+            const borderColors = [
+                'rgba(59, 130, 246, 1)',
+                'rgba(16, 185, 129, 1)',
+                'rgba(251, 146, 60, 1)',
+                'rgba(147, 51, 234, 1)',
+                'rgba(236, 72, 153, 1)',
+                'rgba(250, 204, 21, 1)',
+                'rgba(14, 165, 233, 1)',
+                'rgba(168, 85, 247, 1)',
+            ];
+
+            new Chart(canvas, {
+                type: res.type ?? 'bar',
+                data: {
+                    labels: res['data'].map(row => row.label),
+                    datasets: [{
+                        label: res['title'],
+                        data: res['data'].map(row => row.value),
+                        backgroundColor: res.type === 'pie'  ? backgroundColors : backgroundColors[0],
+                        borderColor: res.type === 'pie' ? borderColors : borderColors[0],
+                        borderWidth: 2,
+                        fill: res.type === 'line',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: res.type === 'pie' ,
+                            position: 'bottom'
+                        }
+                    },
+                    scales: res.type !== 'pie' ? {
+                        y: {
+                            beginAtZero: true
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    } : {}
+                }
+            });
+        } catch (error) {
+            console.error('Error loading chart data for', chartId, ':', error);
+        }
+    }
+});
+</script>
 {% endblock %}
