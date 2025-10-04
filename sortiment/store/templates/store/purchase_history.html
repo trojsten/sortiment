@@ -5,9 +5,33 @@
 
 {% block cartright %}
 
-<div class="max-w-md mx-auto">
-    <h2 class="font-bold text-2xl text-center mb-4 mt-6">História nákupov</h2>
+<h2 class="font-bold text-2xl text-center mb-4 mt-6">História nákupov</h2>
+<div class="mb-8 px-8">
+  <h3 class="font-bold text-xl text-center mb-4">Tvoje štatistiky</h3>
 
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <h4 class="font-semibold text-center mb-2 text-sm">Nákupy za posledné týždne</h4>
+      <canvas class="w-full" id="spend_weeks" style="max-height: 200px;"></canvas>
+    </div>
+    <div>
+      <h4 class="font-semibold text-center mb-2 text-sm">Nákupy za posledné mesiace</h4>
+      <canvas class="w-full" id="spend_months" style="max-height: 200px;"></canvas>
+    </div>
+    <div>
+      <h4 class="font-semibold text-center mb-2 text-sm">Najčastejšie produkty (mesiac)</h4>
+      <canvas class="w-full" id="products_monthly" style="max-height: 200px;"></canvas>
+    </div>
+    <div>
+      <h4 class="font-semibold text-center mb-2 text-sm">Najčastejšie produkty (celkovo)</h4>
+      <canvas class="w-full" id="products_alltime" style="max-height: 200px;"></canvas>
+    </div>
+  </div>
+</div>
+
+<hr class="my-6 dark:border-gray-700">
+
+<div class="max-w-md mx-auto">
     <div class="space-y-2">
     {% for i in events %}
         {% ifchanged i.timestamp.date %}
@@ -58,5 +82,55 @@
     {% endfor %}
     </div>
 </div>
+
+<script>
+Chart.defaults.color = '#fff';
+document.addEventListener("turbo:load", async ()=> {
+    const chartIds = ['spend_weeks', 'spend_months', 'products_monthly', 'products_alltime'];
+
+    for (const chartId of chartIds) {
+        const canvas = document.getElementById(chartId);
+        if (!canvas) continue;
+
+        try {
+            const res = await (await fetch("/store/purchases/stats/" + chartId + "/data/")).json();
+
+            new Chart(canvas, {
+                type: res.type ?? 'bar',
+                data: {
+                    labels: res['data'].map(row => row.label),
+                    datasets: [
+                        {
+                            label: res['title'],
+                            data: res['data'].map(row => row.value),
+                            backgroundColor: res.type === 'line' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.6)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 2,
+                            fill: res.type === 'line',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error loading chart data for', chartId, ':', error);
+        }
+    }
+});
+</script>
 
 {% endblock %}

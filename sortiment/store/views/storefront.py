@@ -1,12 +1,13 @@
 import json
 from datetime import timedelta
+from django.db.models import F, Q
+from django.db.models.functions import TruncWeek, TruncMonth
+from django.db.models.aggregates import Sum, Count
 
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import F, Q
-from django.db.models.aggregates import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -266,3 +267,86 @@ class CheckoutView(LoginRequiredMixin, View):
             return redirect("user_list")
         else:
             return redirect("store:product_list")
+
+
+class PurchaseStatsDataView(LoginRequiredMixin, View):
+    def get_spending_data(self, user, period_type):
+        """Get spending data grouped by week or month"""
+        data = {"title": "€", "type": "line", "data": []}
+
+        if period_type == "weeks":
+            start_date = now().date() - timedelta(weeks=12)
+            trunc_func = TruncWeek("timestamp")
+            date_format = "%d.%m.%Y"
+        else:  # months
+            start_date = now().date() - timedelta(days=365)
+            trunc_func = TruncMonth("timestamp")
+            date_format = "%m/%Y"
+
+        res = list(
+            WarehouseEvent.objects.filter(
+                user=user,
+                type=WarehouseEvent.EventType.PURCHASE,
+                timestamp__gte=start_date,
+                quantity__lte=0,
+            )
+            .annotate(period=trunc_func)
+            .values("period")
+            .annotate(spent=Sum(F("quantity") * F("price")))
+            .order_by("period")
+        )
+
+        for row in res:
+            data["data"].append(
+                {
+                    "label": row["period"].strftime(date_format),
+                    "value": -float(row["spent"]),
+                }
+            )
+
+        return data
+
+    def get_products_data(self, user, time_period):
+        """Get product purchase data for monthly or all-time"""
+        data = {"title": "Počet", "type": "bar", "data": []}
+
+        queryset = WarehouseEvent.objects.filter(
+            user=user,
+            type=WarehouseEvent.EventType.PURCHASE,
+            quantity__lte=0,
+        )
+
+        if time_period == "monthly":
+            queryset = queryset.filter(timestamp__gte=now().date() - timedelta(days=30))
+
+        res = list(
+            queryset.values("product__name")
+            .annotate(total_count=Sum("quantity"))
+            .order_by("total_count")[:15]
+        )
+
+        for row in res:
+            data["data"].append(
+                {
+                    "label": row["product__name"],
+                    "value": -row["total_count"],
+                }
+            )
+
+        return data
+
+    def get(self, request, graph):
+        user = request.user
+
+        if graph == "spend_weeks":
+            data = self.get_spending_data(user, "weeks")
+        elif graph == "spend_months":
+            data = self.get_spending_data(user, "months")
+        elif graph == "products_monthly":
+            data = self.get_products_data(user, "monthly")
+        elif graph == "products_alltime":
+            data = self.get_products_data(user, "alltime")
+        else:
+            data = {"title": "", "type": "bar", "data": []}
+
+        return HttpResponse(json.dumps(data), content_type="application/json")

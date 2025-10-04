@@ -4,7 +4,6 @@
 
 {% block content %}
 <div class="w-full min-h-screen bg-blue-600 dark:bg-blue-800 p-8">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <div class="bg-white dark:bg-gray-950 p-8 rounded-md shadow-xl">
 
         <a class='px-4 py-2 rounded bg-gray-200 dark:bg-gray-800 hover:bg-gray-600 hover:text-white text-xl' href="{% url 'user_list' %}">Späť</a>
@@ -87,7 +86,8 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", async ()=> {
+        Chart.defaults.color = '#fff';
+        document.addEventListener("turbo:load", async ()=> {
             for (const graph of document.getElementsByClassName("graph")) {
                 const res = await (await fetch("/store/stats/" + graph.id + "/data")).json()
                 new Chart(graph, {

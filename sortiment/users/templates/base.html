@@ -9,6 +9,7 @@
 
     <link rel="stylesheet" href="{% static 'app.css' %}?v={{ SORTIMENT_VERSION }}" data-turbo-track="reload">
     <script src="{% static "app.min.js" %}?v={{ SORTIMENT_VERSION }}" data-turbo-track="reload" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <meta name="csrf-token" value="{{ csrf_token }}">
 
     {% block extra_head %}{% endblock extra_head %}
