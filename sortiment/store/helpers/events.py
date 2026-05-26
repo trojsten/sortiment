@@ -1,8 +1,7 @@
 from decimal import Decimal
 
-from users.models import SortimentUser
-
-from store.models import Product, Warehouse, WarehouseEvent
+from sortiment.store.models import Product, Warehouse, WarehouseEvent
+from sortiment.users.models import SortimentUser
 
 
 def new_import(

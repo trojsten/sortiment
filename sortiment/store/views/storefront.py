@@ -14,12 +14,12 @@ from django.utils import timezone
 from django.utils.timezone import now
 from django.views import View
 from django.views.generic import TemplateView
-from users.models import CreditLog, SortimentUser
 
-from store.cart import Cart, CartContext
-from store.helpers import get_dummy_barcode_data, get_warehouse
-from store.logic import get_product_list
-from store.models import Product, Tag, Warehouse, WarehouseEvent
+from sortiment.store.cart import Cart, CartContext
+from sortiment.store.helpers import get_dummy_barcode_data, get_warehouse
+from sortiment.store.logic import get_product_list
+from sortiment.store.models import Product, Tag, Warehouse, WarehouseEvent
+from sortiment.users.models import CreditLog, SortimentUser
 
 
 class ProductListView(LoginRequiredMixin, CartContext, TemplateView):

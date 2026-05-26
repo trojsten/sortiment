@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
-from store import models
-from store.models import Reset
+from sortiment.store import models
+from sortiment.store.models import Reset
 
 
 class ProductAdmin(ModelAdmin):

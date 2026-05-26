@@ -7,9 +7,9 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, FormView, ListView
-from store.cart import CartContext
-from store.helpers import get_warehouse
 
+from sortiment.store.cart import CartContext
+from sortiment.store.helpers import get_warehouse
 from sortiment.turbo import Form422Mixin
 
 from .admin import UserCreationForm

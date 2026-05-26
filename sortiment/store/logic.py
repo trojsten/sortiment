@@ -8,7 +8,7 @@ from django.db.models import F, FloatField, Max, Q, Sum
 from django.db.models.functions import ExtractDay
 from django.utils import timezone
 
-from store.models import Product, Warehouse, WarehouseEvent, WarehouseState
+from sortiment.store.models import Product, Warehouse, WarehouseEvent, WarehouseState
 
 
 @dataclass

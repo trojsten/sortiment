@@ -23,8 +23,8 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("users/", include("users.urls")),
-    path("store/", include("store.urls")),
+    path("users/", include("sortiment.users.urls")),
+    path("store/", include("sortiment.store.urls")),
     path("", lambda request: redirect("user_list")),
 ] + debug_toolbar_urls()
 

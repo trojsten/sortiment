@@ -8,18 +8,23 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, FormView, TemplateView
 
-from sortiment.turbo import Form422Mixin
-from store.forms import (
+from sortiment.store.forms import (
     CorrectionForm,
     DiscardForm,
     InsertForm,
     ProductForm,
     TransferForm,
 )
-from store.helpers import get_warehouse
-from store.helpers.events import new_correction, new_discard, new_import, new_transfer
-from store.models import Product, Reset, Warehouse, WarehouseState
-from store.views.mixins import StaffRequiredMixin
+from sortiment.store.helpers import get_warehouse
+from sortiment.store.helpers.events import (
+    new_correction,
+    new_discard,
+    new_import,
+    new_transfer,
+)
+from sortiment.store.models import Product, Reset, Warehouse, WarehouseState
+from sortiment.store.views.mixins import StaffRequiredMixin
+from sortiment.turbo import Form422Mixin
 
 
 class ProductMixin:

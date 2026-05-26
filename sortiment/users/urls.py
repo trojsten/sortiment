@@ -16,7 +16,7 @@ Including another URLconf
 
 from django.urls import path
 
-from users import views
+from sortiment.users import views
 
 urlpatterns = [
     path("", views.UserListView.as_view(), name="user_list"),

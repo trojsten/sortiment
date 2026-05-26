@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class UsersConfig(AppConfig):
+class StyleConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "sortiment.users"
+    name = "sortiment.style"

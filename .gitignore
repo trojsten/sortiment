@@ -1,5 +1,6 @@
-__pycache__
-.idea
-node_modules
+__pycache__/
+/.idea/
+/.env
+/node_modules
 sortiment/*.svg
-sortiment/uploads/*
+/uploads/

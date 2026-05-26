@@ -36,8 +36,6 @@ if hosts:
 # Application definition
 
 INSTALLED_APPS = [
-    "users.apps.UsersConfig",
-    "store.apps.StoreConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -45,6 +43,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    #
+    "sortiment.style",
+    "sortiment.users",
+    "sortiment.store",
+    #
+    "django_probes",
     "debug_toolbar",
     "django_htmx",
     "django_feather",
@@ -140,13 +144,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+STATIC_ROOT = BASE_DIR / "static"
 
-STATIC_ROOT = BASE_DIR.parent / "static"
-MEDIA_ROOT = BASE_DIR.parent / "uploads"
-MEDIA_URL = "/uploads/"
+MEDIA_URL = "uploads/"
+MEDIA_ROOT = BASE_DIR / "uploads"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

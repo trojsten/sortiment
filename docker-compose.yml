@@ -1,4 +1,3 @@
-version: '3.4'
 services:
   db:
     image: postgres:14-alpine
@@ -16,12 +15,12 @@ services:
       - "8000:8000"
     volumes:
       - ./sortiment/:/app/sortiment/
-      - ./sortiment/uploads/:/app/uploads/
+      - ./uploads/:/app/uploads/
     environment:
       - DEBUG=True
     depends_on:
       - db
-    command: "./start_dev.sh"
+    command: "/app/entrypoint.sh dev"
 
   tailwind:
     build:
