@@ -21,5 +21,3 @@ COPY --from=cssbuild /app/sortiment/style/static/* /app/sortiment/style/static/
 
 RUN python manage.py collectstatic --no-input
 ENV BASE_START=/app/entrypoint.sh
-
-CMD ["/bin/multirun", "caddy run --adapter caddyfile --config /app/Caddyfile", "/app/start.sh"]
