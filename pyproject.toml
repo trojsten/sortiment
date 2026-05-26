@@ -44,6 +44,6 @@ push = true
 "pyproject.toml" = [
     'current_version = "{version}"',
 ]
-"sortiment/sortiment/__init__.py" = [
+"sortiment/__init__.py" = [
     'VERSION = "{version}"',
 ]
