@@ -206,7 +206,9 @@ class InventoryView(StaffRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         warehouses = Warehouse.objects.all()
-        products = Product.objects.filter(is_dummy=False, is_unlimited=False).all()
+        products = Product.objects.filter(is_dummy=False, is_unlimited=False).order_by(
+            "name"
+        )
         states = WarehouseState.objects.filter(product__in=products).all()
         state_map = defaultdict(lambda: 0)
         for s in states:
