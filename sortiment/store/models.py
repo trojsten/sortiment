@@ -52,7 +52,6 @@ class Tag(models.Model):
 class Product(models.Model):
     id: int
     name = models.CharField(max_length=128, verbose_name="názov")
-    barcode = models.CharField(max_length=32, unique=True, verbose_name="čiarový kód")
     image = models.FileField(null=True, verbose_name="obrázok")
     price = models.DecimalField(
         max_digits=6, decimal_places=2, verbose_name="predajná cena"
@@ -64,16 +63,37 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.name} ({self.price} €)"
 
+    @property
+    def ean_codes(self):
+        return [ean.code for ean in self.eans.all()]
+
     @staticmethod
     def generate_one_time_product(price, barcode):
-        product, created = Product.objects.get_or_create(
+        ean = ProductEAN.objects.filter(code=barcode).first()
+        if ean:
+            return ean.product
+
+        product = Product.objects.create(
             price=price,
             name="Jednorazová položka",
             is_unlimited=True,
-            barcode=barcode,
             is_dummy=True,
         )
+        ProductEAN.objects.create(product=product, code=barcode)
         return product
+
+
+class ProductEAN(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="eans", verbose_name="produkt"
+    )
+    code = models.CharField(max_length=32, unique=True, verbose_name="EAN")
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return self.code
 
 
 class WarehouseState(models.Model):

@@ -1,17 +1,74 @@
+import re
+
 from django import forms
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.forms import DecimalField, Form, IntegerField, ModelForm, NumberInput
 
-from .models import Product, Warehouse, WarehouseState
+from .models import Product, ProductEAN, Warehouse, WarehouseState
+
+EAN_SPLIT_RE = re.compile(r"[\s,]+")
 
 
 class ProductForm(ModelForm):
+    eans = forms.CharField(
+        label="EAN kódy",
+        help_text="Zadaj jeden alebo viac EAN kódov, každý na samostatný riadok.",
+        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Jeden EAN na riadok"}),
+    )
+
     class Meta:
         model = Product
-        fields = ["name", "barcode", "image", "is_unlimited", "tags", "price"]
+        fields = ["name", "image", "is_unlimited", "tags", "price"]
         widgets = {
             "price": NumberInput(attrs={"min": 0, "step": 0.01}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields["eans"].initial = "\n".join(self.instance.ean_codes)
+
+    def clean_eans(self):
+        raw = self.cleaned_data["eans"]
+        codes = [code for code in EAN_SPLIT_RE.split(raw) if code]
+        if not codes:
+            raise ValidationError("Zadaj aspoň jeden EAN kód.")
+
+        seen = set()
+        for code in codes:
+            if len(code) > 32:
+                raise ValidationError(
+                    f"EAN kód {code} je príliš dlhý (max. 32 znakov)."
+                )
+            if code in seen:
+                raise ValidationError(f"EAN kód {code} je zadaný viackrát.")
+            seen.add(code)
+
+        existing = ProductEAN.objects.filter(code__in=codes)
+        if self.instance.pk:
+            existing = existing.exclude(product=self.instance)
+        if existing.exists():
+            code = existing.first().code
+            raise ValidationError(f"EAN kód {code} už patrí inému produktu.")
+
+        return codes
+
+    @transaction.atomic
+    def save(self, commit=True):
+        product = super().save(commit=commit)
+        if commit:
+            codes = self.cleaned_data["eans"]
+            product.eans.exclude(code__in=codes).delete()
+            existing = set(product.eans.values_list("code", flat=True))
+            ProductEAN.objects.bulk_create(
+                [
+                    ProductEAN(product=product, code=code)
+                    for code in codes
+                    if code not in existing
+                ]
+            )
+        return product
 
 
 class DiscardForm(Form):

@@ -5,10 +5,15 @@ from sortiment.store import models
 from sortiment.store.models import Reset
 
 
+class ProductEANInline(admin.TabularInline):
+    model = models.ProductEAN
+    extra = 1
+
+
 class ProductAdmin(ModelAdmin):
     list_display = (
         "name",
-        "barcode",
+        "ean_list",
         "price",
         "is_unlimited",
         "is_dummy",
@@ -17,6 +22,11 @@ class ProductAdmin(ModelAdmin):
         "is_unlimited",
         "is_dummy",
     )
+    inlines = [ProductEANInline]
+
+    @admin.display(description="EAN kódy")
+    def ean_list(self, obj):
+        return ", ".join(obj.ean_codes)
 
 
 class WarehouseAdmin(ModelAdmin):

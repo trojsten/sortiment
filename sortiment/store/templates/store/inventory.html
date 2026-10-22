@@ -14,7 +14,7 @@
             <thead class="border-b-2 border-gray-500 dark:border-gray-600">
                 <tr class="bg-gray-200 dark:bg-gray-800 text-left">
                     <th class="p-2">Produkt</th>
-                    <th class="p-2">Čiarový kód</th>
+                    <th class="p-2">EAN kódy</th>
                     {% for wh in warehouses %}
                         <th class="p-2 text-center">{{ wh.name }}</th>
                     {% endfor %}
@@ -35,7 +35,7 @@
                             </div>
                         </div>
                     </td>
-                    <td class="p-2 tabular-nums">{{ product.barcode }}</td>
+                    <td class="p-2 tabular-nums">{{ product.eans|join:", " }}</td>
                     {% for whStock in product.stock %}
                         <td class="p-2 text-center">{{ whStock }}</td>
                     {% endfor %}
