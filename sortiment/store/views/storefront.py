@@ -26,22 +26,22 @@ class ProductListView(LoginRequiredMixin, CartContext, TemplateView):
     template_name = "store/products.html"
 
     def get_queryset(self):
-        products = Product.objects.filter(is_dummy=False)
+        products = Product.objects.filter(is_dummy=False).prefetch_related("eans")
 
         query = self.request.GET.get("query")
         if query:
-            exact = Product.objects.filter(barcode=query)
+            exact = Product.objects.filter(eans__code=query).prefetch_related("eans")
             if exact.exists():
                 return exact
 
             dummy_price = get_dummy_barcode_data(query)
             if dummy_price:
                 dummy_obj = Product.generate_one_time_product(dummy_price, query)
-                return Product.objects.filter(id=dummy_obj.id)
+                return Product.objects.filter(id=dummy_obj.id).prefetch_related("eans")
 
             products = products.filter(
-                Q(name__unaccent__icontains=query) | Q(barcode__startswith=query)
-            )
+                Q(name__unaccent__icontains=query) | Q(eans__code__startswith=query)
+            ).distinct()
 
         # only show products that have active tag
         tag = self.request.GET.get("tag")

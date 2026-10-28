@@ -1,7 +1,7 @@
 {% load icon %}
 {% if not product %}
     <form action="{% url 'store:product_search' %}" method="get" autocomplete="off" data-turbo-frame="product-search">
-        <input type="search" class="input dark:bg-gray-900 dark:border-gray-700" name="q" placeholder="Zadaj čiarový kód / názov produktu..." autofocus />
+        <input type="search" class="input dark:bg-gray-900 dark:border-gray-700" name="q" placeholder="Zadaj EAN / názov produktu..." autofocus />
 
         <turbo-frame id="product-search" target="_top">
             <div class="mt-4 bg-gray-50 dark:bg-gray-950 p-2 rounded-md space-y-2">

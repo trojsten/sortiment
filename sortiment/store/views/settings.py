@@ -206,8 +206,10 @@ class InventoryView(StaffRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         warehouses = Warehouse.objects.all()
-        products = Product.objects.filter(is_dummy=False, is_unlimited=False).order_by(
-            "name"
+        products = (
+            Product.objects.filter(is_dummy=False, is_unlimited=False)
+            .order_by("name")
+            .prefetch_related("eans")
         )
         states = WarehouseState.objects.filter(product__in=products).all()
         state_map = defaultdict(lambda: 0)
@@ -226,7 +228,7 @@ class InventoryView(StaffRequiredMixin, TemplateView):
                 rows.append(
                     {
                         "name": p.name,
-                        "barcode": p.barcode,
+                        "eans": p.ean_codes,
                         "price": p.price,
                         "stock": stock,
                         "total": total,
@@ -254,8 +256,8 @@ class SearchView(StaffRequiredMixin, TemplateView):
         query = self.request.GET.get("q")
         if query:
             ctx["products"] = Product.objects.filter(
-                Q(barcode=query) | Q(name__unaccent__icontains=query)
-            )[0:10]
+                Q(eans__code=query) | Q(name__unaccent__icontains=query)
+            ).distinct()[0:10]
         ctx["query"] = query
         return ctx
 
